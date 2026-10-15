@@ -52,6 +52,7 @@ python3 scripts/grab_fulltext.py reports/triage_YYYY-MM-DD.json
 python3 scripts/px.py 2026-10-01 AAPL
 python3 scripts/sa_public.py article https://seekingalpha.com/article/123
 python3 bat/sa_one.py "Author Name" author-slug
+python3 bat/pitches.py sylencecapital --limit 20
 python3 scripts/make_report.py --prices
 python3 scripts/make_report.py --example
 python3 scripts/source_upkeep.py --plan
@@ -73,8 +74,21 @@ Each tracked source (everything except Seeking Alpha) records:
 - articles scored in the last 6 months
 - average score over those articles
 - 2-year batting average and the pitch count behind it
+- how many of those 2-year pitches were detected from the title (`pitches_title`) and from the body (`pitches_body`)
 
 Batting averages use the windows in `bat/calc.py`. If `state/batting.json` is missing, pitch counts can still come from `bat/pitches.py` and the percentage stays blank. A blank percentage is not a drop and not an add. `python3 bat/pitches.py` then `python3 bat/calc.py` fills the percentages. `--compute-ba` on the upkeep script calls that calculator for saved pitches.
+
+`pitches_title` and `pitches_body` stay blank until that author has been detected. They count the same 2-year pitches as `ba_2y_n`, split by method, and they add up to `ba_2y_n` after detection.
+
+### Substack pitch detection
+
+`python3 bat/pitches.py subdomain` reads the archive and keeps a single US or Canada long. One pitch per ticker per window (the earliest).
+
+- A title that names exactly one ticker is method `title`. `(TSXV: SUM or OTC: SUMMF)` is one company; the listed exchange is kept. The body is not fetched when the title also shows a long stance.
+- No ticker, or more than one company: fetch `https://<host>/api/v1/posts/<slug>`. Files land in `cache/` (gitignored). Uncached calls wait 1 second (`--sleep`). Method `body`.
+- The ticker comes from the opening text and from repeated mentions (`$TICKER`, `(NYSE: X)`, `(TSX: X)`, `ticker: X`). If none appear, the company name is looked up on Yahoo (US/Canada equity only).
+- Long stance means an explicit "I own / I am long / my position" line, or buy/thesis language ("investment thesis", "LONG $TICKER", "why I own"). "May hold" does not count. Bearish, hold, recap, macro, watchlist, and closed positions are dropped.
+- Each pitch stores `method` (`title` or `body`) and `confidence`. A preview body is not mined for a ticker. Seeking Alpha is unchanged: past pitches use the public author API only, not this body fetch.
 
 Rules:
 

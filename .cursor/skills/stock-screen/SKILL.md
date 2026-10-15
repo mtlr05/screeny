@@ -128,6 +128,8 @@ These do not change the /6 score. Put them on the one-pager and in per-name note
 
 For every author on the top list and the next six, follow `.cursor/skills/author-batting-average/SKILL.md`. Save `state/batting.json`. Minimum 5 pitches to appear in the top-5 tables.
 
+Substack detection is `python3 bat/pitches.py subdomain`. A title that names one US or Canada ticker is method `title`. When the title has no ticker, or more than one company, the script fetches the public post body (`/api/v1/posts/<slug>`, cached, one call at a time) and infers the single primary ticker. Each pitch is tagged `title` or `body` with a confidence. The next source-upkeep `--plan` writes the 2-year counts to `pitches_title` and `pitches_body` in `state/source_stats.csv`.
+
 ## 10. Write the report
 
 Build `state/scored.json` (do not invent fields you did not verify):
@@ -192,7 +194,7 @@ python3 scripts/source_upkeep.py --plan
 
 That refreshes `state/source_stats.csv` and writes `reports/source_upkeep_<date>.json`. It does not edit `config/sources.csv` or `config/sources_dormant_or_dead.csv`.
 
-Stats per tracked source: last post date, consecutive failed loads, articles scored in the last 6 months, average score over those articles, and the 2-year batting average with its pitch count. Batting averages use `bat/calc.py` windows. Percentages come from `state/batting.json` when that file exists (`python3 bat/pitches.py` then `python3 bat/calc.py`). Until then the pitch count can still be filled from `bat/pitches.py`, and a blank percentage is not a drop and not an add. `--compute-ba` calls `bat/calc.py` for saved pitch lists. `--crawl` fetches Substack recommendations (same keyword walk as `scripts/crawl_sources.py`) of authors who scored at least 4.5/6.
+Stats per tracked source: last post date, consecutive failed loads, articles scored in the last 6 months, average score over those articles, the 2-year batting average with its pitch count, and how many of those pitches were detected from the title versus the body (`pitches_title`, `pitches_body`). Batting averages use `bat/calc.py` windows. Percentages come from `state/batting.json` when that file exists (`python3 bat/pitches.py` then `python3 bat/calc.py`). Until then the pitch count can still be filled from `bat/pitches.py`, and a blank percentage is not a drop and not an add. `--compute-ba` calls `bat/calc.py` for saved pitch lists. `--crawl` fetches Substack recommendations (same keyword walk as `scripts/crawl_sources.py`) of authors who scored at least 4.5/6.
 
 Show every proposal to the user before changing the list. Each line has the source name, whether it is a drop or an add, the reason, and the numbers behind it. Apply only the entries the user approves. Set `"approved": true` on those entries, then:
 

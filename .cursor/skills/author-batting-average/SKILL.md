@@ -13,18 +13,34 @@ Measures how often an author's past long pitches beat the market. The result is 
 
 ## 1. Collect the author's past pitches
 
-- Pull the archive. Substack: `python3 bat/arch.py subdomain` (`/api/v1/archive`). Blogs: the public archive or sitemap. Seeking Alpha: the public author API only.
+Substack pitches are detected from the archive. A title that happens to omit the ticker is still a pitch when the body names one company.
+
+```bash
+python3 bat/pitches.py subdomain
+python3 bat/pitches.py sylencecapital p14capital --limit 20
+```
+
+`bat/lib.py` keeps a post only when it is a single US or Canada long. One pitch per ticker per window: the author's first pitch on that ticker inside the window.
+
+- **Title.** If the title (and subtitle) name exactly one ticker, the method is `title`. A dual listing such as `(TSXV: SUM or OTC: SUMMF)` is one company; the listed line is the ticker. When the title already shows a long stance, the body is not fetched.
+- **Body.** If the title has no ticker, or names more than one company, fetch the public post at `https://<host>/api/v1/posts/<slug>`. Responses are cached under `cache/` (gitignored). Uncached calls wait `--sleep` seconds (default 1). The method is `body`.
+- The primary ticker is the one in the opening text, or the one repeated most often: `$TICKER`, `(NYSE: X)`, `(NASDAQ: X)`, `(TSX: X)`, `(TSXV: X)`, `ticker: X`. If the body never names a ticker, look the company name up on Yahoo and keep a US or Canada equity. ETFs and other listings are dropped.
+- **Long stance.** Explicit disclosure ("I own", "I am long", "my position", "I bought") or buy/thesis language ("investment thesis", "LONG $TICKER", "why I own", "quick pitch"). "May hold" does not count. Drop bearish, hold, recap, macro, watchlist, screen, and closed-position notes.
+- Each kept pitch stores `method` (`title` or `body`) and `confidence` from 0 to 1. A paywalled preview is not mined for a ticker. Do not bypass a paywall.
+
+`pitches_title` and `pitches_body` in `state/source_stats.csv` count those 2-year-window pitches by method. The two counts add up to `ba_2y_n` after that author has been detected. Until then both columns stay blank. `python3 scripts/source_upkeep.py --plan` rewrites the file. It does not change the source list.
+
+Seeking Alpha is separate. Title, date, ticker, and sentiment are enough. Do not fetch full SA bodies for past pitches.
 
 ```bash
 python3 bat/sa_one.py "Author Name" author-slug
 ```
 
-  Title, date, ticker, and sentiment are enough for Seeking Alpha. Do not fetch full SA bodies for past pitches. If the API returns a bot check (HTTP 401, 403, or 429), stop. Do not retry with cookies and do not bypass anything.
-- Include deleted or moved posts when you can find them (for example the Wayback Machine) so survivorship bias stays limited.
-- Keep single-stock LONG pitches only (a buy or a long thesis, including updates). Drop recaps, macro, holds, sells, and shorts.
-- Count each ticker once per window. Use the author's first pitch on that ticker inside the window.
+If the API returns a bot check (HTTP 401, 403, or 429), stop. Do not retry with cookies and do not bypass anything.
 
-`python3 bat/pitches.py` turns Substack pitch lists plus `bat/sa_auth.json` into `bat/pitches.json`. Extend the pitch list with what you actually found. Do not invent pitches.
+Blogs: use the public archive or sitemap and the same long-pitch rules. Include deleted or moved posts when you can find them (for example the Wayback Machine) so survivorship bias stays limited.
+
+`python3 bat/pitches.py` with no subdomain writes `bat/pitches.json` from the hand list plus `bat/sa_auth.json`. Passing a subdomain detects that author and replaces their hand-entered rows. Do not invent pitches.
 
 ## 2. Windows (relative to today)
 

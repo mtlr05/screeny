@@ -1,10 +1,14 @@
 """Build bat/pitches.json: single-stock long pitches for the batting-average windows.
 
-SUB is a worked list of Substack pitches (ticker, date, url, title).
+SUB is a worked list of Substack pitches (ticker, date, url, title) used when an
+author has not been detected yet. `python3 bat/pitches.py SUBDOMAIN` reads the
+archive and tags each pitch with method title or body (see bat/lib.py).
+
 SA pitches come from bat/sa_auth.json when that file exists (public API metadata only).
 """
 import json
 import os
+import re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SUB = {
@@ -83,15 +87,82 @@ def sa_from_auth(sa):
     return SAP
 
 
-def main():
+def author_subdomain(key):
+    found = re.findall(r"([a-z0-9-]+)\.substack\.com", (key or "").lower())
+    if found:
+        return found[0]
+    token = re.split(r"[\s(]", (key or "").strip().lower())[0]
+    return token
+
+
+def merge_detected(base, subdomain, pitches):
+    """Replace any hand-entered rows for this subdomain with detected pitches."""
+    sub = (subdomain or "").lower()
+    for key in [k for k in base if author_subdomain(k) == sub]:
+        del base[key]
+    base[f"{sub} ({sub}.substack.com)"] = pitches
+    return base
+
+
+def main(argv=None):
+    import argparse
+    import sys
+
+    ap = argparse.ArgumentParser(description="Build bat/pitches.json from hand lists, or detect Substack pitches")
+    ap.add_argument("subdomains", nargs="*", help="Substack subdomains to detect (title, then body)")
+    ap.add_argument("--limit", type=int, default=0, help="newest N newsletter posts per author (0 = through the 2-year window)")
+    ap.add_argument("--since", default="", help="oldest publish date to read (default: start of the 2-year window)")
+    ap.add_argument("--sleep", type=float, default=1.0, help="seconds between uncached HTTP calls")
+    ap.add_argument("--out", default="", help="output JSON (default bat/pitches.json)")
+    args = ap.parse_args(argv)
+    out_path = args.out or os.path.join(HERE, "pitches.json")
     sa_path = os.path.join(HERE, "sa_auth.json")
     sa = json.load(open(sa_path, encoding="utf-8")) if os.path.exists(sa_path) else {}
     SAP = sa_from_auth(sa)
-    json.dump({"SUB": SUB, "SA": SAP, "NONE": NONE}, open(os.path.join(HERE, "pitches.json"), "w", encoding="utf-8"), indent=0)
-    for k, v in SAP.items():
-        print(k, len(v))
-    print("wrote", os.path.join(HERE, "pitches.json"), "sa_authors", len(SAP))
+    sub = {k: list(v) for k, v in SUB.items()}
+    if args.subdomains:
+        import lib
+
+        for name in args.subdomains:
+            result = lib.collect_author(
+                name,
+                limit=args.limit,
+                since=args.since or None,
+                sleep=args.sleep,
+            )
+            merge_detected(sub, result["subdomain"], result["pitches"])
+            raw = result.get("pitches_before_dedupe") or []
+            title_n = sum(1 for p in result["pitches"] if p.get("method") == "title")
+            body_n = sum(1 for p in result["pitches"] if p.get("method") == "body")
+            raw_title = sum(1 for p in raw if p.get("method") == "title")
+            raw_body = sum(1 for p in raw if p.get("method") == "body")
+            print(
+                f"{result['subdomain']}: posts={result['posts_seen']} bodies={result['bodies_fetched']} "
+                f"pitches={len(result['pitches'])} title={title_n} body={body_n} "
+                f"(before one-per-ticker: title={raw_title} body={raw_body}) since={result['since']}"
+            )
+            for pitch in result["pitches"]:
+                print(
+                    f"  {pitch['date']} {pitch['method']:5} {pitch['confidence']:.2f} {pitch['ticker']:8} "
+                    f"{pitch['reason']} | {(pitch['title'] or '')[:70]}"
+                )
+            if result["skipped"]:
+                print("  skipped", dict(sorted(result["skipped"].items(), key=lambda item: -item[1])))
+            kept_urls = {p.get("url") for p in result["pitches"]}
+            repeats = [p for p in raw if p.get("url") not in kept_urls]
+            for pitch in repeats:
+                print(
+                    f"  repeat {pitch['date']} {pitch['method']:5} {pitch['confidence']:.2f} {pitch['ticker']:8} "
+                    f"| {(pitch['title'] or '')[:70]}"
+                )
+    json.dump({"SUB": sub, "SA": SAP, "NONE": NONE}, open(out_path, "w", encoding="utf-8"), indent=0)
+    for key, rows in SAP.items():
+        print(key, len(rows))
+    print("wrote", out_path, "sa_authors", len(SAP), "substack_authors", len(sub))
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    sys.exit(main())

@@ -45,6 +45,8 @@ STATS_FIELDS = [
     "avg_score_6m",
     "ba_2y",
     "ba_2y_n",
+    "pitches_title",
+    "pitches_body",
     "as_of",
     "last_sweep_file",
 ]
@@ -175,17 +177,57 @@ def load_batting(path):
     return json.load(open(path, encoding="utf-8"))
 
 
+def _pitch_subs(key):
+    subs = re.findall(r"([a-z0-9-]+)\.substack\.com", (key or "").lower())
+    if subs:
+        return subs
+    token = re.split(r"[\s(]", (key or "").strip().lower())[0]
+    return [token] if token else []
+
+
+def _absorb_pitches(idx, mapping, replace):
+    for key, rows in (mapping or {}).items():
+        for sub in _pitch_subs(key):
+            if replace or sub not in idx:
+                idx[sub] = list(rows)
+            else:
+                idx[sub].extend(rows)
+
+
 def pitch_index():
-    """Subdomain -> pitch tuples from bat/pitches.py. Seeking Alpha lists are omitted."""
+    """Subdomain -> pitches. Seeking Alpha lists are omitted.
+
+    Hand-entered rows in bat/pitches.py are the fallback. A detected list in
+    bat/pitches.json (each row tagged title or body) replaces that author.
+    """
     idx = {}
-    for key, rows in batpitches.SUB.items():
-        subs = re.findall(r"([a-z0-9-]+)\.substack\.com", key.lower())
-        if not subs:
-            token = re.split(r"[\s(]", key.strip().lower())[0]
-            subs = [token] if token else []
-        for sub in subs:
-            idx.setdefault(sub, []).extend(rows)
+    _absorb_pitches(idx, batpitches.SUB, replace=False)
+    path = os.path.join(BAT, "pitches.json")
+    if os.path.exists(path):
+        try:
+            saved = json.load(open(path, encoding="utf-8")).get("SUB") or {}
+        except (OSError, json.JSONDecodeError):
+            saved = {}
+        tagged = {}
+        for key, rows in saved.items():
+            if any(batcalc.pitch_parts(row)[4] for row in rows or []):
+                tagged[key] = rows
+        _absorb_pitches(idx, tagged, replace=True)
     return idx
+
+
+def method_counts(rows, today):
+    """2-year-window pitches split by detection method. Blank when untagged."""
+    if not rows or not any(batcalc.pitch_parts(row)[4] for row in rows):
+        return None, None
+    title = body = 0
+    for row in batcalc.pitches_in_window(rows, "2y", today):
+        method = batcalc.pitch_parts(row)[4]
+        if method == "title":
+            title += 1
+        elif method == "body":
+            body += 1
+    return title, body
 
 
 def batting_index(batting):
@@ -290,6 +332,7 @@ def build_stats(sources, seen_latest, articles, pitches, batting_by_key, prev, s
         mine = [s for label, s in scored if label_hits(label, keys)] if scores_loaded else []
         sub = subdomain(url)
         pct, n = ba_for_sub(sub, pitches, batting_by_key, as_of, compute)
+        title_n, body_n = method_counts(pitches.get(sub) if sub else None, as_of)
         rows.append(
             {
                 "name": src.get("name") or sub or url,
@@ -301,6 +344,8 @@ def build_stats(sources, seen_latest, articles, pitches, batting_by_key, prev, s
                 "avg_score_6m": f"{statistics.mean(mine):.2f}" if mine else "",
                 "ba_2y": fmt_num(pct),
                 "ba_2y_n": "" if n is None else str(n),
+                "pitches_title": "" if title_n is None else str(title_n),
+                "pitches_body": "" if body_n is None else str(body_n),
                 "as_of": as_of.isoformat(),
                 "last_sweep_file": last_file,
             }
@@ -595,6 +640,8 @@ def plan(args):
         print("No scored-article file. articles_scored and avg_score_6m stay empty until state/scored.json exists.")
     if not os.path.exists(args.batting):
         print("No state/batting.json. Pitch counts come from bat/pitches.py; percentages stay blank until bat/calc.py has run. A blank percentage is not a drop and not an add.")
+    tagged = sum(1 for row in stats_rows if row.get("pitches_title") or row.get("pitches_body"))
+    print(f"Pitch methods: title/body counts filled for {tagged} sources. Blank means bat/pitches.py has not detected that author yet.")
     if not seeds:
         print("No Substack author with a score >= 4.5/6 in the score file, so no recommendation candidates were considered.")
     elif not crawl:

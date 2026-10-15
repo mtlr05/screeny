@@ -35,15 +35,36 @@ def window_bounds(today=None):
     return {"1y": (y1_start, y1_end, 12), "2y": (y2_start, y1_start, 24)}
 
 
+def pitch_parts(row):
+    """ticker, date, url, title, method, confidence. method is title, body, or blank."""
+    if isinstance(row, dict):
+        return (
+            row.get("ticker") or "",
+            (row.get("date") or "")[:10],
+            row.get("url") or "",
+            row.get("title") or "",
+            row.get("method") or "",
+            row.get("confidence"),
+        )
+    title = row[3] if len(row) > 3 else ""
+    method = row[4] if len(row) > 4 else ""
+    confidence = row[5] if len(row) > 5 else None
+    return row[0], (row[1] or "")[:10], row[2], title, method, confidence
+
+
 def pitches_in_window(pitches, window="2y", today=None):
-    """First pitch per ticker inside the window. pitches are (ticker, date, url, title)."""
+    """First pitch per ticker inside the window. Rows are tuples or dicts."""
     start, end, _months = window_bounds(today)[window]
     seen = set()
     out = []
-    for t, d, u, ti in sorted(pitches, key=lambda x: x[1]):
-        if start <= d < end and t not in seen:
-            seen.add(t)
-            out.append((t, d, u, ti))
+    keyed = []
+    for row in pitches or []:
+        ticker, day, _url, _title, _method, _conf = pitch_parts(row)
+        keyed.append((day, ticker, row))
+    for day, ticker, row in sorted(keyed, key=lambda item: item[0]):
+        if start <= day < end and ticker not in seen:
+            seen.add(ticker)
+            out.append(row)
     return out
 
 
@@ -101,32 +122,31 @@ def summarize(name, pitches, today=None):
         return r
 
     res = {"pitches": {}, "summary": {}, "excluded": []}
-    for w, (a, b, m) in W.items():
-        seen = set()
+    for w, (_a, _b, m) in W.items():
         rows = []
-        for t, d, u, ti in sorted(pitches, key=lambda x: x[1]):
-            if not (a <= d < b) or t in seen:
-                continue
-            seen.add(t)
-            bm = "XIC.TO" if t.endswith((".TO", ".V")) else "SPY"
+        for raw in pitches_in_window(pitches, w, today_d):
+            t, d, u, ti, method, conf = pitch_parts(raw)
+            bm = "XIC.TO" if str(t).endswith((".TO", ".V", ".CN", ".NE")) else "SPY"
             r, note = ret(t, d, m)
             br = bret(bm, d, m)
             if r is None or br is None:
                 res["excluded"].append(dict(ticker=t, date=d, window=w, why=note))
                 continue
-            rows.append(
-                dict(
-                    ticker=t,
-                    date=d,
-                    url=u,
-                    title=ti,
-                    stock_ret=round(r, 4),
-                    bench=bm,
-                    bench_ret=round(br, 4),
-                    hit=int(r > br),
-                    note=note,
-                )
+            row = dict(
+                ticker=t,
+                date=d,
+                url=u,
+                title=ti,
+                stock_ret=round(r, 4),
+                bench=bm,
+                bench_ret=round(br, 4),
+                hit=int(r > br),
+                note=note,
             )
+            if method:
+                row["method"] = method
+                row["confidence"] = conf
+            rows.append(row)
         res["pitches"][w] = rows
         if rows:
             ex = [x["stock_ret"] - x["bench_ret"] for x in rows]

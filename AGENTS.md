@@ -28,7 +28,7 @@ On-demand scout for single-stock investment write-ups. David runs it from the Cu
 
 - `config/sources.csv` — active sources. `config/sources_dormant_or_dead.csv` — parked; recheck about monthly.
 - `state/seen_posts.csv` — dedupe key is `url`. Append-only.
-- `state/source_stats.csv` — per tracked source: last post, consecutive failed loads, articles scored in the last 6 months, 6-month average score, 2-year batting average and pitch count. Seeking Alpha is not in this file.
+- `state/source_stats.csv` — per tracked source: last post, consecutive failed loads, articles scored in the last 6 months, 6-month average score, 2-year batting average and pitch count, plus `pitches_title` and `pitches_body` (those pitches split by detection method). Seeking Alpha is not in this file.
 - `state/scored.json`, `state/batting.json` — this run's scores and batting averages.
 - `reports/` — dated outputs. Sample: `reports/2026-10-14/`.
 - `fulltext/` and `cache/` — local only, not committed.
