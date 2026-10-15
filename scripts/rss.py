@@ -21,10 +21,17 @@ status = getattr(d, "status", None)
 if status and status >= 400:
     print(f"unreachable {a.url}: HTTP {status}")
     sys.exit(0)
+def entry_day(e):
+    st = e.get("published_parsed") or e.get("updated_parsed")
+    if st:
+        return dt.date(st.tm_year, st.tm_mon, st.tm_mday).isoformat()
+    raw = (e.get("published") or e.get("updated") or "")[:10]
+    return raw
+
+
 n = 0
 for e in d.entries:
-    raw = e.get("published") or e.get("updated") or ""
-    day = raw[:10]
+    day = entry_day(e)
     if day and day < a.since:
         continue
     title = e.get("title") or ""

@@ -32,7 +32,7 @@ def universe():
 U = universe()
 ensure(REPORTS)
 if not U:
-    print("earnings_drops: no universe (config/universe.csv, state/returns.json, or state/articles_scored.csv). Nothing to check.")
+    print("earnings_drops: 0 tickers. Add rows to config/universe.csv (column ticker), or provide state/returns.json or state/articles_scored.csv. Nothing to check.")
     sys.exit(0)
 cut = (dt.date.today() - dt.timedelta(days=7)).isoformat()
 hits = []
