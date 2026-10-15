@@ -1,0 +1,597 @@
+{
+ "_about": "Machine-readable extract of the 2026-10-14 sample report. Figures are copied from that report so make_report.py can render it; they are not recomputed.",
+ "window": [
+  "2026-06-13",
+  "2026-10-13"
+ ],
+ "stats": {
+  "sourced": 10020,
+  "read": 336,
+  "scored": 62
+ },
+ "ambiguous": [
+  "BRCB 'may hold, buy, or sell'",
+  "DERM 'I may own shares'",
+  "AUUA.V 'I may hold, buy, or sell'",
+  "VITL 'I may hold, buy, or sell'",
+  "FENC 'may hold, directly or indirectly, a position'",
+  "BUKS 'may have bought, sold, or held'",
+  "NUVB 'may hold long positions'",
+  "CLYM 'may hold long positions'",
+  "TNGX 'may hold long positions'",
+  "IVA 'may hold long positions'",
+  "IMMX 'may hold long/short positions'",
+  "MLTX 'may hold long positions'",
+  "ACHV 'may hold long positions'",
+  "UTI 'I may hold positions'",
+  "OCC 'may hold, buy, or sell'",
+  "BOC 'may have bought, sold, or held'",
+  "None 'supports a long position' (recommendation, no holding stated)",
+  "VBNK.TO 'We rate VersaBank a LONG' (rating, no holding stated)",
+  "ETON guest post: the covered writer holds it in his model portfolio",
+  "guest author's own position not stated"
+ ],
+ "articles": [
+  {
+   "sym": "CCOI",
+   "title": "Cogent Communications (NASDAQ: CCOI)",
+   "url": "https://mattlindsay.substack.com/p/cogent-communications-nasdaq-ccoi",
+   "source": "Value & Error",
+   "date": "2026-07-27",
+   "ba": "1/1 = 100% (1y)",
+   "sc": [
+    0.5,
+    1,
+    1,
+    0.75,
+    1,
+    1
+   ],
+   "since_publish": "-29.7% vs IWM -5.3%",
+   "note": "$81 base vs $12; founder-CEO Schaeffer",
+   "notes": {
+    "fact": "Dividend cut, ~7x leverage and founder selling are stated by the author and match filings.",
+    "balance": "High leverage (~7.4x) with a near-term refinancing.",
+    "soft": "Founder-CEO Dave Schaeffer still a large holder despite sales."
+   },
+   "bat_line": "1y 1/1 = 100% (med excess +247 pts); 2y n/a"
+  },
+  {
+   "sym": "HROW",
+   "title": "Harrow (HROW): Q2 2026 Earnings Review",
+   "url": "https://mvcinvesting.substack.com/p/harrow-hrow-q2-2026-earnings-review",
+   "source": "mvcinvesting",
+   "date": "2026-08-13",
+   "ba": "7/15 = 47% (1y)",
+   "sc": [
+    1,
+    1,
+    1,
+    0.75,
+    0.5,
+    1
+   ],
+   "since_publish": "-27.3% vs IWM -8.6%",
+   "note": "$100 by 2028 vs $38.87",
+   "notes": {
+    "guidance": "Author says the quarter did not change the thesis; prior revenue guidance not fully met.",
+    "soft": "$100-by-2028 target is the author's long-run path, not a 12-month call."
+   },
+   "bat_line": "1y 7/15 = 47% (med excess -15 pts); 2y n/a"
+  },
+  {
+   "sym": "PMVP",
+   "title": "PMV Pharmaceuticals: Restoring Mutant P53 Could Create A Mispriced Cancer Opportunity",
+   "url": "https://seekingalpha.com/article/4952592-pmv-pharmaceuticals-restoring-mutant-p53-could-create-a-mispriced-cancer-opportunity",
+   "source": "Eljaye Tellis (SA)",
+   "date": "2026-10-07",
+   "ba": "n/a",
+   "sc": [
+    1,
+    1,
+    0.5,
+    0.75,
+    1,
+    1
+   ],
+   "since_publish": "-10.0% vs IWM -0.4%",
+   "note": "$3.50 base value vs $1.57 (+123%, default 2y ~49%/yr); first-in-class Y220C p53 reactivator (patents, 46% ORR); CEO Mack ~1.5%; pivotal PYNNACLE readout Q4 2026, NDA Q1 2027; differential: warrant/dilution overhang priced as failure",
+   "notes": {
+    "fact": "$1.57 price, 46% ORR (35/76) and 10-mo median DoR are as reported in the article; CEO Mack holds ~1.13M shares (~1.5%, Yahoo insider roster).",
+    "balance": "Runway ~6-7 quarters on ~$130M pro forma cash; 42M warrants at $1.21 plus pre-funded warrants = heavy dilution.",
+    "soft": "Single-arm data, rare mutation; resistance already seen. Overreaction context: financing/warrant overhang, not data."
+   },
+   "bat_line": "1y n/a; 2y n/a"
+  },
+  {
+   "sym": "PDEX",
+   "title": "Pro-Dex ($PDEX): Pay for the Core, Get the Robot for Free",
+   "url": "https://guillaumemeignin.substack.com/p/pro-dex-pdex-pay-for-the-core-get",
+   "source": "guillaumemeignin",
+   "date": "2026-06-29",
+   "ba": "n/a",
+   "sc": [
+    1,
+    0.5,
+    0.5,
+    1,
+    1,
+    1
+   ],
+   "since_publish": "+6.6% vs IWM -7.2%",
+   "note": "Core pays for robotics option",
+   "notes": {
+    "soft": "Chairman holds ~32%; CEO ~2.8%."
+   },
+   "bat_line": "1y n/a; 2y n/a [archive starts 2026-04-29]"
+  },
+  {
+   "sym": "BDC",
+   "title": "$BDC - The Networking Stock to Rule Them All",
+   "url": "https://p14capital.substack.com/p/bdc-the-networking-stock-to-rule",
+   "source": "p14capital",
+   "date": "2026-06-23",
+   "ba": "1/4 = 25% (1y)",
+   "sc": [
+    1,
+    1,
+    0.0,
+    0.75,
+    1,
+    1
+   ],
+   "since_publish": "-8.4% vs IWM -6.1%",
+   "note": "",
+   "notes": {},
+   "bat_line": "1y 1/4 = 25% (med excess -26 pts); 2y n/a"
+  },
+  {
+   "sym": "HIMS",
+   "title": "Hims & Hers Health: The Bullish Case Is Hard To Forecast, But It Is Asymmetrical",
+   "url": "https://seekingalpha.com/article/4953661-hims-and-hers-health-the-bullish-case-is-hard-to-forecast-but-it-is-asymmetrical",
+   "source": "Krzysztof Bogdanski (SA)",
+   "date": "2026-10-13",
+   "ba": "n/a",
+   "sc": [
+    1,
+    0.0,
+    1,
+    0.75,
+    1,
+    1
+   ],
+   "since_publish": "+0.0% vs IWM +0.0%",
+   "note": "$41 FV vs $29.81 (+38%, <25%/yr); founder-CEO Dudum large holder via super-voting Class V; vertically integrated telehealth brand + obsessive founder; differential: stock fell ~15% on FDA peptide committee/FTC suit worth ~$3/sh; dated: Wegovy WAC cut 1 Jan 2027, peptide FDA decision",
+   "notes": {
+    "fact": "Q2 revenue $753.2M, 2.891M subscribers, gross margin ~64% (76% a year ago), per the article.",
+    "guidance": "2026 guide $3.1-3.3B revenue / $275-325M adj. EBITDA; 2030 target $6.5B / $1.3B.",
+    "balance": "$1.0B 2030 converts (conv. $70.67) + $402.5M 2032 converts at the money (~6% dilution).",
+    "soft": "Founder-CEO stake from super-voting Class V; Yahoo shows no direct-share figure. Stock fell ~15% on FDA peptide committee and ~10% on FTC suit (overreaction context)."
+   },
+   "bat_line": "1y n/a; 2y n/a"
+  },
+  {
+   "sym": "NYXH",
+   "title": "Nyxoah: Label Expansion Set To Unlock A Monopoly In A Billion-Dollar Market",
+   "url": "https://seekingalpha.com/article/4951942-nyxoah-stock-label-expansion-set-to-unlock-a-monopoly-billion-dollar-market",
+   "source": "Stephen Tobin (SA)",
+   "date": "2026-10-05",
+   "ba": "13/26 = 50%",
+   "sc": [
+    1,
+    1,
+    0.0,
+    0.75,
+    1,
+    1
+   ],
+   "since_publish": "-9.2% vs IWM -2.4%",
+   "note": "$11 target vs $1.37 (DCF, default 2y); bilateral Genio device, only option for CCC patients if label extended; CEO stepping down, not a large holder; FDA CCC label decision early 2027; differential: market prices post-dilution distress, not label-driven monopoly",
+   "notes": {
+    "fact": "$1.37 price, 2026 guide EUR36M (+260%), CCC pivotal 77% responders, per the article.",
+    "balance": "~EUR98M cash vs ~EUR18M/qtr burn; 166% dilution in 12 months, author models ~15% more; EUR58M debt.",
+    "soft": "CEO and CFO both leaving; related-party deal with Man & Science; Inspire patent suits."
+   },
+   "bat_line": "1y 9/16 = 56% (med excess +4 pts); 2y 13/26 = 50% (med excess -4 pts)"
+  },
+  {
+   "sym": "ELMT",
+   "title": "Elmet: Why This Irreplaceable Pentagon Supplier Is A Strong Buy",
+   "url": "https://seekingalpha.com/article/4953034-elmet-why-this-irreplaceable-pentagon-supplier-is-a-strong-buy",
+   "source": "Laurentian Research (SA)",
+   "date": "2026-10-09",
+   "ba": "2/6 = 33%",
+   "sc": [
+    1,
+    0.5,
+    0.0,
+    1,
+    1,
+    1
+   ],
+   "since_publish": "+0.9% vs IWM -0.8%",
+   "note": "$64-127 by 2031 (3-6x, ~27-46%/yr; midpoint ~38%/yr); only US-owned fully integrated tungsten/moly maker, $450M DoW backing, $2B DLA IDIQ; CEO stake not verified; DFARS ban on Chinese tungsten 1 Jan 2027",
+   "notes": {
+    "fact": "$450M DoW commitment (preferred + warrants up to 19.9%), $2B-ceiling DLA IDIQ with $150M guaranteed, per the article.",
+    "balance": "DoW warrants up to 19.9% dilution; heavy capex plan.",
+    "soft": "Strategic holder: US Department of War (warrants + board seat). CEO stake not verified."
+   },
+   "bat_line": "1y 9/12 = 75% (med excess +56 pts); 2y 2/6 = 33% (med excess -37 pts)"
+  },
+  {
+   "sym": "REAL",
+   "title": "$REAL - The RealReal, Inc.",
+   "url": "https://p14capital.substack.com/p/real-the-realreal-inc",
+   "source": "p14capital",
+   "date": "2026-07-27",
+   "ba": "1/4 = 25% (1y)",
+   "sc": [
+    1,
+    1,
+    0.0,
+    0.5,
+    1,
+    1
+   ],
+   "since_publish": "-15.9% vs IWM -5.3%",
+   "note": "",
+   "notes": {},
+   "bat_line": "1y 1/4 = 25% (med excess -26 pts); 2y n/a"
+  },
+  {
+   "sym": "KITS.TO",
+   "title": "The $15 Pair of Glasses That Somehow Costs You $500",
+   "url": "https://themultibbagerinvestor.substack.com/p/the-15-pair-of-glasses-that-somehow",
+   "source": "themultibbagerinvestor",
+   "date": "2026-08-31",
+   "ba": "n/a",
+   "sc": [
+    1,
+    0.0,
+    1,
+    0.75,
+    1,
+    0.5
+   ],
+   "since_publish": "-2.7% vs XIC.TO -0.5%",
+   "note": "Founder-CEO ~20%+; no target",
+   "notes": {
+    "soft": "Founder-CEO Roger Hardy has been a consistent open-market buyer."
+   },
+   "bat_line": "1y n/a; 2y n/a [archive starts 2026-07-25]"
+  },
+  {
+   "sym": "LEAT",
+   "title": "Leatt Corporation (OTCQB: LEAT)",
+   "url": "https://rodrigolezama.substack.com/p/leatt-corporation-otcqb-leat",
+   "source": "The Micro-Capo",
+   "date": "2026-07-18",
+   "ba": "n/a",
+   "sc": [
+    1,
+    0.5,
+    0.5,
+    0.75,
+    1,
+    0.5
+   ],
+   "since_publish": "-10.7% vs IWM -5.1%",
+   "note": "+84%, default 2y",
+   "notes": {
+    "guidance": "EPS case built on management's own operating-leverage guidance."
+   },
+   "bat_line": "1y n/a; 2y n/a [archive starts 2025-10-28]"
+  },
+  {
+   "sym": "LUMN",
+   "title": "Lumen Technologies (LUMN) Deep Dive",
+   "url": "https://blindspotvalue.substack.com/p/lumen-technologies-lumn-deep-dive",
+   "source": "Blindspot Value",
+   "date": "2026-06-29",
+   "ba": "n/a",
+   "sc": [
+    1,
+    1,
+    0.0,
+    0.75,
+    1,
+    0.5
+   ],
+   "since_publish": "-37.3% vs IWM -7.2%",
+   "note": "",
+   "notes": {
+    "balance": "Heavy debt load."
+   },
+   "bat_line": "1y n/a; 2y n/a [archive starts 2026-06-23]"
+  },
+  {
+   "sym": "SHOE",
+   "title": "Shoe Station: Half The Float Sold Short, Yet Priced Below Working Capital",
+   "url": "https://seekingalpha.com/article/4952124-shoe-station-half-the-float-sold-short-yet-priced-below-working-capital",
+   "source": "The Asymmetric Contrarian (SA)",
+   "date": "2026-10-06",
+   "ba": "n/a",
+   "sc": [
+    0.5,
+    1,
+    0.5,
+    0.75,
+    1,
+    0.5
+   ],
+   "since_publish": "+0.5% vs IWM -1.6%",
+   "note": ">75% upside by end FY27 (~1.3y); cheap turnaround, little growth; returning CEO Sifford (proven 2012-21 record) holds ~1.5%; 50% of float short after guidance cut = overreaction; catalysts: holiday/FY27 results (not dated)",
+   "notes": {
+    "fact": "$132M cash, no debt; ~50% of float short; adj. EPS guide cut ~45% to ~$0.83, per the article. CEO Sifford ~412K shares (~1.5%, Yahoo).",
+    "guidance": "Guidance cut in Sept 2026 under prior strategy; returning CEO ran 2012-21 with $408M FCF and $194M buybacks.",
+    "balance": "Clean: net cash, capex falling to <$20M."
+   },
+   "bat_line": "1y n/a; 2y n/a"
+  },
+  {
+   "sym": "SRI",
+   "title": "Stoneridge (SRI) - deeply undervalued at a cyclical trough with a hidden growth engine",
+   "url": "https://blindspotvalue.substack.com/p/stoneridge-sri-deeply-undervalued",
+   "source": "Blindspot Value",
+   "date": "2026-08-19",
+   "ba": "n/a",
+   "sc": [
+    1,
+    1,
+    0.0,
+    0.75,
+    1,
+    0.5
+   ],
+   "since_publish": "-16.2% vs IWM -8.1%",
+   "note": "",
+   "notes": {},
+   "bat_line": "1y n/a; 2y n/a [archive starts 2026-06-23]"
+  },
+  {
+   "sym": "SUM.V",
+   "title": "Summit Royalties (TSXV: SUM or OTC: SUMMF)",
+   "url": "https://sylencecapital.substack.com/p/summit-royalties-tsxv-sum-or-otc",
+   "source": "sylencecapital",
+   "date": "2026-08-22",
+   "ba": "3/4 = 75%",
+   "sc": [
+    1,
+    0.0,
+    0.5,
+    0.5,
+    1,
+    1
+   ],
+   "since_publish": "-3.0% vs XIC.TO -1.6%",
+   "note": "Royalty growth at ~half NAV; no dated return target",
+   "notes": {},
+   "bat_line": "1y 1/4 = 25% (med excess -59 pts); 2y 3/4 = 75% (med excess +88 pts)"
+  },
+  {
+   "sym": "ALM",
+   "title": "Almonty: The Market Is Pricing A Tungsten Crash That Hasn't Come",
+   "url": "https://seekingalpha.com/article/4952737-almonty-stock-market-pricing-tungsten-crash-that-has-not-come",
+   "source": "The Bullionaire (SA)",
+   "date": "2026-10-08",
+   "ba": "n/a",
+   "sc": [
+    1,
+    0.0,
+    0.0,
+    0.75,
+    1,
+    1
+   ],
+   "since_publish": "",
+   "note": "",
+   "notes": {},
+   "bat_line": "1y n/a; 2y n/a"
+  },
+  {
+   "sym": "GTLB",
+   "title": "GitLab Will Finally Break GitHub's Monopoly In 2027",
+   "url": "https://seekingalpha.com/article/4953754-gitlab-stock-will-finally-break-githubs-monopoly-in-2027",
+   "source": "Ignacio Planas Gonzalez (SA)",
+   "date": "2026-10-13",
+   "ba": "n/a",
+   "sc": [
+    1,
+    0.0,
+    0.0,
+    0.75,
+    1,
+    1
+   ],
+   "since_publish": "",
+   "note": "",
+   "notes": {},
+   "bat_line": "1y n/a; 2y n/a"
+  },
+  {
+   "sym": "KARO",
+   "title": "Karooooo: Why I own an expensive stock",
+   "url": "https://aktieblogg.substack.com/p/karooooo-why-i-own-an-expensive-stock",
+   "source": "Gustav",
+   "date": "2026-06-18",
+   "ba": "n/a",
+   "sc": [
+    1,
+    0.0,
+    1,
+    0.75,
+    0.5,
+    0.5
+   ],
+   "since_publish": "",
+   "note": "",
+   "notes": {},
+   "bat_line": "1y n/a; 2y n/a [archive starts 2026-01-24]"
+  },
+  {
+   "sym": "SIRI",
+   "title": "Sirius XM: This Living Dead Is Ready To Rise",
+   "url": "https://seekingalpha.com/article/4953418-sirius-xm-this-living-dead-ready-to-rise",
+   "source": "Early Retiree (SA)",
+   "date": "2026-10-12",
+   "ba": "0/3 = 0%",
+   "sc": [
+    0.5,
+    0.5,
+    0.0,
+    0.75,
+    1,
+    1
+   ],
+   "since_publish": "",
+   "note": "",
+   "notes": {},
+   "bat_line": "1y 1/2 = 50% (med excess -11 pts); 2y 0/3 = 0% (med excess -56 pts)"
+  },
+  {
+   "sym": "URGN",
+   "title": "UroGen Pharma: An Emerging GARP Stock",
+   "url": "https://seekingalpha.com/article/4953717-urogen-pharma-an-emerging-garp-stock",
+   "source": "Bret Jensen (SA)",
+   "date": "2026-10-13",
+   "ba": "7/12 = 58%",
+   "sc": [
+    1,
+    0.0,
+    0.0,
+    0.75,
+    1,
+    1
+   ],
+   "since_publish": "",
+   "note": "",
+   "notes": {},
+   "bat_line": "1y 5/6 = 83% (med excess +17 pts); 2y 7/12 = 58% (med excess +42 pts)"
+  },
+  {
+   "sym": "VBNK",
+   "title": "VersaBank: Expensive, But Growth Still Justifies A Buy",
+   "url": "https://seekingalpha.com/article/4952205-versabank-expensive-but-growth-still-justifies-a-buy",
+   "source": "Grassroots Trading (SA)",
+   "date": "2026-10-06",
+   "ba": "8/18 = 44%",
+   "sc": [
+    1,
+    0.0,
+    0.5,
+    0.75,
+    0.5,
+    1
+   ],
+   "since_publish": "",
+   "note": "",
+   "notes": {},
+   "bat_line": "1y 39/86 = 45% (med excess -4 pts); 2y 8/18 = 44% (med excess -8 pts)"
+  }
+ ],
+ "batting": {
+  "Bret Jensen (SA)": {
+   "summary": {
+    "1y": {
+     "hits": 5,
+     "n": 6,
+     "pct": 0.83,
+     "median_excess": 0.17,
+     "best": "AUPH +76% vs +14%",
+     "worst": "ALDX +6% vs +16%",
+     "small": false
+    },
+    "2y": {
+     "hits": 7,
+     "n": 12,
+     "pct": 0.58,
+     "median_excess": 0.42,
+     "best": "HROW +284% vs +46%",
+     "worst": "RCKT -86% vs +30%",
+     "small": false
+    }
+   }
+  },
+  "Laurentian Research (SA)": {
+   "summary": {
+    "1y": {
+     "hits": 9,
+     "n": 12,
+     "pct": 0.75,
+     "median_excess": 0.56,
+     "best": "ABBRF +332% vs +14%",
+     "worst": "DEC -2% vs +22%",
+     "small": false
+    },
+    "2y": {
+     "hits": 2,
+     "n": 6,
+     "pct": 0.33,
+     "median_excess": -0.37,
+     "best": "CNQ +51% vs +36%",
+     "worst": "PIFYF -31% vs +48%",
+     "small": false
+    }
+   }
+  },
+  "Stephen Tobin (SA)": {
+   "summary": {
+    "1y": {
+     "hits": 9,
+     "n": 16,
+     "pct": 0.56,
+     "median_excess": 0.04,
+     "best": "QBTS +3096% vs +19%",
+     "worst": "EVTL -87% vs +19%",
+     "small": false
+    },
+    "2y": {
+     "hits": 13,
+     "n": 26,
+     "pct": 0.5,
+     "median_excess": -0.04,
+     "best": "LUNR +401% vs +44%",
+     "worst": "EH -69% vs +41%",
+     "small": false
+    }
+   }
+  },
+  "mvcinvesting": {
+   "summary": {
+    "1y": {
+     "hits": 7,
+     "n": 15,
+     "pct": 0.47,
+     "median_excess": -0.15,
+     "best": "TWST +401% vs +17%",
+     "worst": "ALVO -56% vs +31%",
+     "small": false
+    }
+   }
+  },
+  "Grassroots Trading (SA)": {
+   "summary": {
+    "1y": {
+     "hits": 39,
+     "n": 86,
+     "pct": 0.45,
+     "median_excess": -0.04,
+     "best": "TTMI +581% vs +31%",
+     "worst": "NTHI -77% vs +17%",
+     "small": false
+    },
+    "2y": {
+     "hits": 8,
+     "n": 18,
+     "pct": 0.44,
+     "median_excess": -0.08,
+     "best": "HRTG +118% vs +41%",
+     "worst": "PROP -95% vs +38%",
+     "small": false
+    }
+   }
+  }
+ },
+ "detailed_stats_md": "- **Articles sourced:** 10,020 posts in window\n  - seekingalpha (Long Ideas feed 5,217 + 4 author-page posts from the earlier sweep): 5,221\n  - substack: 4,762\n  - x_network_blog: 22\n  - forum: 15\n  - Sources that could not be read: 7 (r/SecurityAnalysis (403); r/CanadianInvestor (429); r/Microcap (403); VIC public ideas (login wall); biggercapital.com (no feed, 404); clarksquarecapital.com (connection failed); Seeking Alpha ticker feeds (headlines only, paywalled))\n- **Passed screening:** 62 articles (60 tickers)\n- **Dropped, by screening reason:**\n  - Seeking Alpha: failed list screen (cap / listing / ETF / recap / multi-stock / no ticker): 2,987\n  - paywalled: 2,553\n  - Seeking Alpha: passed list screen but not read (older than 2 weeks, or not reached before the bot check): 2,046\n  - not a single-stock pitch (no ticker focus): 947\n  - not a single-stock pitch (recap/macro/portfolio/list): 387\n  - not a single-stock bullish pitch on a US/Canada small/mid cap (title review): 294\n  - not a written article (podcast/restack): 181\n  - Seeking Alpha: author not long (no explicit long disclosure on this ticker): 108\n  - author not long (no explicit long-position disclosure): 79\n  - not a single-stock pitch (multi-stock): 43\n  - Seeking Alpha: preview-only (browser flagged it as open, but only the summary/teaser loaded): 40\n  - no moat or edge (commodity, shipping, explorer, cash shell, special situation) (after full read): 23\n  - not a bullish pitch (hold / fairly valued / bearish / no buy case) (after full read): 20\n  - not a single-stock pitch (essay, primer, roundup, credit/arb trade) (after full read): 20\n  - not US/Canada listed: 15\n  - not US/Canada listed (or company not identifiable) (after full read): 8\n  - preview-only / member-gated text (after full read): 3\n  - Seeking Alpha: no moat or edge (gold miner): 3\n  - Seeking Alpha: no moat or edge (gold explorer/junior miner): 1\n  - Seeking Alpha: no moat or edge (department store, no moat case): 1\n  - Seeking Alpha: no moat or edge (contract driller (cyclical)): 1\n  - Seeking Alpha: not US/Canada listed (German listing, OTC ADR only): 1\n  - Seeking Alpha: no moat or edge (product tanker): 1\n  - Seeking Alpha: no moat or edge (oil E&P): 1\n  - Seeking Alpha: no moat or edge (met coal miner): 1\n  - Seeking Alpha: no moat or edge (life insurer, no moat case): 1\n  - Seeking Alpha: fund / BDC, not an operating company: 1\n  - Seeking Alpha: no moat or edge (crude tanker): 1\n- **Read in full:** 336\n- **Scored /6:** 62\n- **Seeking Alpha breakdown (Long Ideas only; investing-group posts excluded):**\n  - Long Ideas captured: 5,217 (published 2026-07-07 to 2026-10-13)\n  - Passed list screen (cap, listing, single stock, not ETF/recap): 2,230; of these 332 published in the last 2 weeks (Sep 29 to Oct 13)\n  - Last-2-weeks set needing a browser read: 305; checked in the browser before the bot check stopped it: 166 (165 opened)\n  - Texts evaluated: 184 (165 from the browser pass + 19 other full texts of 1,200+ words from Sep 29 on)\n  - Read in full: 144 (40 turned out to be previews)\n  - Passed screening: 23 (drops are listed above under 'Seeking Alpha:')\n  - Scored: 23",
+ "ambiguous_text": "BRCB 'may hold, buy, or sell'; DERM 'I may own shares'; AUUA.V 'I may hold, buy, or sell'; VITL 'I may hold, buy, or sell'; FENC 'may hold, directly or indirectly, a position'; BUKS 'may have bought, sold, or held'; NUVB 'may hold long positions'; CLYM 'may hold long positions'; TNGX 'may hold long positions'; IVA 'may hold long positions'; IMMX 'may hold long/short positions'; MLTX 'may hold long positions'; ACHV 'may hold long positions'; UTI 'I may hold positions'; OCC 'may hold, buy, or sell'; BOC 'may have bought, sold, or held'; None 'supports a long position' (recommendation, no holding stated); VBNK.TO 'We rate VersaBank a LONG' (rating, no holding stated); ETON guest post: the covered writer holds it in his model portfolio; guest author's own position not stated"
+}

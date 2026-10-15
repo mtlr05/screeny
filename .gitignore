@@ -1,0 +1,32 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+*.pdf
+
+# Fetched article text and HTTP caches (rebuilt locally)
+fulltext/
+cache/
+rerun/ft/
+rerun/*.json
+
+# Generated intermediates. Dated REPORT.md files under reports/ are kept.
+reports/triage_*.json
+reports/stats_*.json
+reports/earnings_drops_*.json
+
+# Run state. The seen-posts seed is tracked; these are rebuilt each run.
+state/scored.json
+state/batting.json
+state/sa_breakdown.json
+state/returns.json
+state/backlog.json
+state/articles_scored.csv
+state/articles.csv
+bat/arch.json
+bat/sa_auth.json
+bat/pitches.json
+crawl.json
+swept_posts.json
+sources_all.csv

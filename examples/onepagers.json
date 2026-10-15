@@ -1,0 +1,375 @@
+{
+ "_about": "Per-name one-pager justifications for the report appendix. Keyed by ticker. make_report.py renders a page for every ranked ticker; scores come from the scoring data, text from here. Fields: company, words, read, long, c1..c6 (justification per criterion), flags (list), thin (true if reconstructed from the full text because stored notes were thin).",
+ "CCOI": {
+  "company": "Cogent Communications",
+  "words": "~18,100",
+  "read": "Read in full",
+  "long": "Author states he is buying (\"So why am I buying?\"); no formal disclosure line",
+  "c1": "Partial (0.5). The core IP-transit business is steady and cheap, and the Sprint wireline network is being refilled with Wavelengths and IPv4 leasing. The article frames it mainly as undervalued hard assets plus a recovery, not a long secular growth story.",
+  "c2": "Full. Base case $81/share vs about $12.22 at the publish-day close (author range $40-150). No timeframe given, so the default 2 years applies, which is well above 40%/yr.",
+  "c3": "Full. Founder-CEO Dave Schaeffer is quoted saying he owns about 10% of the company. He has been selling, and the article says so.",
+  "c4": "Moderate (0.75). Scale and cost advantage: the lowest-cost transit network ($0.07/Mbps), owned fiber and data-center footprint, about 12.5M IPv4 addresses (cited in a related article; the author values the Sprint block via appraisals), and a proven founder-operator. Main threat: Wavelengths has repeatedly missed guidance, and the moat sits under a 7.4x-levered balance sheet.",
+  "c5": "Full. The market prices in a 98% dividend cut, founder selling, 16% short interest and an 86% drawdown. The author argues the core is intact and the hard assets cover the downside, so de-levering should force a re-rating.",
+  "c6": "Full. The $750M senior unsecured notes due June 15, 2027 are to be refinanced with 2033 secured notes, and leverage is guided to about 3x by May 2028.",
+  "flags": [
+   "About 7.4x net leverage and a June 2027 maturity: refinancing risk.",
+   "Management has missed several Sprint and Wavelengths projections; the author expects the 2028 targets to be missed.",
+   "Founder selling and a 98% dividend cut. Fact-check: these are stated by the author and match filings.",
+   "Stock has fallen about 30% since publication (as of Oct 13)."
+  ]
+ },
+ "HROW": {
+  "company": "Harrow",
+  "words": "~4,300",
+  "read": "Read in full",
+  "long": "Counted as long by the earlier manual check; no disclosure line was found in the saved text, so this needs re-checking",
+  "c1": "Full. A branded ophthalmic portfolio (VEVYE at 42% of revenue, IHEEZO, TRIESENCE, plus the TYRVAYA acquisition) is growing; branded revenue rose 33% YoY to 79% of the total.",
+  "c2": "Full. The author sees \"a credible path\" to $100 by 2028 vs $38.87 at the publish-day close: about 2.6x in about 2.4 years, roughly 50%/yr.",
+  "c3": "Full per the stored score (CEO Mark Baum). The saved article doesn't give his stake, so this can't be confirmed from the text.",
+  "c4": "Moderate (0.75). Edge rather than structural moat: a commercial ophthalmology platform that buys under-managed branded drugs (TYRVAYA from Viatris) and re-launches them through its own enlarged sales force, with >90% gross margin on IHEEZO. Main threat: execution. Management keeps missing its own guidance, and the author calls Baum a salesman.",
+  "c5": "Partial (0.5). An earnings-review update: the author argues expectations have reset below guidance and H2 conversion isn't priced in, but gives no sharp reason the market is wrong beyond that.",
+  "c6": "Full. Dated catalysts: IHEEZO's ~25% net price increase from July 1, 2026, VEVYE's new top-three PBM coverage from Aug 1, and the G-MELT NDA plus product catalysts in 2027.",
+  "flags": [
+   "$300M of 8.625% notes due September 2030.",
+   "Guidance record is poor: Q2 revenue came in below the bottom of the range, again.",
+   "H2 2026 guide needs more than double H1 revenue.",
+   "Stock has fallen about 27% since publication (as of Oct 13)."
+  ],
+  "thin": true
+ },
+ "PDEX": {
+  "company": "Pro-Dex",
+  "words": "~11,500",
+  "read": "Read in full",
+  "long": "\"I hold a position in the securities discussed\"",
+  "c1": "Full. A profitable, self-funding maker of powered surgical handpieces whose orthopedic and robotic end-effector business rides growth in surgical robotics.",
+  "c2": "Partial (0.5). Base case about $100 vs $58.40 at the publish-day close: about +71% over the default 2 years, roughly 31%/yr (in the 25-40% band).",
+  "c3": "Partial (0.5). CEO Rick Van Kirk owns about 2.8%. Chairman Nicholas Swenson holds about 32%, but he isn't the CEO.",
+  "c4": "Strong (1). Switching costs plus intangibles: patented adaptive torque-limiting algorithms, characterized to each customer's own screw set, so a rival can't drop in a substitute. More than 15 years of patents back this up (e.g., DePuy's MatrixPRO II runs on it). Main threat: 79% customer concentration, likely Stryker, which has in-house capability.",
+  "c5": "Full. Headline EPS is inflated by a one-time Monogram gain and the stock is discounted for concentration. The author argues the core alone pays for the price, so the robotics option comes free; the customer's extension to 2028 with minimum volumes reduces the overhang.",
+  "c6": "Full. The robotics/Mako-related option reaches \"a genuine catalyst in early 2027\", per the author.",
+  "flags": [
+   "One customer was 79% of 9-month FY26 revenue; the top three were 94%.",
+   "The chairman's stock is partly pledged against a loan, and the CEO has been trimming.",
+   "Some information comes from a management meeting, not filings (the author flags this)."
+  ]
+ },
+ "BDC": {
+  "company": "Belden",
+  "words": "~6,700",
+  "read": "Read in full",
+  "long": "\"The author of this post holds a long position in BDC\"",
+  "c1": "Full. Industrial and enterprise networking for the AI, automation, Wi-Fi 7 and broadband (BEAD) build-outs. Solutions mix is targeted to reach 30% of revenue by 2028.",
+  "c2": "Full. Base-case target $235 within two years vs $118.44 at the publish-day close: about +98%, roughly 41%/yr.",
+  "c3": "Zero. CEO Ashish Chand is a long-time insider, but the article only cites a 6x-salary ownership requirement, not a large stake.",
+  "c4": "Moderate (0.75). Switching costs and specification power: in industrial automation downtime is costly and rewiring is painful, plus channel and application-engineering breadth across a fragmented market. Main threat: larger networking players in the active layer it is now entering with RUCKUS.",
+  "c5": "Full. The market fixes on RUCKUS's ~13x headline multiple and the leverage step-up. The author argues it lifts margins and mix, and that consensus for 2027-28 is stale, so revisions should re-rate the stock.",
+  "c6": "Full. RUCKUS fully integrated by 2027, with most of the margin step-up in 2027, and management's 2.9x net-leverage target by 2027.",
+  "flags": [
+   "$1.85B of new acquisition debt (JPM, SOFR+225); M&A and buybacks paused until leverage falls.",
+   "Stock has fallen about 8% since publication (as of Oct 13)."
+  ],
+  "thin": true
+ },
+ "REAL": {
+  "company": "The RealReal",
+  "words": "~4,300",
+  "read": "Read in full",
+  "long": "\"The author of this post holds a long position in the stock discussed\"",
+  "c1": "Full. Leader in authenticated luxury resale, with a growing pre-owned watch and jewelry mix (a $35.7B market cited at a 13% CAGR) and AI-driven intake (Athena).",
+  "c2": "Full. Base-case $19.22 (3.0x FY27E revenue) vs $11.66 at the publish-day close: +65%. Read as a valuation at the end of FY27 (about 1.4 years), that's about 40%/yr. On a 2-year reading it would be about 29%/yr and only 0.5.",
+  "c3": "Zero. CEO Rati Sahi Levesque is a 15-year veteran, appointed in 2024; no large stake is stated.",
+  "c4": "Narrow (0.5). Scale and trust in authentication (intake and authentication centers, data, brand) give a modest edge. Main threat: other resale marketplaces and the low switching costs of consignors.",
+  "c5": "Full. The stock was punished for flat Q2 guidance and tough H2 comps. The author argues operating leverage (AEBITDA margin 7% to a 15-20% target) and FCF inflection aren't priced.",
+  "c6": "Full per the stored score. Athena is targeted at ~50% of units by end-2026 and FY27 margins are the test; these are dated milestones rather than one hard event.",
+  "flags": [
+   "Net leverage about 5.0x LTM; cash fell to $123.9M from $151.2M.",
+   "The author's model assumes ~12% more diluted shares vs FY25.",
+   "Stock has fallen about 16% since publication (as of Oct 13)."
+  ],
+  "thin": true
+ },
+ "KITS.TO": {
+  "company": "KITS Eyecare",
+  "words": "~5,600",
+  "read": "Read in full",
+  "long": "\"I have owned shares of KITS ... for a few months now\"",
+  "c1": "Full. Online prescription eyewear is still early in penetration, and KITS is growing quickly against a high-markup incumbent chain.",
+  "c2": "Zero. No price target. The base scenario is about C$30.59 by FY2030 vs ~C$16.90 at the publish-day close: +84% over five years, roughly 13%/yr.",
+  "c3": "Full. Founder-CEO Roger Hardy holds about 20%+ per the stored note, and has been buying on the open market. The exact figure wasn't re-confirmed in the saved text.",
+  "c4": "Moderate (0.75). Cost advantage from vertical integration: its own Vancouver lab makes glasses at a fraction of incumbent cost, plus proprietary OpticianAI data and about 64% repeat revenue. The author rates the moat \"middle of the pack\". Edge: Hardy built and sold the same model (Coastal Contacts) once before. Main threat: EssilorLuxottica and Warby Parker.",
+  "c5": "Full. The headline multiple looks expensive because nearly all operating profit is reinvested in customer acquisition. The author argues steady-state earnings are much higher.",
+  "c6": "Partial (0.5). No dated catalyst; the case is a five-year compounding path.",
+  "flags": [
+   "Modest dilution from stock-based pay assumed (34M to 35M shares).",
+   "Low current net margin because of heavy reinvestment."
+  ],
+  "thin": true
+ },
+ "LEAT": {
+  "company": "Leatt Corporation",
+  "words": "~2,700",
+  "read": "Read in full",
+  "long": "\"Why I Own It: I bought this in early June 2026 at $12.00\"",
+  "c1": "Full. A protective-gear brand (neck braces, helmets, body armor) taking share while the industry recovers from destocking. Revenue is still about 19% below its peak and margins are a third of peak.",
+  "c2": "Partial (0.5). Weighted fair value of about $22 vs $12.65 at the first close after publication: +74% (the author says +84% from $12.10) over the default 2 years, roughly 32-36%/yr.",
+  "c3": "Partial (0.5) per the stored score. Founder Dr. Christopher Leatt is Chairman and head of R&D; CEO Sean Macdonald's stake isn't stated in the article, so this can't be confirmed.",
+  "c4": "Moderate (0.75). Brand and IP: the original neck-brace inventor, with an ecosystem that customers buy for protection per dollar. Edge: growing about 27% while peers (Fox, Shimano) shrink. Main threat: a discretionary category and cyclical destocking.",
+  "c5": "Full. No analyst coverage; the discount is illiquidity, not a broken business, and the $1.30 EPS rests on management's own operating-leverage guidance.",
+  "c6": "Partial (0.5). Catalysts are quarterly margin expansion and a late-summer 2026 helmet launch; no hard dated re-rating event.",
+  "flags": [
+   "Clean: $16.7M net cash, no debt, flat share count for a decade.",
+   "OTCQB-listed and illiquid.",
+   "Comparisons are getting harder (Q2 2026 laps +61%)."
+  ],
+  "thin": true
+ },
+ "LUMN": {
+  "company": "Lumen Technologies",
+  "words": "~3,500",
+  "read": "Read in full",
+  "long": "\"Note: the author holds a long position in the security analyzed\"",
+  "c1": "Full. AI and cloud demand turns its 340,000-route-mile intercity fiber network into scarce infrastructure; Strategic revenue is over 50% of Business revenue, and digital and NaaS are growing about 36%.",
+  "c2": "Full. Base case about $17 (8x 2029 cash EBITDA) vs $7.96 at the publish-day close: +114%, about 46%/yr over the default 2 years (upside case $25-44).",
+  "c3": "Zero. The article gives no meaningful CEO stake.",
+  "c4": "Moderate (0.75). Hard-to-replicate assets: the Level 3 long-haul fiber, the largest US 400G footprint, and partnerships (AWS, Palantir, Corning). Main threat: Zayo competition for new builds, and future PCF deals may need costlier new conduit.",
+  "c5": "Full. The market still extrapolates telecom decline, while the mix has crossed to growth. The author argues EBITDA inflects in 2026, revenue in 2028, and the complexity and distress discount unwinds.",
+  "c6": "Partial (0.5). Catalysts (EBITDA inflection in 2026, Business revenue in 2028, further PCF wins) are described as \"identifiable over the medium-term\", not one dated event.",
+  "flags": [
+   "Heavy debt, though net leverage fell below 4x after the FTTH sale, and Level 3 maturities run past 2030.",
+   "Stock has fallen about 37% since publication (as of Oct 13)."
+  ],
+  "thin": true
+ },
+ "SRI": {
+  "company": "Stoneridge",
+  "words": "~4,100",
+  "read": "Read in full",
+  "long": "\"Note: author holds a long position in the security analyzed\"",
+  "c1": "Full. MirrorEye camera-mirror systems (~1/4 of FY26 sales, ~100% North American share) on top of a cyclical recovery in Class 8 trucks, after selling legacy Control Devices.",
+  "c2": "Full. Value about $15/share vs $7.28 at the publish-day close: +106%, about 43%/yr over the default 2 years.",
+  "c3": "Zero. A new CEO (previously head of Electronics); no stake is stated.",
+  "c4": "Moderate (0.75). Switching costs: MirrorEye is \"spec-ed in\" at OEMs (Daimler and Volvo programs ramping), with a near-monopoly in North America. Main threat: limited EU share gains against Bosch/MEKRA, and OEM validation cycles.",
+  "c5": "Full. Orphaned by the market (down more than 60%, almost no coverage) because of a truck down-cycle. The author argues normalized earnings plus MirrorEye growth are mispriced.",
+  "c6": "Partial (0.5). The author calls it \"a patience story rather than one with a hard catalyst\"; the credit facility refinancing (matures July 2027) is the nearest dated event.",
+  "flags": [
+   "Thin covenant room (max 4x leverage, 2.5x interest coverage) could be breached if EBITDA falls further.",
+   "CEO and CFO turnover.",
+   "2026 EBITDA guide cut from $70M to $20-25M.",
+   "Stock has fallen about 16% since publication (as of Oct 13)."
+  ],
+  "thin": true
+ },
+ "SUM.V": {
+  "company": "Summit Royalties",
+  "words": "~3,400",
+  "read": "Read in full",
+  "long": "\"Disclaimer: I am long shares at CAD$ 1.36\"",
+  "c1": "Full. A royalty model with high margins; the book moves from small cash flows to >$15M FCF in 2027 as Copperstone and Pitangui start production.",
+  "c2": "Zero per the stored score: there's no explicit dated price target. The author's FCF math (15x 2027 FCF, about $2.10/share) implies about +41% from C$1.49, but it isn't stated as a target with a timeframe.",
+  "c3": "Partial (0.5). Insiders own about 11% (company deck); CEO Drew Clark's personal stake isn't broken out.",
+  "c4": "Narrow (0.5). Edge rather than moat: CEO Drew Clark comes from Metalla's growth years, and royalties are a structurally high-margin model. Main threat: execution and dilution at a small royalty company.",
+  "c5": "Full. It trades at about 0.6x P/NAV vs peers above 1x; the author argues FCF arriving in 2027 closes that gap.",
+  "c6": "Full. Copperstone and Pitangui production in mid/H2 2027, a PEA in H2 2026, and the silver-stream deficit settling in December 2027.",
+  "flags": [
+   "History of equity issuance; a new credit facility (up to $50M) is meant to stop dilution.",
+   "Mine execution risk, mainly Copperstone.",
+   "TSXV micro-cap (~$110M)."
+  ],
+  "thin": true
+ },
+ "PMVP": {
+  "company": "PMV Pharmaceuticals",
+  "words": "~3,000",
+  "read": "Read in full",
+  "long": "Seeking Alpha long-position disclosure",
+  "c1": "Full. First-in-class reactivator of the p53 Y220C mutation (rezatapopt), a new cancer drug class.",
+  "c2": "Full. $3.50 base value vs $1.57: +123%, about 49%/yr over the default 2 years.",
+  "c3": "Partial (0.5). CEO Mack holds about 1.13M shares, about 1.5% (Yahoo insider roster).",
+  "c4": "Moderate (0.75). Patents and first-mover data in a defined mutation (46% ORR, 35/76; 10-month median duration of response). Not Strong because the data are single-arm, the mutation is rare, and resistance has already been seen.",
+  "c5": "Full. The warrant and dilution overhang is priced as failure, while the data point the other way; overreaction to financing, not data.",
+  "c6": "Full. Pivotal PYNNACLE readout in Q4 2026; NDA in Q1 2027.",
+  "flags": [
+   "Runway about 6-7 quarters on ~$130M pro forma cash (under 24 months).",
+   "42M warrants at $1.21 plus pre-funded warrants: heavy dilution.",
+   "Single-asset, binary readout; ~$105M market cap."
+  ]
+ },
+ "HIMS": {
+  "company": "Hims & Hers Health",
+  "words": "~2,800",
+  "read": "Read in full",
+  "long": "Seeking Alpha long-position disclosure",
+  "c1": "Full. A vertically integrated direct-to-consumer telehealth platform (2.89M subscribers, Q2 revenue $753M), with a 2030 target of $6.5B revenue.",
+  "c2": "Zero. $41 fair value vs $29.81: +38% in total, under 25%/yr.",
+  "c3": "Full, with a caveat. Founder-CEO Andrew Dudum controls the company via super-voting Class V shares; Yahoo shows no direct-share figure. Without this credit, the score would be 3.75 and the stock would drop off the list.",
+  "c4": "Moderate (0.75). Brand, scale and vertical integration (pharmacy, fulfillment) plus an obsessive founder. Main threat: regulatory action (FDA on compounded peptides, FTC) and GLP-1 pricing from drugmakers.",
+  "c5": "Full. The stock fell about 15% on the FDA peptide committee and about 10% on the FTC suit; the author sizes the impact at about $3/share, so this is an overreaction.",
+  "c6": "Full. Wegovy list-price cut on Jan 1, 2027 and the FDA peptide decision.",
+  "flags": [
+   "$1.0B of 2030 converts (convert price $70.67) plus $402.5M of 2032 converts at the money: ~6% dilution.",
+   "Gross margin down to ~64% from 76% a year ago."
+  ]
+ },
+ "NYXH": {
+  "company": "Nyxoah",
+  "words": "~3,000",
+  "read": "Read in full",
+  "long": "Seeking Alpha long-position disclosure",
+  "c1": "Full. Genio implant for sleep apnea; if the label extends to complete concentric collapse (CCC) patients, it opens a large, growing market Nyxoah alone can serve.",
+  "c2": "Full. $11 DCF target vs $1.37: about 8x, far above 40%/yr even over the default 2 years.",
+  "c3": "Zero. The CEO is stepping down and isn't a large holder.",
+  "c4": "Moderate (0.75). Regulatory exclusivity in the CCC group plus the bilateral design and clinical data (77% responders in the CCC pivotal trial). Not Strong because the label isn't granted and Inspire could follow.",
+  "c5": "Full. Priced as post-dilution distress, not as a label-driven monopoly.",
+  "c6": "Full. FDA CCC label decision expected in early 2027.",
+  "flags": [
+   "About EUR98M cash vs ~EUR18M/quarter burn; 166% dilution in 12 months, and the author models about 15% more.",
+   "EUR58M of debt.",
+   "CEO and CFO both leaving; a related-party deal with Man & Science; Inspire patent suits.",
+   "About $133M market cap; a binary FDA bet."
+  ]
+ },
+ "ELMT": {
+  "company": "Elmet Technologies",
+  "words": "~2,300",
+  "read": "Read in full",
+  "long": "Seeking Alpha long-position disclosure",
+  "c1": "Full. The only US-owned, fully integrated tungsten and molybdenum producer, as defense supply chains move away from China.",
+  "c2": "Partial (0.5). $64-127 by 2031 vs $21.12: 3-6x over about 5 years, roughly 27-46%/yr (midpoint ~38%/yr).",
+  "c3": "Zero. The CEO's stake couldn't be verified.",
+  "c4": "Strong (1). Regulatory and strategic position: the only integrated domestic source, backed by a $450M Department of War commitment and a $2B-ceiling DLA IDIQ ($150M guaranteed). Main threat: execution on heavy capex.",
+  "c5": "Full. The market prices it as a small industrial; the author argues it is an irreplaceable Pentagon supplier.",
+  "c6": "Full. DFARS ban on Chinese tungsten effective Jan 1, 2027.",
+  "flags": [
+   "DoW warrants: up to 19.9% dilution; heavy capex plan.",
+   "Strategic holder: US Department of War (warrants plus a board seat)."
+  ]
+ },
+ "SHOE": {
+  "company": "Shoe Station",
+  "words": "~1,700",
+  "read": "Read in full",
+  "long": "Seeking Alpha long-position disclosure",
+  "c1": "Partial (0.5). A cheap turnaround with little growth.",
+  "c2": "Full. More than 75% upside by end FY27 (about 1.3 years), above 40%/yr.",
+  "c3": "Partial (0.5). Returning CEO Sifford holds about 412K shares, about 1.5% (Yahoo).",
+  "c4": "Moderate (0.75). Edge: the returning CEO's proven 2012-21 record ($408M FCF, $194M buybacks). Main threat: a weak footwear retail backdrop.",
+  "c5": "Full. About 50% of the float is short after a ~45% EPS guidance cut; the author calls it an overreaction, with the stock priced below working capital.",
+  "c6": "Partial (0.5). Holiday-quarter and FY27 results; no specific dated event.",
+  "flags": [
+   "Clean balance sheet: $132M cash, no debt, capex falling below $20M.",
+   "Guidance cut in Sept 2026 under the prior strategy."
+  ]
+ },
+ "ALM": {
+  "company": "Almonty Industries",
+  "words": "~1,300",
+  "read": "Read in full",
+  "long": "SA beneficial long position in ALM / ALM:CA",
+  "c1": "Full. Sangdong is framed as a long-life (21-year Plansee offtake with a price floor) non-China tungsten mine, so the thesis is secular supply security for tungsten, not a one-off trade.",
+  "c2": "0. Target $15.85 vs about $13.40 at publication through 2030 is roughly 17%/yr, under the 25%/yr bar.",
+  "c3": "0. CEO stake is not verified in the article.",
+  "c4": "Moderate (0.75). Scarce non-China tungsten, a long offtake with a floor price, and a mine that is hard to replicate. Not Strong because the premium is still commodity-price risked and the company is early in first sales.",
+  "c5": "Full. The market is pricing a tungsten-price crash that has not arrived; if the premium holds and Sangdong ramps, the author argues the stock is mispriced against his risked value.",
+  "c6": "Full. First Sangdong sales expected mid-November (Q3), and DFARS non-China tungsten rules start 1 Jan 2027.",
+  "flags": [
+   "Commodity-price risk: the author sizes it as a small, junior-style position.",
+   "CEO stake unverified.",
+   "Author target implies only ~17%/yr to 2030.",
+   "Thin notes reconstructed from full text."
+  ],
+  "thin": true
+ },
+ "GTLB": {
+  "company": "GitLab",
+  "words": "~4,000",
+  "read": "Read in full",
+  "long": "SA beneficial long position in GTLB",
+  "c1": "Full. AI coding and source-control sovereignty are treated as a multi-year secular shift that lifts GitLab\u2019s addressable market versus GitHub.",
+  "c2": "0. No explicit price target; the article is qualitative on upside.",
+  "c3": "0. The CEO is not a large holder; the founder is chair.",
+  "c4": "Moderate (0.75). Product and reliability edge versus GitHub plus rising net ARR (+42% cited), but GitHub recovery and competition keep it from Strong.",
+  "c5": "Full. The market still treats GitHub as the default; the author argues reliability, sovereignty and AI-agent tooling will drive a 2027 inflection that the share price does not fully price.",
+  "c6": "Full. Orbit GA is next month and the 2027 inflection is dated within 24 months.",
+  "flags": [
+   "Premium valuation already prices in strong execution.",
+   "GitHub recovery and rising competition are the main risks.",
+   "No own price target.",
+   "Thin notes reconstructed from full text."
+  ],
+  "thin": true
+ },
+ "KARO": {
+  "company": "Karooooo",
+  "words": "~4,800",
+  "read": "Read in full",
+  "long": "Author states \"I own the stock\"",
+  "c1": "Full. Telematics / fleet SaaS with 15%+ end-market growth, ASEAN expansion and a durable South African franchise.",
+  "c2": "0. Thesis is \"15-20% CAGR if the multiple holds\"; no 40%/yr target.",
+  "c3": "Full. Founder-CEO Isaias (Zack) Calisto is described as owning about two-thirds of the company.",
+  "c4": "Moderate (0.75). ~40% South Africa share, 95% retention, net cash, no SBC and vertical integration. Not Strong because ASEAN is still early and Powerfleet / peers compete.",
+  "c5": "Partial (0.5). The stock is called \"expensive but underfollowed\"; the differential is more about neglect than a clear temporary mispricing with a named correction path.",
+  "c6": "Partial (0.5). Catalysts (ASEAN ramp, continued Rule-of-50 compounding) are not tightly dated within 24 months.",
+  "flags": [
+   "Already trades at a premium multiple; thesis depends on the multiple holding.",
+   "Concentration: ~70% of income from South Africa.",
+   "Thin notes reconstructed from full text."
+  ],
+  "thin": true
+ },
+ "SIRI": {
+  "company": "Sirius XM",
+  "words": "~2,000",
+  "read": "Read in full",
+  "long": "SA beneficial long position in SIRI",
+  "c1": "Partial (0.5). Framed mainly as a cheap, FCF-rich \"living dead\" asset (spectrum + satellite radio licence), not a long secular growth story.",
+  "c2": "Partial (0.5). $43 at 10x FCF now is about +62% (roughly 27%/yr over 2 years), or $64 after 3 years of buybacks (~36%/yr). Between 25 and 40%/yr.",
+  "c3": "0. CEO is not a large holder.",
+  "c4": "Moderate (0.75). Only US satellite-radio licence plus spectrum that the author values above enterprise value; weakened streaming rivals help. Not Strong because the core audio business is mature.",
+  "c5": "Full. Market prices Sirius as a dying satellite radio company at spectrum value; the author argues FCF and buybacks restart a re-rating.",
+  "c6": "Full. Share buybacks are guided to restart in 2027 after multi-year debt reduction.",
+  "flags": [
+   "Mature / declining subscriber narrative; thesis leans on capital return.",
+   "Net debt was still material after the multi-year reduction cycle.",
+   "Thin notes reconstructed from full text."
+  ],
+  "thin": true
+ },
+ "URGN": {
+  "company": "UroGen Pharma",
+  "words": "~1,800",
+  "read": "Read in full",
+  "long": "SA beneficial long position in URGN (also CGON)",
+  "c1": "Full. Zusduri / RTGel is the only approved non-surgical option for recurrent low-grade intermediate-risk NMIBC, with IP into the 2040s and a growing bladder-cancer addressable market.",
+  "c2": "0. No own target; cites Street without a quantified 40%/yr path from the publish-day close.",
+  "c3": "0. CEO stake not established.",
+  "c4": "Moderate (0.75). RTGel delivery IP and first-mover status in non-surgical LG-IR-NMIBC. Not Strong because clinical competitors are coming.",
+  "c5": "Full. A ~30% pullback after a 208% rally is treated as an overreaction while the franchise and pipeline (UGN-103, CGON) still look intact.",
+  "c6": "Full. UGN-103 NDA expected 3Q26 / approval 2027; CGON readout 2H26.",
+  "flags": [
+   "Clinical competition is coming after 2027.",
+   "No author-owned price target.",
+   "Author also long CGON, so related-position bias.",
+   "Thin notes reconstructed from full text."
+  ],
+  "thin": true
+ },
+ "VBNK": {
+  "company": "VersaBank",
+  "words": "~1,500",
+  "read": "Read in full",
+  "long": "SA beneficial long position in VBNK",
+  "c1": "Full. Branchless B2B digital bank with the SRP model and very low credit losses (0.03% cited), so the thesis is secular digital-banking / receivable purchase growth.",
+  "c2": "0. Author rejects a FAST Graphs $52 figure and gives no own 40%/yr target; also calls the stock expensive.",
+  "c3": "Partial (0.5). President / founder Taylor is a meaningful holder, but the exact % is unverified.",
+  "c4": "Moderate (0.75). Differentiated SRP / receivable-purchase model and credit discipline. Not Strong given the author himself calls valuation rich.",
+  "c5": "Partial (0.5). Differential is weaker: growth may justify the multiple, but the article does not sharply name why the market is wrong.",
+  "c6": "Full. Corporate reorganization is expected to close in late October 2026.",
+  "flags": [
+   "Author calls it expensive; return bar not met.",
+   "Founder stake % unverified.",
+   "Thin notes reconstructed from full text."
+  ],
+  "thin": true
+ }
+}
