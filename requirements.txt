@@ -1,0 +1,8 @@
+requests>=2.31
+feedparser>=6.0
+yfinance>=0.2.40
+pandas>=2.0
+
+# Optional PDF rendering (scripts/make_report.py --pdf). Markdown is the report.
+# markdown>=3.5
+# weasyprint>=60
