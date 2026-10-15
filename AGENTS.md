@@ -28,6 +28,7 @@ On-demand scout for single-stock investment write-ups. David runs it from the Cu
 
 - `config/sources.csv` — active sources. `config/sources_dormant_or_dead.csv` — parked; recheck about monthly.
 - `state/seen_posts.csv` — dedupe key is `url`. Append-only.
+- `state/source_stats.csv` — per tracked source: last post, consecutive failed loads, articles scored in the last 6 months, 6-month average score, 2-year batting average and pitch count. Seeking Alpha is not in this file.
 - `state/scored.json`, `state/batting.json` — this run's scores and batting averages.
 - `reports/` — dated outputs. Sample: `reports/2026-10-14/`.
 - `fulltext/` and `cache/` — local only, not committed.
@@ -36,3 +37,7 @@ On-demand scout for single-stock investment write-ups. David runs it from the Cu
 - `scripts/` — sweep, fetch, prices, earnings drops, report. `rerun/` — full-window helpers. `bat/` — batting-average helpers.
 
 X links are optional. The user pastes them. Do not call the X MCP and do not keep an X account list.
+
+## Source upkeep
+
+After a screen, run `python3 scripts/source_upkeep.py --plan` and show the proposals. Apply a proposal only after approval (`--apply` on entries marked approved). Tracked active sources have a soft cap of 600. Drop a source only for a 2-year batting average under 30% on at least 5 pitches, no post in 6 months, or 4 failed loads in a row. Do not drop a source only because it has no scored articles. Add a Substack recommendation only when that author scored at least 4.5/6 and the new author has a 2-year batting average above 50% on at least 5 pitches. Seeking Alpha stays on its own weekly pull and is not a tracked source.

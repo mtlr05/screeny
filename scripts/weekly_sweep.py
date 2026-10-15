@@ -117,6 +117,7 @@ ST = {
     "since": a.since,
     "sources": len(src),
     "failed_sources": len(dead),
+    "attempted": [r["url"] for r in src],
     "failed": dead,
     "sourced": len(new),
     "dropped": dict(dr),

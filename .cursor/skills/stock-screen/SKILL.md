@@ -33,7 +33,7 @@ python3 scripts/rss.py FEED_URL --since YYYY-MM-DD
 
 If a feed returns 403, 429, or no entries, record it as unreachable and move on. Add write-up URLs to the triage list.
 
-Recheck `config/sources_dormant_or_dead.csv` about monthly. Mark a feed dead after it fails on two runs. Add a Substack recommendation when a writer scores at least 4.5/6.
+Source adds and drops are the last step of the run (section 11). Do not add or remove a source during the sweep.
 
 ## 2. Earnings-drop overreactions
 
@@ -182,7 +182,36 @@ Remove scored URLs from `state/backlog.json` if that file exists.
 
 A full 4-month rebuild, when asked, is `python3 scripts/rerun_sweep.py`, then `rerun/fetch.py`, `rerun/screen1.py`, `rerun/resolve.py`, a full read recorded in `rerun/dispo.py`, then `python3 scripts/make_report.py --legacy`.
 
-## 11. What to tell the user
+## 11. Source upkeep
+
+Do this after the report is written. Runs are on request, so the rules use dates and run counts, not a calendar schedule. Seeking Alpha is not a tracked source. Leave the weekly Seeking Alpha pull as it is. Do not put Seeking Alpha authors in `state/source_stats.csv`.
+
+```bash
+python3 scripts/source_upkeep.py --plan
+```
+
+That refreshes `state/source_stats.csv` and writes `reports/source_upkeep_<date>.json`. It does not edit `config/sources.csv` or `config/sources_dormant_or_dead.csv`.
+
+Stats per tracked source: last post date, consecutive failed loads, articles scored in the last 6 months, average score over those articles, and the 2-year batting average with its pitch count. Batting averages use `bat/calc.py` windows. Percentages come from `state/batting.json` when that file exists (`python3 bat/pitches.py` then `python3 bat/calc.py`). Until then the pitch count can still be filled from `bat/pitches.py`, and a blank percentage is not a drop and not an add. `--compute-ba` calls `bat/calc.py` for saved pitch lists. `--crawl` fetches Substack recommendations (same keyword walk as `scripts/crawl_sources.py`) of authors who scored at least 4.5/6.
+
+Show every proposal to the user before changing the list. Each line has the source name, whether it is a drop or an add, the reason, and the numbers behind it. Apply only the entries the user approves. Set `"approved": true` on those entries, then:
+
+```bash
+python3 scripts/source_upkeep.py --apply reports/source_upkeep_<date>.json
+```
+
+Approved drops move that row to `config/sources_dormant_or_dead.csv`. Approved adds append a row to `config/sources.csv`. Unapproved entries stay as proposals.
+
+Rules:
+
+- Soft cap: 600 tracked active sources. Only if the list would be over 600, propose dropping the lowest average score over the last 6 months, and only among sources with at least 3 scored articles in that window, until the list fits.
+- Drop when the 2-year batting average is under 30% on at least 5 pitches.
+- Drop when the last known article is older than 6 months. A blank last-post date is unknown, not a drop.
+- Drop when the feed failed to load on 4 consecutive runs. A run counts only when `weekly_sweep.py` recorded that source in its stats file. There is no probation.
+- Do not drop a source merely because it produced no scored articles.
+- Add a source only when it is a Substack recommendation of an author who scored at least 4.5/6, and the candidate's own 2-year batting average is above 50% on at least 5 pitches. Candidates with fewer than 5 pitches are skipped for now.
+
+## 12. What to tell the user
 
 Lead with:
 
@@ -190,6 +219,7 @@ Lead with:
 - the path to `REPORT.md`
 - how many Seeking Alpha articles were skipped because the full text could not be read
 - sources that could not be reached
+- the source-upkeep proposals (name, drop or add, reason, numbers), and that nothing was added or removed until they approve
 - one line when nothing cleared the screen
 
 The ranked list and the one-pagers are the product. Do not dump every dropped title in the chat.

@@ -11,76 +11,100 @@ import os
 import statistics as S
 import sys
 
-import pandas as pd
-import yfinance as yf
-
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "scripts"))
 from _paths import STATE, ensure
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-P = json.load(open(os.path.join(HERE, "pitches.json"), encoding="utf-8"))
-TODAY = pd.Timestamp(dt.date.today())
-y1_end = (TODAY - pd.DateOffset(years=1)).strftime("%Y-%m-%d")
-y1_start = (TODAY - pd.DateOffset(years=2)).strftime("%Y-%m-%d")
-y2_end = y1_start
-y2_start = (TODAY - pd.DateOffset(years=3)).strftime("%Y-%m-%d")
-W = {"1y": (y1_start, y1_end, 12), "2y": (y2_start, y2_end, 24)}
 # Known buyouts where the adjusted-close series stops. Extend this when a pitch was acquired.
 BUY = {"CTLP": ("2025-07-31", 11.20), "IAS": ("2025-12-01", 10.30)}
-cache = {}
 
 
-def hist(t):
-    if t not in cache:
-        h = None
+def window_bounds(today=None):
+    """1y: published 1–2 years ago. 2y: published 2–3 years ago. End dates are exclusive."""
+    today = dt.date.fromisoformat(str(today)[:10]) if today else dt.date.today()
+
+    def back(years):
         try:
-            h = yf.Ticker(t).history(start=y2_start, end=(TODAY + pd.Timedelta(days=1)).strftime("%Y-%m-%d"), auto_adjust=True)["Close"]
-        except Exception:
+            return today.replace(year=today.year - years)
+        except ValueError:
+            return today.replace(year=today.year - years, day=28)
+
+    y1_end = back(1).isoformat()
+    y1_start = back(2).isoformat()
+    y2_start = back(3).isoformat()
+    return {"1y": (y1_start, y1_end, 12), "2y": (y2_start, y1_start, 24)}
+
+
+def pitches_in_window(pitches, window="2y", today=None):
+    """First pitch per ticker inside the window. pitches are (ticker, date, url, title)."""
+    start, end, _months = window_bounds(today)[window]
+    seen = set()
+    out = []
+    for t, d, u, ti in sorted(pitches, key=lambda x: x[1]):
+        if start <= d < end and t not in seen:
+            seen.add(t)
+            out.append((t, d, u, ti))
+    return out
+
+
+def summarize(name, pitches, today=None):
+    """Batting-average record for one author. Market libraries load only when this runs."""
+    import pandas as pd
+    import yfinance as yf
+
+    today_d = dt.date.fromisoformat(str(today)[:10]) if today else dt.date.today()
+    TODAY = pd.Timestamp(today_d)
+    W = window_bounds(today_d)
+    cache = {}
+
+    def hist(t):
+        if t not in cache:
             h = None
-        if h is None or h.empty:
-            h = pd.Series(dtype=float, index=pd.DatetimeIndex([]))
-        else:
-            h.index = pd.DatetimeIndex(h.index).tz_localize(None)
-        cache[t] = h
-    return cache[t]
+            try:
+                h = yf.Ticker(t).history(
+                    start=W["2y"][0],
+                    end=(TODAY + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
+                    auto_adjust=True,
+                )["Close"]
+            except Exception:
+                h = None
+            if h is None or len(getattr(h, "index", [])) == 0:
+                h = pd.Series(dtype=float, index=pd.DatetimeIndex([]))
+            else:
+                h.index = pd.DatetimeIndex(h.index).tz_localize(None)
+            cache[t] = h
+        return cache[t]
 
-
-def ret(t, d0, m):
-    h = hist(t)
-    d0 = pd.Timestamp(d0)
-    d1 = d0 + pd.DateOffset(months=m)
-    if d1 > TODAY:
-        return None, "window not complete"
-    s = h[h.index >= d0]
-    if s.empty:
-        if t in BUY:
-            return None, "buyout but no start price"
-        return None, "no price data"
-    p0 = s.iloc[0]
-    e = h[h.index <= d1]
-    if t in BUY and pd.Timestamp(BUY[t][0]) < d1:
-        return BUY[t][1] / p0 - 1, "buyout price"
-    if e.empty or e.index[-1] < d1 - pd.Timedelta(days=10):
-        if t in BUY:
+    def ret(t, d0, m):
+        h = hist(t)
+        d0 = pd.Timestamp(d0)
+        d1 = d0 + pd.DateOffset(months=m)
+        if d1 > TODAY:
+            return None, "window not complete"
+        s = h[h.index >= d0]
+        if s.empty:
+            if t in BUY:
+                return None, "buyout but no start price"
+            return None, "no price data"
+        p0 = s.iloc[0]
+        e = h[h.index <= d1]
+        if t in BUY and pd.Timestamp(BUY[t][0]) < d1:
             return BUY[t][1] / p0 - 1, "buyout price"
-        return (e.iloc[-1] / p0 - 1 if not e.empty else None), "last trade " + (str(e.index[-1].date()) if not e.empty else "")
-    return e.iloc[-1] / p0 - 1, ""
+        if e.empty or e.index[-1] < d1 - pd.Timedelta(days=10):
+            if t in BUY:
+                return BUY[t][1] / p0 - 1, "buyout price"
+            return (e.iloc[-1] / p0 - 1 if not e.empty else None), "last trade " + (str(e.index[-1].date()) if not e.empty else "")
+        return e.iloc[-1] / p0 - 1, ""
 
+    def bret(b, d0, m):
+        r, _ = ret(b, d0, m)
+        return r
 
-def bret(b, d0, m):
-    r, _ = ret(b, d0, m)
-    return r
-
-
-out = {}
-
-
-def run(name, L):
     res = {"pitches": {}, "summary": {}, "excluded": []}
     for w, (a, b, m) in W.items():
         seen = set()
         rows = []
-        for t, d, u, ti in sorted(L, key=lambda x: x[1]):
+        for t, d, u, ti in sorted(pitches, key=lambda x: x[1]):
             if not (a <= d < b) or t in seen:
                 continue
             seen.add(t)
@@ -90,7 +114,19 @@ def run(name, L):
             if r is None or br is None:
                 res["excluded"].append(dict(ticker=t, date=d, window=w, why=note))
                 continue
-            rows.append(dict(ticker=t, date=d, url=u, title=ti, stock_ret=round(r, 4), bench=bm, bench_ret=round(br, 4), hit=int(r > br), note=note))
+            rows.append(
+                dict(
+                    ticker=t,
+                    date=d,
+                    url=u,
+                    title=ti,
+                    stock_ret=round(r, 4),
+                    bench=bm,
+                    bench_ret=round(br, 4),
+                    hit=int(r > br),
+                    note=note,
+                )
+            )
         res["pitches"][w] = rows
         if rows:
             ex = [x["stock_ret"] - x["bench_ret"] for x in rows]
@@ -108,17 +144,28 @@ def run(name, L):
             )
         else:
             res["summary"][w] = None
-    out[name] = res
-    print(name, {w: (s and f"{s['hits']}/{s['n']}") for w, s in res["summary"].items()}, "excl", len(res["excluded"]))
+    return res
 
 
-for k, L in P.get("SUB", {}).items():
-    run(k, L)
-for k, L in P.get("SA", {}).items():
-    run(k, L)
-for k, why in P.get("NONE", {}).items():
-    out[k] = {"pitches": {}, "summary": {"1y": None, "2y": None}, "note": why}
-ensure(STATE)
-dest = os.path.join(STATE, "batting.json")
-json.dump(out, open(dest, "w", encoding="utf-8"), indent=1)
-print("wrote", dest)
+def main():
+    path = os.path.join(HERE, "pitches.json")
+    if not os.path.exists(path):
+        print("missing", path, "(run python3 bat/pitches.py first)")
+        sys.exit(2)
+    P = json.load(open(path, encoding="utf-8"))
+    out = {}
+    for group in ("SUB", "SA"):
+        for k, L in P.get(group, {}).items():
+            res = summarize(k, L)
+            out[k] = res
+            print(k, {w: (s and f"{s['hits']}/{s['n']}") for w, s in res["summary"].items()}, "excl", len(res["excluded"]))
+    for k, why in P.get("NONE", {}).items():
+        out[k] = {"pitches": {}, "summary": {"1y": None, "2y": None}, "note": why}
+    ensure(STATE)
+    dest = os.path.join(STATE, "batting.json")
+    json.dump(out, open(dest, "w", encoding="utf-8"), indent=1)
+    print("wrote", dest)
+
+
+if __name__ == "__main__":
+    main()

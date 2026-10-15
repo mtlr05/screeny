@@ -35,6 +35,7 @@ The agent follows `AGENTS.md` and `.cursor/skills/stock-screen/SKILL.md`.
 | `config/sources_dormant_or_dead.csv` | Parked feeds |
 | `config/universe.csv` | Optional ticker list for earnings-drop search |
 | `state/seen_posts.csv` | URLs already swept (dedupe) |
+| `state/source_stats.csv` | Per-source upkeep stats (Seeking Alpha is excluded) |
 | `reports/` | Dated reports. Sample: `reports/2026-10-14/` |
 | `examples/` | Same sample, plus `scored.json` so the report script can re-render it |
 | `fulltext/`, `cache/` | Local fetches. Gitignored |
@@ -53,11 +54,37 @@ python3 scripts/sa_public.py article https://seekingalpha.com/article/123
 python3 bat/sa_one.py "Author Name" author-slug
 python3 scripts/make_report.py --prices
 python3 scripts/make_report.py --example
+python3 scripts/source_upkeep.py --plan
+python3 scripts/source_upkeep.py --apply reports/source_upkeep_YYYY-MM-DD.json
 ```
 
 `make_report.py --example` re-renders the 2026-10-14 sample from `examples/scored.json` into `cache/example-REPORT.md`. It does not call the network.
 
 Triage files are JSON. `grab_fulltext.py` reads that file directly, so you do not need `jq`.
+
+## Source upkeep
+
+Runs happen when someone asks, so upkeep keys off dates and run counts. `python3 scripts/source_upkeep.py --plan` rewrites `state/source_stats.csv` and writes a proposal under `reports/`. It does not change the source lists. Show the proposal, set `"approved": true` on the entries to keep, then `--apply` that file. Approved drops move the row to `config/sources_dormant_or_dead.csv`. Approved adds append to `config/sources.csv`.
+
+Each tracked source (everything except Seeking Alpha) records:
+
+- last post date
+- consecutive failed loads
+- articles scored in the last 6 months
+- average score over those articles
+- 2-year batting average and the pitch count behind it
+
+Batting averages use the windows in `bat/calc.py`. If `state/batting.json` is missing, pitch counts can still come from `bat/pitches.py` and the percentage stays blank. A blank percentage is not a drop and not an add. `python3 bat/pitches.py` then `python3 bat/calc.py` fills the percentages. `--compute-ba` on the upkeep script calls that calculator for saved pitches.
+
+Rules:
+
+- Soft cap of 600 tracked active sources. Only when the list would exceed 600, propose trimming the lowest 6-month average score, and only for sources with at least 3 scored articles in that window, until it fits.
+- Drop when the 2-year batting average is under 30% on at least 5 pitches.
+- Drop when the last known post is older than 6 months. An unknown date is not a drop.
+- Drop when a feed fails to load on 4 consecutive runs (`weekly_sweep.py` records which sources it tried). No probation period.
+- Do not drop a source only because it has no scored articles.
+- Add a source only if it is a Substack recommendation of an author who scored at least 4.5/6 (`scripts/crawl_sources.py` walks those recommendations) and the candidate's 2-year batting average is above 50% on at least 5 pitches. Candidates with fewer than 5 pitches are skipped for now. `--crawl` fetches the recommendations; without it, `--plan` uses `cache/crawl.json` when that file exists.
+- Seeking Alpha is not tracked as a source. The weekly Seeking Alpha pull is unchanged.
 
 ## Rules that do not change
 

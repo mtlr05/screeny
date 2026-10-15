@@ -60,27 +60,38 @@ NONE = {
     "Blindspot Value (LUMN, SRI)": "archive starts 2026-06-23",
     "Gustav / aktieblogg (KARO)": "archive starts 2026-01-24",
 }
-sa_path = os.path.join(HERE, "sa_auth.json")
-sa = json.load(open(sa_path, encoding="utf-8")) if os.path.exists(sa_path) else {}
-SAP = {}
-for n, v in sa.items():
-    L = []
-    for a in v.get("arts") or []:
-        se = a.get("se") or []
-        if not se or se[0] not in ("bullish", "very_bullish"):
-            continue
-        tk = a.get("tk") or []
-        us = [t for t in tk if ":" not in t]
-        ca = [t.split(":")[0] for t in tk if str(t).endswith(":CA")]
-        if len(us) == 1:
-            t = us[0]
-        elif not us and len(set(ca)) == 1:
-            t = ca[0] + ".TO"
-        else:
-            continue
-        L.append((t, a["d"], f"https://seekingalpha.com/article/{a['id']}", a["t"]))
-    SAP[n + " (SA)"] = L
-json.dump({"SUB": SUB, "SA": SAP, "NONE": NONE}, open(os.path.join(HERE, "pitches.json"), "w", encoding="utf-8"), indent=0)
-for k, v in SAP.items():
-    print(k, len(v))
-print("wrote", os.path.join(HERE, "pitches.json"), "sa_authors", len(SAP))
+def sa_from_auth(sa):
+    """Single-stock bullish pitches from a public Seeking Alpha author dump."""
+    SAP = {}
+    for n, v in (sa or {}).items():
+        L = []
+        for a in v.get("arts") or []:
+            se = a.get("se") or []
+            if not se or se[0] not in ("bullish", "very_bullish"):
+                continue
+            tk = a.get("tk") or []
+            us = [t for t in tk if ":" not in t]
+            ca = [t.split(":")[0] for t in tk if str(t).endswith(":CA")]
+            if len(us) == 1:
+                t = us[0]
+            elif not us and len(set(ca)) == 1:
+                t = ca[0] + ".TO"
+            else:
+                continue
+            L.append((t, a["d"], f"https://seekingalpha.com/article/{a['id']}", a["t"]))
+        SAP[n + " (SA)"] = L
+    return SAP
+
+
+def main():
+    sa_path = os.path.join(HERE, "sa_auth.json")
+    sa = json.load(open(sa_path, encoding="utf-8")) if os.path.exists(sa_path) else {}
+    SAP = sa_from_auth(sa)
+    json.dump({"SUB": SUB, "SA": SAP, "NONE": NONE}, open(os.path.join(HERE, "pitches.json"), "w", encoding="utf-8"), indent=0)
+    for k, v in SAP.items():
+        print(k, len(v))
+    print("wrote", os.path.join(HERE, "pitches.json"), "sa_authors", len(SAP))
+
+
+if __name__ == "__main__":
+    main()
