@@ -2,7 +2,7 @@
 
 On-demand stock-article scout. It sweeps Substack and a short list of blogs, forums, Value Investors Club, and Seeking Alpha, reads pitches in full, scores them out of 6, and writes a ranked Markdown report.
 
-David runs it from the Cursor agent window. A run starts when someone asks. Nothing runs on a timer, and there is no signed-in browser.
+Runs from the Cursor agent window. A run starts when someone asks. Nothing runs on a timer, and there is no signed-in browser.
 
 ## Setup
 
