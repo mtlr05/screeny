@@ -2,7 +2,7 @@
 
 On-demand stock-article scout. It sweeps Substack and a short list of blogs, forums, Value Investors Club, and Seeking Alpha, reads pitches in full, scores them out of 6, and writes a ranked Markdown report.
 
-David runs it from the Cursor agent window. A run starts when someone asks. Nothing runs on a timer, and there is no signed-in browser.
+The user runs it from the Cursor agent window. A run starts when someone asks. Nothing runs on a timer, and there is no signed-in browser.
 
 ## Setup
 
@@ -95,68 +95,70 @@ A full 4-month rebuild, when asked, is `python3 scripts/rerun_sweep.py`, then `r
 
 ## Source list
 
-The active list is `config/sources.csv`. The sweep and `scripts/make_report.py` read it. `scripts/source_upkeep.py --plan` only rewrites `state/source_stats.csv` and writes a proposal. `--apply` changes the lists, and only for entries David marks `"approved": true`.
+The active list is `config/sources.csv`. The sweep and the report read that file. They do not run `--plan`. There is no timer. When the agent follows the stock-screen skill, it writes the report and then runs `python3 scripts/source_upkeep.py --plan`. That refreshes `state/source_stats.csv` and writes a proposal. It does not change the source lists. `--apply` changes them only for proposals the user marks `"approved": true`.
 
 ```mermaid
 flowchart TD
-  sources["config/sources.csv"]
-  sweep["Sweep, read, score"]
-  report["REPORT.md and REPORT.pdf"]
-  plan["source_upkeep.py --plan"]
-  sources --> sweep --> report --> plan
+  ask["The user asks the agent to run the stock screen"]
+  skill["Agent follows the stock-screen skill"]
+  sweep["Sweep, read, and score config/sources.csv"]
+  report["Write REPORT.md and REPORT.pdf"]
+  planNode["After the report, the skill runs source_upkeep.py --plan"]
+  ask --> skill --> sweep --> report --> planNode
 
   sa{"Seeking Alpha row?"}
-  plan --> sa
-  sa -->|yes| untracked["Left out of source_stats"]
-  sa -->|no| stats["Refresh source_stats.csv"]
+  planNode --> sa
+  sa -->|yes| untracked["Left out of source_stats. List unchanged"]
+  sa -->|no| stats["Refresh source_stats.csv and write a proposal"]
 
   drop{"Removal rule?"}
   stats --> drop
   drop -->|"2y BA at or under 33% on 5+ pitches"| dropProp["Drop proposal"]
-  drop -->|"Last post older than 6 months"| dropProp
+  drop -->|"Known last post older than 6 months"| dropProp
   drop -->|"Feed failed 4 runs in a row"| dropProp
-  drop -->|none| kept["Stays. No scored articles is not a drop"]
+  drop -->|none| kept["No drop. No scored articles is not a reason"]
 
-  cap{"Active list over 600 after adds?"}
+  cap{"Still over 600 after those drops and proposed adds?"}
   kept --> cap
-  cap -->|yes| trim["Propose lowest 6-month score, 3+ scored articles"]
+  cap -->|yes| trim["Cap proposal: lowest 6-month score, 3+ scored articles"]
   cap -->|no| remain["Keep"]
   trim --> dropProp
 
-  seeds["Author scored at least 4.5/6"]
-  stats --> seeds
-  crawl["Substack recommendations"]
-  seeds --> crawl
-  stock{"Name or description is stock research?"}
-  crawl --> stock
-  stock -->|no| skipTopic["Skip"]
-  stock -->|yes| blocked{"Already listed, dormant, or never-readd?"}
-  blocked -->|yes| skipKnown["Skip"]
-  blocked -->|no| bar{"2y BA above 50% on 5+ pitches?"}
-  bar -->|"Under 5 pitches"| skipFew["Skip for now"]
-  bar -->|"50% or less"| notAdded["Recorded as not added"]
-  bar -->|yes| addProp["Add proposal, BA stored on the proposal"]
+  auto["Automatic add search in the same --plan"]
+  stats --> auto
+  high["Recommendation of an author who scored at least 4.5/6"]
+  auto --> high
+  stock{"Publication reads as stock research?"}
+  high --> stock
+  stock -->|no| skipTopic["Not a candidate"]
+  stock -->|yes| known{"Already active, dormant, or on never-readd?"}
+  known -->|yes| skipKnown["Skipped"]
+  known -->|no| bar{"2y BA above 50% on at least 5 pitches?"}
+  bar -->|"Fewer than 5"| skipFew["Skipped for now"]
+  bar -->|"50% or less"| notAdded["Not added"]
+  bar -->|yes| addProp["Add proposal"]
 
-  hand["David hand-add"]
-  hand --> blocked
+  approve{"The user sets approved true?"}
+  dropProp --> approve
+  addProp --> approve
+  approve -->|no| unchanged["sources.csv unchanged"]
+  approve -->|drop| parked["--apply moves the row to dormant and appends never-readd"]
+  approve -->|add| applied["--apply appends the row and stores its BA"]
 
-  david{"David sets approved true?"}
-  dropProp --> david
-  addProp --> david
-  david -->|no| unchanged["Lists unchanged"]
-  david -->|drop| parked["Move to dormant and append never-readd"]
-  david -->|add| added["Append to sources.csv and write BA into source_stats"]
-  parked --> sources
-  added --> sources
+  hand["The user adds a row to sources.csv by hand"]
+  handCheck{"On the never-readd list?"}
+  hand --> handCheck
+  handCheck -->|yes| handNo["Not added. Only a hand edit of that file overrides it"]
+  handCheck -->|no| handYes["On the active list. The 50% on 5 pitches bar does not apply"]
 ```
 
-A blank last-post date is not a stale drop, and there is no probation. Discovery and `--apply` both refuse `config/sources_dropped_never_readd.csv`. A dormant recheck does not put that author back. The override is a hand edit of that file. The three publications added on 2026-10-16 are the hand-add path: they miss the 50% on 5 pitches bar, and none of them is on the never-readd list.
+A blank last-post date is not a stale drop, and there is no probation. The 50% on 5 pitches test is only for an automatic add proposal. The three publications added on 2026-10-16 were hand-adds: they miss that bar, and none is on the never-readd list. A dormant recheck does not put a never-readd author back.
 
 ## Source upkeep
 
 `python3 scripts/source_upkeep.py --plan` rewrites `state/source_stats.csv` and writes `reports/source_upkeep_<date>.json`. It leaves `config/sources.csv`, `config/sources_dormant_or_dead.csv`, and `config/sources_dropped_never_readd.csv` unchanged. It does not recompute every batting average.
 
-Every drop and every add is a proposal. Show David each line with the source name, whether it is a drop or an add, the reason, the numbers behind it, `p_lt_hits_by_chance`, and `ba_updated` (the date that batting average was calculated). Set `"approved": true` only on the entries David approves, then:
+Every drop and every add is a proposal. Show the user each line with the source name, whether it is a drop or an add, the reason, the numbers behind it, `p_lt_hits_by_chance`, and `ba_updated` (the date that batting average was calculated). Set `"approved": true` only on the entries the user approves, then:
 
 ```bash
 python3 scripts/source_upkeep.py --apply reports/source_upkeep_YYYY-MM-DD.json
@@ -194,7 +196,7 @@ Seeking Alpha is not a tracked source. It is left out of `state/source_stats.csv
 
 ### Manual-add exception
 
-The automatic add bar is above 50% on at least 5 pitches. David can still approve a source by hand. On 2026-10-16 three publications were added that way. Each row's `how_discovered` records the exception. None of the three is on the never-readd list. Each is `type=substack`, `status=active`, with `feed_url` set to `<url>/feed`. The batting averages below are seeded with `ba_updated=2026-10-16` and `ba_method=v2-excl-TO`.
+The automatic add bar is above 50% on at least 5 pitches. The user can still approve a source by hand. On 2026-10-16 three publications were added that way. Each row's `how_discovered` records the exception. None of the three is on the never-readd list. Each is `type=substack`, `status=active`, with `feed_url` set to `<url>/feed`. The batting averages below are seeded with `ba_updated=2026-10-16` and `ba_method=v2-excl-TO`.
 
 | Source | URL | 2y BA | p_lt_hits_by_chance |
 |---|---|---|---|
