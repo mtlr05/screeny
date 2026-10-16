@@ -93,6 +93,65 @@ Triage files are JSON. `grab_fulltext.py` reads that file directly.
 
 A full 4-month rebuild, when asked, is `python3 scripts/rerun_sweep.py`, then `rerun/fetch.py`, `rerun/screen1.py`, `rerun/resolve.py`, a full read recorded in `rerun/dispo.py`, then `python3 scripts/make_report.py --legacy`.
 
+## Source list
+
+The active list is `config/sources.csv`. The sweep and `scripts/make_report.py` read it. `scripts/source_upkeep.py --plan` only rewrites `state/source_stats.csv` and writes a proposal. `--apply` changes the lists, and only for entries David marks `"approved": true`.
+
+```mermaid
+flowchart TD
+  sources["config/sources.csv"]
+  sweep["Sweep, read, score"]
+  report["REPORT.md and REPORT.pdf"]
+  plan["source_upkeep.py --plan"]
+  sources --> sweep --> report --> plan
+
+  sa{"Seeking Alpha row?"}
+  plan --> sa
+  sa -->|yes| untracked["Left out of source_stats"]
+  sa -->|no| stats["Refresh source_stats.csv"]
+
+  drop{"Removal rule?"}
+  stats --> drop
+  drop -->|"2y BA at or under 33% on 5+ pitches"| dropProp["Drop proposal"]
+  drop -->|"Last post older than 6 months"| dropProp
+  drop -->|"Feed failed 4 runs in a row"| dropProp
+  drop -->|none| kept["Stays. No scored articles is not a drop"]
+
+  cap{"Active list over 600 after adds?"}
+  kept --> cap
+  cap -->|yes| trim["Propose lowest 6-month score, 3+ scored articles"]
+  cap -->|no| remain["Keep"]
+  trim --> dropProp
+
+  seeds["Author scored at least 4.5/6"]
+  stats --> seeds
+  crawl["Substack recommendations"]
+  seeds --> crawl
+  stock{"Name or description is stock research?"}
+  crawl --> stock
+  stock -->|no| skipTopic["Skip"]
+  stock -->|yes| blocked{"Already listed, dormant, or never-readd?"}
+  blocked -->|yes| skipKnown["Skip"]
+  blocked -->|no| bar{"2y BA above 50% on 5+ pitches?"}
+  bar -->|"Under 5 pitches"| skipFew["Skip for now"]
+  bar -->|"50% or less"| notAdded["Recorded as not added"]
+  bar -->|yes| addProp["Add proposal, BA stored on the proposal"]
+
+  hand["David hand-add"]
+  hand --> blocked
+
+  david{"David sets approved true?"}
+  dropProp --> david
+  addProp --> david
+  david -->|no| unchanged["Lists unchanged"]
+  david -->|drop| parked["Move to dormant and append never-readd"]
+  david -->|add| added["Append to sources.csv and write BA into source_stats"]
+  parked --> sources
+  added --> sources
+```
+
+A blank last-post date is not a stale drop, and there is no probation. Discovery and `--apply` both refuse `config/sources_dropped_never_readd.csv`. A dormant recheck does not put that author back. The override is a hand edit of that file. The three publications added on 2026-10-16 are the hand-add path: they miss the 50% on 5 pitches bar, and none of them is on the never-readd list.
+
 ## Source upkeep
 
 `python3 scripts/source_upkeep.py --plan` rewrites `state/source_stats.csv` and writes `reports/source_upkeep_<date>.json`. It leaves `config/sources.csv`, `config/sources_dormant_or_dead.csv`, and `config/sources_dropped_never_readd.csv` unchanged. It does not recompute every batting average.
