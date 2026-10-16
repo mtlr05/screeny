@@ -2,7 +2,7 @@
 
 On-demand stock-article scout. It sweeps Substack and a short list of blogs, forums, Value Investors Club, and Seeking Alpha, reads pitches in full, scores them out of 6, and writes a ranked Markdown report.
 
-The user runs it from the Cursor agent window. A run starts when someone asks. Nothing runs on a timer, and there is no signed-in browser.
+The user runs it from the Cursor agent window. A run starts when someone asks. Nothing runs on a timer. The Seeking Alpha Long Ideas pull is the only step that uses a signed-in browser. No password or cookie is stored in the repo.
 
 ## Setup
 
@@ -46,6 +46,7 @@ The agent follows `AGENTS.md` and `.cursor/skills/`. A full run covers the last 
 | `state/source_stats.csv` | Per-source upkeep stats. Seeking Alpha is excluded |
 | `state/scored.json`, `state/batting.json` | This run's scores and batting averages |
 | `state/sa_breakdown.json` | Seeking Alpha counts actually observed this run |
+| `state/sa_results.json` | Seeking Alpha article ids already checked or merged. Gitignored |
 | `reports/` | Dated reports and upkeep proposals. Sample: `reports/2026-10-14/` |
 | `examples/` | Same sample, plus `scored.json` so the report script can re-render it |
 | `fulltext/`, `cache/` | Local fetches, including pitch bodies and `cache/crawl.json`. Gitignored |
@@ -74,6 +75,10 @@ python3 scripts/earnings_drops.py
 python3 scripts/rss.py FEED_URL --since 2026-10-08
 python3 scripts/grab_fulltext.py reports/triage_YYYY-MM-DD.json
 python3 scripts/px.py 2026-10-01 AAPL
+python3 scripts/sa_ingest.py screen --list reports/sa_list_YYYY-MM-DD.csv --since YYYY-MM-DD
+python3 scripts/sa_ingest.py check --obs reports/sa_obs_YYYY-MM-DD.json
+python3 scripts/sa_ingest.py merge --candidates reports/sa_candidates_YYYY-MM-DD.csv --triage reports/triage_YYYY-MM-DD.json
+python3 scripts/sa_ingest.py self-test
 python3 scripts/sa_public.py article https://seekingalpha.com/article/123
 python3 bat/sa_one.py "Author Name" author-slug
 python3 bat/pitches.py subdomain --limit 20
@@ -193,7 +198,7 @@ Median stock return for that same window is stored as `ba2y_med_ret`. `bat/lib.p
 
 While evaluating new authors, a recommendation is kept only when the publication name or description reads as stock research (small-cap, value, equity, thesis, and similar wording). Publications about crypto, bitcoin, forex, options trading, day trading, real estate, macro-only, or politics are skipped and are not add candidates.
 
-Seeking Alpha is not a tracked source. It is left out of `state/source_stats.csv`. The weekly Seeking Alpha pull is unchanged. `--apply` skips a Seeking Alpha row.
+Seeking Alpha is one pull for the run, not a tracked source. It is left out of `state/source_stats.csv`. The pull uses the machine's signed-in browser: save the Long Ideas list, run `scripts/sa_ingest.py screen`, read candidates slowly in the browser, then `check` and `merge`. If the session has expired, ask the user to sign in. Do not request or store a password or a cookie. A preview is not scored. A bot check stops the pull. `--apply` skips a Seeking Alpha row.
 
 ### Never re-add
 

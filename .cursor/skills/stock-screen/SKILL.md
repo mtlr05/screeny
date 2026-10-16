@@ -51,15 +51,40 @@ Each run, check VIC public ideas that have newly come off the ~45-day embargo (p
 
 ## 4. Seeking Alpha
 
-There is no signed-in browser. Do not paste cookies, do not log in, and do not bypass a paywall or a bot check. Never use Seeking Alpha investing groups.
+Seeking Alpha is one pull for this run. It is not a tracked source and it is not a row in `state/source_stats.csv`. Never use Seeking Alpha investing groups. Do not paste cookies, do not store a login, and do not put credentials in the repo. Use the machine's signed-in browser. If the session has expired, ask the user to sign in, then continue. Do not ask for the password or the cookie.
 
-- **Past pitches, for batting average only.** `python3 bat/sa_one.py "Author Name" author-slug` uses the public author API. Title, date, ticker, and sentiment are enough. Do not fetch full bodies for old pitches. `python3 scripts/sa_public.py author SLUG` does the same for a short look.
-- **New articles this run.** `python3 scripts/sa_public.py article URL_OR_ID`. Score the article only when the result is `"status": "full"` (body well past the summary, about 600 words or more, and not ending on a paywall prompt). Read that text and apply the same rules as any other source.
-- If the status is `skipped` or the body is preview-only, drop the article. Never score a preview. Add 1 to the skip count.
-- If the status is `blocked` or `bot_check` is true, stop gathering Seeking Alpha articles immediately and score only what was already read in full.
-- The report's detailed-stats appendix states how many Seeking Alpha articles were skipped because the full text could not be read. Say that number to the user as well.
+Past pitches, for batting average only, stay on the public author API: `python3 bat/sa_one.py "Author Name" author-slug`. Title, date, ticker, and sentiment are enough. Do not fetch full bodies for old pitches.
 
-Write observed counts to `state/sa_breakdown.json` (only numbers you actually counted): `li`, `li_from`, `li_to`, `kept`, `read`, `previews`, `skipped_unread`, `passed`, `scored`. Omit the breakdown rather than inventing it.
+New Long Ideas this run:
+
+1. In the signed-in browser, open the Long Ideas list for the window (last 7 days, or 4 months on a full run). Save it as `reports/sa_list_<date>.csv` with columns `id,url,title,author,date,ticker,exchange,market_cap,summary`. Do not save the page's cookies.
+2. Cheap screen, no full read yet:
+
+```bash
+python3 scripts/sa_ingest.py screen --list reports/sa_list_<date>.csv --since YYYY-MM-DD
+```
+
+That writes `reports/sa_candidates_<date>.csv`. The candidates file extends the `seen_posts` columns with `sa_id`, `ticker`, `author`, `screen`, and `reason`. Investing groups, non-US/Canada listings, caps above about US$10B, ETFs, recaps, holds, multi-stock posts, and rows with no ticker are dropped.
+3. Read each candidate in the browser, about 20–30 seconds apart. An article counts as read only when the body is well past the summary, about 600 words or more, and does not end on a paywall or subscribe prompt. Record `id`, `url`, `words`, and `ending` in `reports/sa_obs_<date>.json`. If a Press & Hold bot check appears, set `bot_check` true on that row and stop. Do not retry and do not bypass it.
+
+```bash
+python3 scripts/sa_ingest.py check --obs reports/sa_obs_<date>.json
+```
+
+A bot check makes this command exit with status 3. Score only what was already read in full.
+4. Merge the full articles into the triage list. Dedupe is `state/sa_results.json`.
+
+```bash
+python3 scripts/sa_ingest.py merge --candidates reports/sa_candidates_<date>.csv --triage reports/triage_<date>.json
+```
+
+That also appends the new URLs to `state/seen_posts.csv` and writes `state/sa_breakdown.json` (`li`, `li_from`, `li_to`, `kept`, `read`, `previews`, `skipped_unread`, `passed`, `scored`). The report appendix reads that file. After scoring, set `scored` to the number actually scored. Previews are not scored. Say how many were skipped because the full text could not be read.
+
+```bash
+python3 scripts/sa_ingest.py self-test
+```
+
+That checks the screen, the preview and bot-check rules, and dedupe on fake rows. It does not touch the network.
 
 ## 5. X
 
