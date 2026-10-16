@@ -35,7 +35,8 @@ import pitches as batpitches
 CAP = 600
 # Drop when the 2-year average is under 33.4% (a one-third record, 0.333..., is included).
 BA_DROP_FRAC = 0.334
-BA_ADD = 50.0
+# Automatic add: ba2y_p_lt_hits above this, and a positive 2-year median excess.
+P_ADD = 0.23
 MIN_PITCHES = 5
 MIN_SCORED_FOR_TRIM = 3
 SCORE_FLOOR = 4.5
@@ -61,6 +62,7 @@ STATS_FIELDS = [
     "ba2y_n",
     "ba2y_pct",
     "ba2y_p_lt_hits",
+    "ba2y_median_excess",
     "ba2y_n_title",
     "ba2y_n_body",
     "ba2y_excl",
@@ -75,6 +77,7 @@ BA_KEEP = [
     "ba2y_n",
     "ba2y_pct",
     "ba2y_p_lt_hits",
+    "ba2y_median_excess",
     "ba2y_n_title",
     "ba2y_n_body",
     "ba2y_excl",
@@ -235,6 +238,8 @@ def compute_ba(row, sub, as_of):
     row["ba2y_pct"] = "" if pct is None else f"{pct:.4f}"
     row["ba_2y"] = "" if pct is None else f"{pct * 100:.1f}"
     row["ba2y_p_lt_hits"] = "" if not n else batcalc.p_lt_hits(hits, n)
+    excess = res.get("median_excess")
+    row["ba2y_median_excess"] = "" if excess is None else f"{float(excess):.4f}"
     row["ba2y_n_title"] = str(res["n_title"])
     row["ba2y_n_body"] = str(res["n_body"])
     row["pitches_title"] = str(res["n_title"])
@@ -607,6 +612,7 @@ def consider_adds(crawl, seeds, known_subs, pitches, batting_by_key, as_of, comp
                     "ba_2y",
                     "ba_2y_n",
                     "ba2y_p_lt_hits",
+                    "ba2y_median_excess",
                     "ba2y_n_title",
                     "ba2y_n_body",
                     "pitches_title",
@@ -619,14 +625,25 @@ def consider_adds(crawl, seeds, known_subs, pitches, batting_by_key, as_of, comp
                     "last_run",
                 )
             }
+        p_num = med_num = None
+        if not blank(temp.get("ba_updated")):
+            try:
+                p_num = float(temp.get("ba2y_p_lt_hits"))
+            except (TypeError, ValueError):
+                p_num = None
+            try:
+                med_num = float(temp.get("ba2y_median_excess"))
+            except (TypeError, ValueError):
+                med_num = None
         numbers = {
             "subdomain": sub,
             "recommended_by": m.group(1),
             "ba_2y": pct,
             "ba_2y_n": n,
             "ba2y_p_lt_hits": plt,
+            "ba2y_median_excess": "" if med_num is None else med_num,
             "ba_updated": fresh,
-            "bar": f">{BA_ADD:g}% on >={MIN_PITCHES} pitches",
+            "bar": f"p>{P_ADD} and median_excess_2y>0",
         }
         item = {
             "action": "add",
@@ -639,21 +656,22 @@ def consider_adds(crawl, seeds, known_subs, pitches, batting_by_key, as_of, comp
             "numbers": numbers,
             "ba_stats": ba_stats,
         }
-        if n is None or n < MIN_PITCHES:
-            item["reason"] = "skipped for now: fewer than 5 pitches in the 2-year window"
-            item["reason_code"] = "few_pitches"
-            skipped.append(item)
-        elif pct is None:
-            item["reason"] = "skipped for now: 2-year batting average has not been computed"
+        if p_num is None or med_num is None:
+            item["reason"] = "skipped for now: 2-year chance or median excess has not been computed"
             item["reason_code"] = "ba_unknown"
             skipped.append(item)
-        elif pct > BA_ADD:
-            item["reason"] = f"2-year batting average {pct:g}% on {n} pitches (above 50%), recommended by {m.group(1)} who scored >= 4.5/6"
-            item["reason_code"] = "ba_2y"
+        elif p_num > P_ADD and med_num > 0:
+            item["reason"] = (
+                f"p_lt_hits {p_num:g} > {P_ADD} and median excess 2y {med_num:g} > 0, "
+                f"recommended by {m.group(1)} who scored >= 4.5/6"
+            )
+            item["reason_code"] = "p_and_excess"
             adds.append(item)
         else:
-            item["reason"] = f"not added: 2-year batting average {pct:g}% on {n} pitches is not above 50%"
-            item["reason_code"] = "ba_below_bar"
+            item["reason"] = (
+                f"not added: p_lt_hits {p_num:g} (need > {P_ADD}) and median excess 2y {med_num:g} (need > 0)"
+            )
+            item["reason_code"] = "below_bar"
             declined.append(item)
     return adds, skipped, declined
 
@@ -845,7 +863,7 @@ def plan(args):
             "drop_stale": "no article published in 6 months (known last-post date only)",
             "drop_fails": f"feed failed to load on {FAILS_TO_DROP} consecutive runs",
             "no_drop_for": "producing no scored articles",
-            "add": f"Substack recommendation of an author who scored >= {SCORE_FLOOR}/6, and the candidate's 2-year batting average > {BA_ADD:g}% on >= {MIN_PITCHES} pitches",
+            "add": f"Substack recommendation of an author who scored >= {SCORE_FLOOR}/6, and the candidate's ba2y_p_lt_hits > {P_ADD} and ba2y_median_excess > 0",
             "cap": f"only when active tracked sources would exceed {args.cap}, trim lowest 6-month average among sources with >= {MIN_SCORED_FOR_TRIM} scored articles",
             "seeking_alpha": "not tracked; the weekly Seeking Alpha pull is unchanged",
         },
@@ -860,8 +878,8 @@ def plan(args):
     print(f"Stats: {args.stats}")
     print(f"Drops proposed: {len(base_drops) + len(cap_drops)}")
     print(f"Adds proposed: {len(adds)}")
-    print(f"Candidates skipped (<{MIN_PITCHES} pitches or batting average not computed): {len(skipped)}")
-    print(f"Recommendations not added (batting average at or under {BA_ADD:g}%): {len(declined)}")
+    print(f"Candidates skipped (chance or median excess not computed): {len(skipped)}")
+    print(f"Recommendations not added (p <= {P_ADD} or median excess 2y <= 0): {len(declined)}")
     if len(tracked_rows) + len(adds) - len(base_drops) <= args.cap:
         print("Cap trim: not needed.")
     else:
