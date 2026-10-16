@@ -33,7 +33,7 @@ python3 scripts/rss.py FEED_URL --since YYYY-MM-DD
 
 If a feed returns 403, 429, or no entries, record it as unreachable and move on. Add write-up URLs to the triage list.
 
-Recheck `config/sources_dormant_or_dead.csv` about monthly. Mark a feed dead after it fails on two runs. Add a Substack recommendation when a writer scores at least 4.5/6.
+Source adds and drops are the last step of the run (section 11). Do not add or remove a source during the sweep.
 
 ## 2. Earnings-drop overreactions
 
@@ -128,6 +128,12 @@ These do not change the /6 score. Put them on the one-pager and in per-name note
 
 For every author on the top list and the next six, follow `.cursor/skills/author-batting-average/SKILL.md`. Save `state/batting.json`. Minimum 5 pitches to appear in the top-5 tables.
 
+Substack detection for the /6 score is `python3 bat/pitches.py subdomain`. A title that names one US or Canada ticker is method `title`. When the title has no ticker, or more than one company, the script fetches the public post body (`/api/v1/posts/<slug>`, cached). Uncached calls wait `--sleep` seconds (default 1). Each pitch is tagged `title` or `body` with a confidence. The upkeep batting-average pass fetches bodies for the 1–3 year window in parallel, including posts whose title already names a ticker. The next source-upkeep `--plan` writes the 2-year counts to `pitches_title` and `pitches_body` in `state/source_stats.csv`.
+
+The /6 score still requires an explicit long. The 2-year batting average is one pitch per ticker, published 2–3 years ago. `bat/longcheck.py` drops a short, a sell, and a hold unless the body shows ownership. An unclear stance with no such signal still counts. A bare symbol with no listing is retried as `.TO`, then `.V`. The benchmark is XIC.TO for `.TO` and `.V`, and SPY otherwise. `ba_updated` is the calculation date and `ba_method` is `v2-excl-TO`. A stored average has no expiry and is recalculated only for an add candidate or a removal proposal.
+
+`p_lt_hits_by_chance` is binomial `P(X <= hits-1)` with p=0.5. It is stored as `ba2y_p_lt_hits`, shown in the report, and summaries sort by it, highest first. Median stock return and median excess return (1y and 2y) will be stored with the batting average and shown on upkeep proposals. The report already prints median excess for authors computed in this run. Those stats columns are not stored yet.
+
 ## 10. Write the report
 
 Build `state/scored.json` (do not invent fields you did not verify):
@@ -171,10 +177,12 @@ Leave `ba`, `bat_line`, and `since_publish` empty to have the report fill them f
 One-pagers go in `state/onepagers.json`, keyed by ticker: `company`, `words`, `read`, `long`, `c1`–`c6`, `flags` (list), optional `thin`. Model the prose on `reports/2026-10-14/onepagers.json` (the Nyxoah page is the style sample: score, linked article, author, date, length, long disclosure, batting line, each criterion in 1–3 sentences, then red flags).
 
 ```bash
-python3 scripts/make_report.py --prices
+python3 scripts/make_report.py --prices --pdf
 ```
 
-That writes `reports/<today>/REPORT.md` and `articles.csv`. Confirm both exist before you tell the user the run is done. PDF is optional: `python3 scripts/make_report.py --pdf` (needs `markdown` and `weasyprint`). If they are missing, ship the Markdown.
+That writes `reports/<today>/REPORT.md`, `articles.csv`, and `REPORT.pdf`. The PDF is the Markdown converted in full, so **Articles from top-record authors** is in both. `--pdf` needs `markdown` and `weasyprint` (`pip install markdown weasyprint`). If those imports fail, the script keeps the Markdown and prints that the PDF was skipped. Confirm `REPORT.md` exists before you tell the user the run is done, and confirm `REPORT.pdf` when the PDF step printed its path.
+
+After the next-six list, the report has **Articles from top-record authors**. `scripts/make_report.py` builds it from `state/source_stats.csv` at report time: every active source whose stored 2-year `ba2y_p_lt_hits` is at least 0.5 on at least 2 pitches. Next to the author, show hits/pitches, the batting average, and that chance. Under each author, list every article in the report window (from `state/seen_posts.csv`, plus any scored article in this run) with title, date, link, and the /6 score when the article was scored. Authors are ordered by `ba2y_p_lt_hits`, highest first. Do not keep a hand list of these authors. An approved `--apply` add stores the recomputed batting average, so the next report includes that author.
 
 Rank by score. Best article per ticker. Top list = top 15 plus every tie at the 15th score, numbered 1..N, ties alphabetical by ticker. The next six sit under the ranked list.
 
@@ -182,7 +190,38 @@ Remove scored URLs from `state/backlog.json` if that file exists.
 
 A full 4-month rebuild, when asked, is `python3 scripts/rerun_sweep.py`, then `rerun/fetch.py`, `rerun/screen1.py`, `rerun/resolve.py`, a full read recorded in `rerun/dispo.py`, then `python3 scripts/make_report.py --legacy`.
 
-## 11. What to tell the user
+## 11. Source upkeep
+
+Do this after the report is written. Runs are on request, so the rules use dates and run counts, not a calendar schedule. Seeking Alpha is not a tracked source. Leave the weekly Seeking Alpha pull as it is. Do not put Seeking Alpha authors in `state/source_stats.csv`.
+
+```bash
+python3 scripts/source_upkeep.py --plan
+```
+
+That refreshes `state/source_stats.csv` and writes `reports/source_upkeep_<date>.json`. It leaves `config/sources.csv`, `config/sources_dormant_or_dead.csv`, and `config/sources_dropped_never_readd.csv` unchanged. It does not recompute every batting average. A stored average has no expiry. It is recalculated only for a removal proposal or an add candidate, and only when `ba_updated` is not today. `--full-ba` is the resumable pass (saves every 10 authors; `--force` redoes them; `--ba-limit N` bounds it).
+
+Stats per tracked source: last post date, consecutive failed loads, articles scored in the last 6 months, average score over those articles, the 2-year batting average with its pitch count, `ba2y_p_lt_hits` (`p_lt_hits_by_chance`), `ba_updated`, `ba_method`, exclusion counts, price-loss counts, and how many of those pitches were detected from the title versus the body. A blank percentage is neither a drop nor an add. `--crawl` fetches Substack recommendations (same walk as `scripts/crawl_sources.py`) of authors who scored at least 4.5/6. A recommendation is kept only when the publication name or description reads as stock research. Crypto, bitcoin, forex, options trading, day trading, real estate, macro-only, and politics are skipped and are not add candidates. Anyone on the never-readd list is skipped.
+
+Show every proposal to David before changing the list. Each line has the source name, whether it is a drop or an add, the reason, the numbers behind it, `p_lt_hits_by_chance`, and `ba_updated`. Apply only the entries David approves. Set `"approved": true` on those entries, then:
+
+```bash
+python3 scripts/source_upkeep.py --apply reports/source_upkeep_<date>.json
+```
+
+Approved drops move that row to `config/sources_dormant_or_dead.csv` and append `name`, `url`, `dropped_on`, and `reason` to `config/sources_dropped_never_readd.csv`. Approved adds append a row to `config/sources.csv` and write the batting average computed for that candidate into `state/source_stats.csv`. `--apply` prints `REFUSED` and does not add anyone already on the never-readd list. A dormant recheck must not reactivate them either. Unapproved entries stay as proposals. Every proposal line shows `ba2y_p_lt_hits` and `ba_updated`.
+
+Rules:
+
+- Soft cap: 600 tracked active sources. Only if the list would be over 600 after the rule drops and after counting proposed adds, propose dropping the lowest average score over the last 6 months, and only among sources with at least 3 scored articles in that window, until the list fits.
+- Drop when the 2-year batting average is 33% or less on at least 5 pitches. The cutoff is a fraction under 0.334, so a one-third record is included.
+- Drop when the last known article is older than 6 months. A blank last-post date stays.
+- Drop when the feed failed to load on 4 consecutive runs. A run counts only when `weekly_sweep.py` recorded that source in its stats file. The fourth failure is enough. There is no probation.
+- A source that produced no scored articles stays.
+- Add a source only when it is a Substack recommendation of an author who scored at least 4.5/6, the publication reads as stock research, the candidate's own 2-year batting average is above 50% on at least 5 pitches, and the author is not on the never-readd list. Candidates with fewer than 5 pitches are skipped for now.
+- David can approve a hand add that misses that bar. Three were added on 2026-10-16 and stay active: Intrinsic Value System (https://intrinsicvaluesystem.substack.com, 15/31, `p_lt_hits_by_chance` 0.3601), Welfare Capital Research (https://welfarecapital.substack.com, 2/2, 0.75), and The Lead-Lag Report (https://leadlagreport.substack.com, 2/2, 0.75). Each `how_discovered` records the exception. Later drops still use the rules above.
+- Median stock return and median excess return for the 1-year and 2-year windows will be stored with the batting average and shown on these proposals. Those columns are not in the stats file yet.
+
+## 12. What to tell the user
 
 Lead with:
 
@@ -190,6 +229,7 @@ Lead with:
 - the path to `REPORT.md`
 - how many Seeking Alpha articles were skipped because the full text could not be read
 - sources that could not be reached
+- the source-upkeep proposals (name, drop or add, reason, numbers, `p_lt_hits_by_chance`, and `ba_updated`), and that nothing was added or removed until David approves
 - one line when nothing cleared the screen
 
 The ranked list and the one-pagers are the product. Do not dump every dropped title in the chat.

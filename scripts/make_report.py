@@ -19,7 +19,9 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _paths import CACHE, EXAMPLES, REPORTS, RERUN, ROOT, STATE, ensure
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "bat"))
+from _paths import CACHE, EXAMPLES, REPORTS, RERUN, ROOT, SEEN, SOURCES, STATE, ensure
+import calc as batcalc
 
 LBL = ["Thesis/runway", "Return ~40%/yr", "CEO large holder", "Moat or edge", "Differential view", "Dated catalyst"]
 FULL = [1, 1, 1, 1, 1, 1]
@@ -41,12 +43,23 @@ def tot(sc):
     return round(sum(sc), 2)
 
 
+def _chance(summary):
+    if not summary:
+        return ""
+    if summary.get("p_lt") not in (None, ""):
+        return summary["p_lt"]
+    return batcalc.p_lt_hits(summary.get("hits") or 0, summary.get("n") or 0)
+
+
 def fmt_bat(bat):
     def one(w):
         x = (bat.get("summary") or {}).get(w)
         if not x:
             return f"{w} n/a"
-        return f"{w} {x['hits']}/{x['n']} = {x['pct']*100:.0f}% (med excess {x['median_excess']*100:+.0f} pts)"
+        line = f"{w} {x['hits']}/{x['n']} = {x['pct']*100:.0f}% (med excess {x['median_excess']*100:+.0f} pts)"
+        if w == "2y":
+            line += f", P(fewer hits by chance) {_chance(x)}"
+        return line
 
     note = bat.get("note")
     extra = f" [{note}]" if note else ""
@@ -66,7 +79,7 @@ def cell_bat(article, batting):
     s = bat.get("summary") or {}
     y2, y1 = s.get("2y"), s.get("1y")
     if y2:
-        return f"{y2['hits']}/{y2['n']} = {y2['pct']*100:.0f}%"
+        return f"{y2['hits']}/{y2['n']} = {y2['pct']*100:.0f}% (p_lt {_chance(y2)})"
     if y1:
         return f"{y1['hits']}/{y1['n']} = {y1['pct']*100:.0f}% (1y)"
     return "n/a"
@@ -86,8 +99,185 @@ def top_bat(authors, batting, window, n=5, min_n=5):
         if not x or x["n"] < min_n:
             continue
         rows.append((a, x))
-    rows.sort(key=lambda ax: (-ax[1]["pct"], ax[0]))
+    rows.sort(key=lambda ax: (-float(_chance(ax[1]) or 0), ax[0]))
     return rows[:n]
+
+
+def _host_token(value):
+    text = (value or "").strip().lower()
+    if "://" in text:
+        text = text.split("://", 1)[1]
+    text = text.split("/")[0]
+    if text.startswith("www."):
+        text = text[4:]
+    if text.endswith(".substack.com"):
+        text = text[: -len(".substack.com")]
+    return text
+
+
+def _num(value):
+    if value is None or str(value).strip() == "":
+        return None
+    try:
+        return float(value)
+    except ValueError:
+        return None
+
+
+def _pct_label(row, hits, n):
+    stored = _num(row.get("ba_2y"))
+    if stored is None:
+        frac = _num(row.get("ba2y_pct"))
+        stored = None if frac is None else frac * 100
+    if stored is None and n:
+        stored = 100.0 * hits / n
+    if stored is None:
+        return ""
+    if abs(stored - round(stored)) < 0.05:
+        return f"{round(stored):.0f}%"
+    return f"{stored:.1f}%"
+
+
+def top_record_authors(stats_path=None, sources_path=None):
+    """Active sources whose stored 2y chance is at least 0.5 on at least 2 pitches.
+
+    Read at report time from state/source_stats.csv, limited to URLs still in
+    config/sources.csv, so a newly added author appears once their stats are stored.
+    """
+    stats_path = stats_path or os.path.join(STATE, "source_stats.csv")
+    sources_path = sources_path or SOURCES
+    if not os.path.exists(stats_path):
+        return []
+    active = None
+    if sources_path and os.path.exists(sources_path):
+        with open(sources_path, newline="", encoding="utf-8") as f:
+            active = {(row.get("url") or "").rstrip("/") for row in csv.DictReader(f)}
+    found = []
+    with open(stats_path, newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            url = (row.get("url") or "").rstrip("/")
+            if active is not None and url not in active:
+                continue
+            n = _num(row.get("ba2y_n"))
+            if n is None:
+                n = _num(row.get("ba_2y_n"))
+            chance = _num(row.get("ba2y_p_lt_hits"))
+            hits = _num(row.get("ba2y_hits"))
+            if n is None or chance is None or n < 2 or chance < 0.5:
+                continue
+            hits = 0 if hits is None else int(hits)
+            n = int(n)
+            found.append(
+                {
+                    "name": row.get("name") or _host_token(url),
+                    "url": url,
+                    "sub": _host_token(url),
+                    "hits": hits,
+                    "n": n,
+                    "pct": _pct_label(row, hits, n),
+                    "p": str(row.get("ba2y_p_lt_hits")).strip(),
+                    "chance": chance,
+                }
+            )
+    found.sort(key=lambda row: (-row["chance"], row["name"].lower()))
+    return found
+
+
+def _article_owner(url, source, authors):
+    url_sub = _host_token(url)
+    if url_sub:
+        for author in authors:
+            if url_sub == author["sub"]:
+                return author
+    src_sub = _host_token(source)
+    label = (source or "").strip().lower()
+    for author in authors:
+        if src_sub and (src_sub == author["sub"] or src_sub == author["name"].lower()):
+            return author
+        if label and label == author["name"].lower():
+            return author
+    return None
+
+
+def _md_cell(text):
+    return (text or "").replace("|", "\\|").replace("\n", " ").strip()
+
+
+def top_record_lines(doc, authors, seen_path=None):
+    """Markdown for every in-window article by a top-record author."""
+    window = doc.get("window") or ["", ""]
+    start = (window[0] or "")[:10] if window else ""
+    end = (window[1] or "")[:10] if len(window) > 1 else ""
+    scores = {}
+    for article in doc.get("articles") or []:
+        url = (article.get("url") or "").rstrip("/")
+        sc = article.get("sc") or []
+        if url and len(sc) >= 6:
+            scores[url] = tot(sc[:6])
+    posts = {}
+
+    def add(url, title, date, source):
+        day = (date or "")[:10]
+        if not url or not day:
+            return
+        if start and day < start:
+            return
+        if end and day > end:
+            return
+        owner = _article_owner(url, source, authors)
+        if not owner:
+            return
+        key = url.rstrip("/")
+        prev = posts.get(key)
+        score = scores.get(key)
+        if prev and prev.get("score") is not None and score is None:
+            score = prev["score"]
+        posts[key] = {
+            "author": owner["name"],
+            "date": day,
+            "title": title or url,
+            "url": url,
+            "score": score if score is not None else (prev or {}).get("score"),
+        }
+
+    seen_path = seen_path or SEEN
+    if seen_path and os.path.exists(seen_path):
+        with open(seen_path, newline="", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                add(row.get("url") or "", row.get("title") or "", row.get("date") or "", row.get("source") or "")
+    for article in doc.get("articles") or []:
+        add(article.get("url") or "", article.get("title") or "", article.get("date") or "", article.get("source") or "")
+    by_author = {author["name"]: [] for author in authors}
+    for post in posts.values():
+        by_author.setdefault(post["author"], []).append(post)
+    lines = [
+        "## Articles from top-record authors",
+        "",
+        "Every article in this window from an author whose stored 2-year record has at least 2 pitches and `p_lt_hits_by_chance` (`ba2y_p_lt_hits`) of 0.5 or higher. The author list is read from `state/source_stats.csv` when the report is written, so it follows the source list. Hits/pitches, batting average, and that chance are shown next to the author. A score is shown only when the article was scored.",
+        "",
+    ]
+    if not authors:
+        lines.append("No author currently meets that bar.")
+        lines.append("")
+        return lines
+    for author in authors:
+        lines.append(f"### {author['name']} ({author['hits']}/{author['n']} = {author['pct']}, p_lt {author['p']})")
+        lines.append("")
+        rows = by_author.get(author["name"]) or []
+        rows.sort(key=lambda row: row["title"].lower())
+        rows.sort(key=lambda row: row["date"], reverse=True)
+        if not rows:
+            lines.append("No articles in this window.")
+            lines.append("")
+            continue
+        lines.append("| Date | Article | Score |")
+        lines.append("|---|---|---|")
+        for row in rows:
+            score = "" if row["score"] is None else f"{row['score']:g}"
+            title = _md_cell(row["title"])
+            lines.append(f"| {row['date']} | [{title}]({row['url']}) | {score} |")
+        lines.append("")
+    return lines
 
 
 def since_publish(r, live):
@@ -212,13 +402,15 @@ def render(doc, onepagers, live):
     for window_name, title in (("1y", "### By 1-year batting average"), ("2y", "### By 2-year batting average")):
         A(title)
         A("")
-        A("| # | Author | Hits / N | Avg | Median excess | Best | Worst |")
-        A("|---|---|---|---|---|---|---|")
+        A("| # | Author | Hits / N | Avg | P(fewer hits by chance) | Median excess | Best | Worst |")
+        A("|---|---|---|---|---|---|---|---|")
         got = top_bat(authors, batting, window_name)
         for i, (a, x) in enumerate(got, 1):
-            A(f"| {i} | {a} | {x['hits']}/{x['n']} | {x['pct']*100:.0f}% | {x['median_excess']*100:+.0f} pts | {x['best']} | {x['worst']} |")
+            A(
+                f"| {i} | {a} | {x['hits']}/{x['n']} | {x['pct']*100:.0f}% | {_chance(x)} | {x['median_excess']*100:+.0f} pts | {x['best']} | {x['worst']} |"
+            )
         if not got:
-            A("| — | none with ≥5 pitches | | | | | |")
+            A("| — | none with ≥5 pitches | | | | | | |")
         A("")
     A("## Next six (ranks 16–21)")
     A("")
@@ -227,6 +419,8 @@ def render(doc, onepagers, live):
     for i, r in enumerate(near, 16):
         A(f"| {i} | {r['sym']} | {r['score']:g} | [{r['title']}]({r['url']}) | {r['source']} | {miss(r['sc'])} |")
     A("")
+    for line in top_record_lines(doc, top_record_authors()):
+        A(line)
     A("## Caveats")
     A("")
     A('- Prices are Yahoo daily closes; "since publish" uses the first close on or after the publish date.')
@@ -326,14 +520,20 @@ def write_outputs(md, rows, ranked, out_path):
 
 
 def try_pdf(md_path):
+    """Write REPORT.pdf from the same Markdown, including Articles from top-record authors."""
     try:
         import markdown
         import weasyprint
     except Exception as e:
         print("PDF skipped (optional markdown/weasyprint not installed):", e)
         return
-    h = markdown.markdown(open(md_path, encoding="utf-8").read(), extensions=["tables"])
-    css = "@page{size:Letter landscape;margin:1.4cm} body{font-family:sans-serif;font-size:9.5pt} table{border-collapse:collapse;font-size:8pt} td,th{border:1px solid #bbb;padding:3px} .pb{page-break-before:always} h3{margin-top:0} a{color:#1a4fa0}"
+    source = open(md_path, encoding="utf-8").read()
+    h = markdown.markdown(source, extensions=["tables"])
+    heading = "Articles from top-record authors"
+    if heading in source and heading not in h:
+        print(f"PDF not written: the Markdown has {heading!r} but the HTML conversion dropped it")
+        sys.exit(1)
+    css = "@page{size:Letter landscape;margin:1.4cm} body{font-family:sans-serif;font-size:9.5pt} table{border-collapse:collapse;font-size:8pt} td,th{border:1px solid #bbb;padding:3px} .pb{page-break-before:always} h2,h3{break-after:avoid} h3{margin-top:0} tr{break-inside:avoid} a{color:#1a4fa0}"
     pdf_path = os.path.splitext(md_path)[0] + ".pdf"
     weasyprint.HTML(string=f"<html><head><meta charset='utf-8'><style>{css}</style></head><body>{h}</body></html>").write_pdf(pdf_path)
     print(pdf_path)

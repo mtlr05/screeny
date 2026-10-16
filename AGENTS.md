@@ -21,13 +21,14 @@ On-demand scout for single-stock investment write-ups. David runs it from the Cu
 1. **Stats** — three numbers only: articles sourced, articles read in full, articles scored.
 2. Screening and scoring rules.
 3. **Ranked list** — top 15 plus every name tied with the 15th score. Include a **BA 2y (1y)** column: the author's 2-year batting average as hits/n = %, else the 1-year tagged `(1y)`, else `n/a`. The column does not change the /6 score.
-4. Author batting top-5 tables, near misses, caveats.
+4. Author batting top-5 tables, near misses, then **Articles from top-record authors**, then caveats.
 5. **Appendix: one-pagers**, then **Appendix: detailed stats** (drop reasons, Seeking Alpha breakdown, counts by source type). Detailed stats stay in the appendix.
 
 ## Where things live
 
-- `config/sources.csv` — active sources. `config/sources_dormant_or_dead.csv` — parked; recheck about monthly.
+- `config/sources.csv` — active sources. `config/sources_dormant_or_dead.csv` — parked. `config/sources_dropped_never_readd.csv` — authors who have been dropped (`name`, `url`, `dropped_on`, `reason`). Discovery skips them. `--apply` refuses the add. A dormant recheck must not reactivate anyone on that list. Only a hand edit of the never-readd file overrides it.
 - `state/seen_posts.csv` — dedupe key is `url`. Append-only.
+- `state/source_stats.csv` — per tracked source: last post, consecutive failed loads, articles scored in the last 6 months, 6-month average score, 2-year batting average and pitch count, `ba2y_p_lt_hits` (`p_lt_hits_by_chance`), `ba_updated`, `ba_method`, exclusion and price-loss counts, plus title versus body pitch counts. Seeking Alpha is not in this file. A stored batting average has no expiry. Recalculate it only for an add candidate or a removal proposal, and only when `ba_updated` is not today, unless someone asks for `--full-ba`.
 - `state/scored.json`, `state/batting.json` — this run's scores and batting averages.
 - `reports/` — dated outputs. Sample: `reports/2026-10-14/`.
 - `fulltext/` and `cache/` — local only, not committed.
@@ -36,3 +37,23 @@ On-demand scout for single-stock investment write-ups. David runs it from the Cu
 - `scripts/` — sweep, fetch, prices, earnings drops, report. `rerun/` — full-window helpers. `bat/` — batting-average helpers.
 
 X links are optional. The user pastes them. Do not call the X MCP and do not keep an X account list.
+
+## Source upkeep
+
+After a screen, run `python3 scripts/source_upkeep.py --plan` and show the proposals. Every drop and every add needs David's approval. Each line has the source name, drop or add, the reason, the numbers, `p_lt_hits_by_chance` (`ba2y_p_lt_hits`), and `ba_updated`. Apply only entries marked `"approved": true`.
+
+Tracked active sources have a soft cap of 600. Drop a source only for a 2-year batting average of 33% or less on at least 5 pitches (cutoff under 0.334, so one third is included), no post in 6 months (a blank date stays), or 4 failed loads in a row. The fourth failure is enough; there is no probation. A source with no scored articles stays. Add a Substack recommendation only when that author scored at least 4.5/6 and the new author has a 2-year batting average above 50% on at least 5 pitches. While evaluating new authors, skip a publication whose name or description is not stock research (crypto, bitcoin, forex, options trading, day trading, real estate, macro-only, or politics). Never add back an author who is on `config/sources_dropped_never_readd.csv`. Seeking Alpha stays on its own weekly pull and is not a tracked source.
+
+David can approve a source by hand when it misses the automatic add bar. Three publications were added that way on 2026-10-16: Intrinsic Value System (15/31, `p_lt_hits_by_chance` 0.3601), Welfare Capital Research (2/2, 0.75), and The Lead-Lag Report (2/2, 0.75). The exception is recorded in each row's `how_discovered`. Later removal proposals still use the drop rules.
+
+The /6 score still needs an explicit long disclosure. The 2-year batting average is separate. One pitch per ticker, published 2–3 years ago. `bat/longcheck.py` drops a short, a sell, or a hold unless the body shows the author owns the shares. A pitch with no such signal still counts. Price timeouts are not delistings. A symbol with no price data is retried as `.TO` then `.V`. The batting-average benchmark is XIC.TO for `.TO` and `.V`, and SPY otherwise. `ba_method` for that path is `v2-excl-TO`.
+
+`p_lt_hits_by_chance` is `P(X <= hits - 1)` with `p = 0.5`. It is always stored as `ba2y_p_lt_hits`, shown on every proposal and in the report, and batting summaries sort by it, highest first.
+
+Median stock return and median excess return (1-year and 2-year) will be stored with the batting average and shown on proposals. Those columns are not in the stats file yet. The screen report already prints median excess for authors computed during a run.
+
+An approved add writes the batting average computed for that candidate into `state/source_stats.csv`.
+
+## Articles from top-record authors
+
+The generated report includes this section after the next-six list, in `REPORT.md` and in `REPORT.pdf` when `python3 scripts/make_report.py --pdf` is used. The PDF is that Markdown converted in full. It is every article in the report window from an author whose stored 2-year `ba2y_p_lt_hits` is at least 0.5 on at least 2 pitches. Read `state/source_stats.csv` when the report is written, and keep only URLs still in `config/sources.csv`. Show hits/pitches, the batting average, and `p_lt_hits_by_chance` next to the author, then each article's title, date, link, and score when one exists. Sort authors by that chance, highest first. Do not keep a separate author list. An approved source add stores the recomputed row, so the next report includes that author.

@@ -15,6 +15,7 @@ rerun/*.json
 reports/triage_*.json
 reports/stats_*.json
 reports/earnings_drops_*.json
+reports/source_upkeep_*.json
 
 # Run state. The seen-posts seed is tracked; these are rebuilt each run.
 state/scored.json

@@ -48,34 +48,48 @@ KW = re.compile(
     re.I,
 )
 NEG = re.compile(r"crypto|bitcoin|forex|options trad|day trad|real estate|macro only|politic", re.I)
-src = {}
-for s in seeds:
-    src[s] = {"name": s, "how": "seed: prior scored author / known small-cap writer", "hero": ""}
-frontier = list(seeds)
-seen = set()
-for depth in (1, 2):
-    with cf.ThreadPoolExecutor(16) as ex:
-        res = list(ex.map(recs, [f for f in frontier if f not in seen]))
-    nxt = []
-    for sub, pid, rp in res:
-        seen.add(sub)
-        if sub in src:
-            src[sub]["pid"] = pid
-        for p in rp:
-            sd = p.get("subdomain")
-            txt = (p.get("name") or "") + " " + (p.get("hero_text") or "")
-            if not sd or sd in src:
-                continue
-            if KW.search(txt) and not NEG.search(txt):
-                src[sd] = {
-                    "name": p.get("name"),
-                    "how": f"Substack recommendation from {sub}",
-                    "hero": (p.get("hero_text") or "")[:150],
-                    "custom": p.get("custom_domain") or "",
-                }
-                nxt.append(sd)
-    frontier = nxt[:250]
-    print(depth, len(src))
-ensure(CACHE)
-json.dump(src, open(os.path.join(CACHE, "crawl.json"), "w", encoding="utf-8"))
-print("wrote", os.path.join(CACHE, "crawl.json"))
+
+
+def crawl(seed_list, seed_how="seed: prior scored author / known small-cap writer"):
+    """Two levels of Substack recommendations. Keyword filter matches the historical crawl."""
+    src = {}
+    for s in seed_list:
+        src[s] = {"name": s, "how": seed_how, "hero": ""}
+    frontier = list(seed_list)
+    seen = set()
+    for depth in (1, 2):
+        with cf.ThreadPoolExecutor(16) as ex:
+            res = list(ex.map(recs, [f for f in frontier if f not in seen]))
+        nxt = []
+        for sub, pid, rp in res:
+            seen.add(sub)
+            if sub in src:
+                src[sub]["pid"] = pid
+            for p in rp:
+                sd = p.get("subdomain")
+                txt = (p.get("name") or "") + " " + (p.get("hero_text") or "")
+                if not sd or sd in src:
+                    continue
+                if KW.search(txt) and not NEG.search(txt):
+                    src[sd] = {
+                        "name": p.get("name"),
+                        "how": f"Substack recommendation from {sub}",
+                        "hero": (p.get("hero_text") or "")[:150],
+                        "custom": p.get("custom_domain") or "",
+                    }
+                    nxt.append(sd)
+        frontier = nxt[:250]
+        print(depth, len(src))
+    return src
+
+
+def main():
+    src = crawl(seeds)
+    ensure(CACHE)
+    dest = os.path.join(CACHE, "crawl.json")
+    json.dump(src, open(dest, "w", encoding="utf-8"))
+    print("wrote", dest)
+
+
+if __name__ == "__main__":
+    main()
