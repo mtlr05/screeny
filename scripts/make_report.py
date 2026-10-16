@@ -20,7 +20,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "bat"))
-from _paths import CACHE, EXAMPLES, REPORTS, RERUN, ROOT, STATE, ensure
+from _paths import CACHE, EXAMPLES, REPORTS, RERUN, ROOT, SEEN, SOURCES, STATE, ensure
 import calc as batcalc
 
 LBL = ["Thesis/runway", "Return ~40%/yr", "CEO large holder", "Moat or edge", "Differential view", "Dated catalyst"]
@@ -101,6 +101,183 @@ def top_bat(authors, batting, window, n=5, min_n=5):
         rows.append((a, x))
     rows.sort(key=lambda ax: (-float(_chance(ax[1]) or 0), ax[0]))
     return rows[:n]
+
+
+def _host_token(value):
+    text = (value or "").strip().lower()
+    if "://" in text:
+        text = text.split("://", 1)[1]
+    text = text.split("/")[0]
+    if text.startswith("www."):
+        text = text[4:]
+    if text.endswith(".substack.com"):
+        text = text[: -len(".substack.com")]
+    return text
+
+
+def _num(value):
+    if value is None or str(value).strip() == "":
+        return None
+    try:
+        return float(value)
+    except ValueError:
+        return None
+
+
+def _pct_label(row, hits, n):
+    stored = _num(row.get("ba_2y"))
+    if stored is None:
+        frac = _num(row.get("ba2y_pct"))
+        stored = None if frac is None else frac * 100
+    if stored is None and n:
+        stored = 100.0 * hits / n
+    if stored is None:
+        return ""
+    if abs(stored - round(stored)) < 0.05:
+        return f"{round(stored):.0f}%"
+    return f"{stored:.1f}%"
+
+
+def top_record_authors(stats_path=None, sources_path=None):
+    """Active sources whose stored 2y chance is at least 0.5 on at least 2 pitches.
+
+    Read at report time from state/source_stats.csv, limited to URLs still in
+    config/sources.csv, so a newly added author appears once their stats are stored.
+    """
+    stats_path = stats_path or os.path.join(STATE, "source_stats.csv")
+    sources_path = sources_path or SOURCES
+    if not os.path.exists(stats_path):
+        return []
+    active = None
+    if sources_path and os.path.exists(sources_path):
+        with open(sources_path, newline="", encoding="utf-8") as f:
+            active = {(row.get("url") or "").rstrip("/") for row in csv.DictReader(f)}
+    found = []
+    with open(stats_path, newline="", encoding="utf-8") as f:
+        for row in csv.DictReader(f):
+            url = (row.get("url") or "").rstrip("/")
+            if active is not None and url not in active:
+                continue
+            n = _num(row.get("ba2y_n"))
+            if n is None:
+                n = _num(row.get("ba_2y_n"))
+            chance = _num(row.get("ba2y_p_lt_hits"))
+            hits = _num(row.get("ba2y_hits"))
+            if n is None or chance is None or n < 2 or chance < 0.5:
+                continue
+            hits = 0 if hits is None else int(hits)
+            n = int(n)
+            found.append(
+                {
+                    "name": row.get("name") or _host_token(url),
+                    "url": url,
+                    "sub": _host_token(url),
+                    "hits": hits,
+                    "n": n,
+                    "pct": _pct_label(row, hits, n),
+                    "p": str(row.get("ba2y_p_lt_hits")).strip(),
+                    "chance": chance,
+                }
+            )
+    found.sort(key=lambda row: (-row["chance"], row["name"].lower()))
+    return found
+
+
+def _article_owner(url, source, authors):
+    url_sub = _host_token(url)
+    if url_sub:
+        for author in authors:
+            if url_sub == author["sub"]:
+                return author
+    src_sub = _host_token(source)
+    label = (source or "").strip().lower()
+    for author in authors:
+        if src_sub and (src_sub == author["sub"] or src_sub == author["name"].lower()):
+            return author
+        if label and label == author["name"].lower():
+            return author
+    return None
+
+
+def _md_cell(text):
+    return (text or "").replace("|", "\\|").replace("\n", " ").strip()
+
+
+def top_record_lines(doc, authors, seen_path=None):
+    """Markdown for every in-window article by a top-record author."""
+    window = doc.get("window") or ["", ""]
+    start = (window[0] or "")[:10] if window else ""
+    end = (window[1] or "")[:10] if len(window) > 1 else ""
+    scores = {}
+    for article in doc.get("articles") or []:
+        url = (article.get("url") or "").rstrip("/")
+        sc = article.get("sc") or []
+        if url and len(sc) >= 6:
+            scores[url] = tot(sc[:6])
+    posts = {}
+
+    def add(url, title, date, source):
+        day = (date or "")[:10]
+        if not url or not day:
+            return
+        if start and day < start:
+            return
+        if end and day > end:
+            return
+        owner = _article_owner(url, source, authors)
+        if not owner:
+            return
+        key = url.rstrip("/")
+        prev = posts.get(key)
+        score = scores.get(key)
+        if prev and prev.get("score") is not None and score is None:
+            score = prev["score"]
+        posts[key] = {
+            "author": owner["name"],
+            "date": day,
+            "title": title or url,
+            "url": url,
+            "score": score if score is not None else (prev or {}).get("score"),
+        }
+
+    seen_path = seen_path or SEEN
+    if seen_path and os.path.exists(seen_path):
+        with open(seen_path, newline="", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                add(row.get("url") or "", row.get("title") or "", row.get("date") or "", row.get("source") or "")
+    for article in doc.get("articles") or []:
+        add(article.get("url") or "", article.get("title") or "", article.get("date") or "", article.get("source") or "")
+    by_author = {author["name"]: [] for author in authors}
+    for post in posts.values():
+        by_author.setdefault(post["author"], []).append(post)
+    lines = [
+        "## Articles from top-record authors",
+        "",
+        "Every article in this window from an author whose stored 2-year record has at least 2 pitches and `p_lt_hits_by_chance` (`ba2y_p_lt_hits`) of 0.5 or higher. The author list is read from `state/source_stats.csv` when the report is written, so it follows the source list. Hits/pitches, batting average, and that chance are shown next to the author. A score is shown only when the article was scored.",
+        "",
+    ]
+    if not authors:
+        lines.append("No author currently meets that bar.")
+        lines.append("")
+        return lines
+    for author in authors:
+        lines.append(f"### {author['name']} ({author['hits']}/{author['n']} = {author['pct']}, p_lt {author['p']})")
+        lines.append("")
+        rows = by_author.get(author["name"]) or []
+        rows.sort(key=lambda row: row["title"].lower())
+        rows.sort(key=lambda row: row["date"], reverse=True)
+        if not rows:
+            lines.append("No articles in this window.")
+            lines.append("")
+            continue
+        lines.append("| Date | Article | Score |")
+        lines.append("|---|---|---|")
+        for row in rows:
+            score = "" if row["score"] is None else f"{row['score']:g}"
+            title = _md_cell(row["title"])
+            lines.append(f"| {row['date']} | [{title}]({row['url']}) | {score} |")
+        lines.append("")
+    return lines
 
 
 def since_publish(r, live):
@@ -242,6 +419,8 @@ def render(doc, onepagers, live):
     for i, r in enumerate(near, 16):
         A(f"| {i} | {r['sym']} | {r['score']:g} | [{r['title']}]({r['url']}) | {r['source']} | {miss(r['sc'])} |")
     A("")
+    for line in top_record_lines(doc, top_record_authors()):
+        A(line)
     A("## Caveats")
     A("")
     A('- Prices are Yahoo daily closes; "since publish" uses the first close on or after the publish date.')

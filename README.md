@@ -96,7 +96,7 @@ Every drop and every add is a proposal. Show David each line with the source nam
 python3 scripts/source_upkeep.py --apply reports/source_upkeep_YYYY-MM-DD.json
 ```
 
-`--apply` changes the lists only for those approved entries. Unapproved entries stay proposals. An approved drop moves the row to `config/sources_dormant_or_dead.csv` and appends `name`, `url`, `dropped_on`, and `reason` to `config/sources_dropped_never_readd.csv`. An approved add appends a Substack row to `config/sources.csv`.
+`--apply` changes the lists only for those approved entries. Unapproved entries stay proposals. An approved drop moves the row to `config/sources_dormant_or_dead.csv` and appends `name`, `url`, `dropped_on`, and `reason` to `config/sources_dropped_never_readd.csv`. An approved add appends a Substack row to `config/sources.csv` and writes the batting average computed for that candidate into `state/source_stats.csv`. The next report picks the new author up from that file.
 
 ### When a source is proposed for removal
 
@@ -202,6 +202,12 @@ A stored batting average has no expiry. `--plan` keeps the stored numbers and re
 - the author is an add candidate
 
 `python3 scripts/source_upkeep.py --plan --full-ba` is the one-off pass over every Substack author. It skips authors already stored with `ba_method=v2-excl-TO`, saves every 10 authors, and resumes. `--force` redoes authors already stored with the current method. `--ba-limit N` stops early. If an author's time budget runs out, that partial average is not saved. Recomputing an author can change a number if the archive or prices have moved.
+
+## Report
+
+`python3 scripts/make_report.py` writes `reports/<today>/REPORT.md`. After the ranked list, the batting tables, and the next six, the report has **Articles from top-record authors**.
+
+That section lists every article published inside the report window by an author whose stored 2-year record has at least 2 pitches and `ba2y_p_lt_hits` of 0.5 or higher. The author list is read from `state/source_stats.csv` at report time and limited to URLs still in `config/sources.csv`. Next to each author: hits/pitches, the batting average, and `p_lt_hits_by_chance`. Each article shows the date, title, link, and the /6 score when that article was scored. Authors are ordered by that chance, highest first. An approved add is included on the next report because `--apply` stores the recomputed batting average.
 
 ## Coming
 

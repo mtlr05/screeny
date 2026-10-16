@@ -182,6 +182,8 @@ python3 scripts/make_report.py --prices
 
 That writes `reports/<today>/REPORT.md` and `articles.csv`. Confirm both exist before you tell the user the run is done. PDF is optional: `python3 scripts/make_report.py --pdf` (needs `markdown` and `weasyprint`). If they are missing, ship the Markdown.
 
+After the next-six list, the report has **Articles from top-record authors**. `scripts/make_report.py` builds it from `state/source_stats.csv` at report time: every active source whose stored 2-year `ba2y_p_lt_hits` is at least 0.5 on at least 2 pitches. Next to the author, show hits/pitches, the batting average, and that chance. Under each author, list every article in the report window (from `state/seen_posts.csv`, plus any scored article in this run) with title, date, link, and the /6 score when the article was scored. Authors are ordered by `ba2y_p_lt_hits`, highest first. Do not keep a hand list of these authors. An approved `--apply` add stores the recomputed batting average, so the next report includes that author.
+
 Rank by score. Best article per ticker. Top list = top 15 plus every tie at the 15th score, numbered 1..N, ties alphabetical by ticker. The next six sit under the ranked list.
 
 Remove scored URLs from `state/backlog.json` if that file exists.
@@ -206,7 +208,7 @@ Show every proposal to David before changing the list. Each line has the source 
 python3 scripts/source_upkeep.py --apply reports/source_upkeep_<date>.json
 ```
 
-Approved drops move that row to `config/sources_dormant_or_dead.csv` and append `name`, `url`, `dropped_on`, and `reason` to `config/sources_dropped_never_readd.csv`. Approved adds append a row to `config/sources.csv`. `--apply` prints `REFUSED` and does not add anyone already on the never-readd list. A dormant recheck must not reactivate them either. Unapproved entries stay as proposals. Every proposal line shows `ba2y_p_lt_hits` and `ba_updated`.
+Approved drops move that row to `config/sources_dormant_or_dead.csv` and append `name`, `url`, `dropped_on`, and `reason` to `config/sources_dropped_never_readd.csv`. Approved adds append a row to `config/sources.csv` and write the batting average computed for that candidate into `state/source_stats.csv`. `--apply` prints `REFUSED` and does not add anyone already on the never-readd list. A dormant recheck must not reactivate them either. Unapproved entries stay as proposals. Every proposal line shows `ba2y_p_lt_hits` and `ba_updated`.
 
 Rules:
 

@@ -596,6 +596,29 @@ def consider_adds(crawl, seeds, known_subs, pitches, batting_by_key, as_of, comp
             plt = p_lt_cell(temp)
             fresh = ba_date_cell(temp)
         name = info.get("name") or sub
+        ba_stats = {}
+        if not blank(temp.get("ba_updated")):
+            ba_stats = {
+                key: temp.get(key, "")
+                for key in (
+                    "ba2y_hits",
+                    "ba2y_n",
+                    "ba2y_pct",
+                    "ba_2y",
+                    "ba_2y_n",
+                    "ba2y_p_lt_hits",
+                    "ba2y_n_title",
+                    "ba2y_n_body",
+                    "pitches_title",
+                    "pitches_body",
+                    "ba2y_excl",
+                    "ba2y_lost_px",
+                    "ba2y_lost_notfound",
+                    "ba_updated",
+                    "ba_method",
+                    "last_run",
+                )
+            }
         numbers = {
             "subdomain": sub,
             "recommended_by": m.group(1),
@@ -614,6 +637,7 @@ def consider_adds(crawl, seeds, known_subs, pitches, batting_by_key, as_of, comp
             "focus": scrub(info.get("hero") or ""),
             "approved": False,
             "numbers": numbers,
+            "ba_stats": ba_stats,
         }
         if n is None or n < MIN_PITCHES:
             item["reason"] = "skipped for now: fewer than 5 pitches in the 2-year window"
@@ -948,7 +972,39 @@ def approved(item):
     return v is True or str(v).strip().lower() in {"1", "true", "yes", "y"}
 
 
-def apply_proposal(path, sources_path, dormant_path, never_path):
+def upsert_added_stats(stats_path, pairs):
+    """Write the batting average computed for an approved add into source_stats.csv.
+
+    The next report reads that file, so a newly added author is included as soon
+    as the add is applied. Existing non-BA columns on a matching URL are kept.
+    """
+    fields, rows = read_csv(stats_path)
+    fields = list(STATS_FIELDS)
+    by_url = {(row.get("url") or "").rstrip("/"): row for row in rows}
+    wrote = []
+    for source_row, stats in pairs:
+        if not stats or blank(stats.get("ba_updated")):
+            continue
+        url = (source_row.get("url") or "").rstrip("/")
+        row = by_url.get(url)
+        if row is None:
+            row = {key: "" for key in fields}
+            rows.append(row)
+            by_url[url] = row
+        row["name"] = source_row.get("name") or row.get("name") or ""
+        row["type"] = source_row.get("type") or row.get("type") or "substack"
+        row["url"] = source_row.get("url") or row.get("url") or ""
+        for key, value in stats.items():
+            if key in fields:
+                row[key] = "" if value is None else str(value)
+        wrote.append(row["name"] or url)
+    if wrote:
+        rows.sort(key=lambda row: ((row.get("name") or "").lower(), row.get("url") or ""))
+        write_csv(stats_path, fields, rows)
+    return wrote
+
+
+def apply_proposal(path, sources_path, dormant_path, never_path, stats_path=None):
     doc = json.load(open(path, encoding="utf-8"))
     chosen = [p for p in doc.get("proposals") or [] if approved(p)]
     when = doc.get("as_of") or dt.date.today().isoformat()
@@ -965,6 +1021,7 @@ def apply_proposal(path, sources_path, dormant_path, never_path):
     new_rows = []
     dropped = []
     added = []
+    added_stats = []
     for item in chosen:
         url = (item.get("url") or "").rstrip("/")
         if is_sa({"type": item.get("type"), "url": url}):
@@ -1016,11 +1073,16 @@ def apply_proposal(path, sources_path, dormant_path, never_path):
             new_rows.append(row)
             by_url[url] = row
             added.append(row["name"])
+            added_stats.append((row, item.get("ba_stats") or {}))
         else:
             print("unknown action", item.get("action"), item.get("name"))
     kept = [r for r in sources if (r.get("url") or "").rstrip("/") not in remove]
     write_csv(sources_path, fields, kept + new_rows)
     write_csv(dormant_path, dfields, dormant)
+    if stats_path:
+        stored = upsert_added_stats(stats_path, added_stats)
+        if stored:
+            print(f"Stored batting averages for {len(stored)}: {', '.join(stored)}")
     print(f"Dropped {len(dropped)}: {', '.join(dropped) if dropped else 'none'}")
     print(f"Added {len(added)}: {', '.join(added) if added else 'none'}")
 
@@ -1053,7 +1115,7 @@ def main():
         print("Pass only one of --plan or --apply")
         sys.exit(2)
     if args.apply:
-        apply_proposal(args.apply, args.sources, args.dormant, args.never)
+        apply_proposal(args.apply, args.sources, args.dormant, args.never, args.stats)
     elif args.plan:
         plan(args)
     else:

@@ -21,7 +21,7 @@ On-demand scout for single-stock investment write-ups. David runs it from the Cu
 1. **Stats** — three numbers only: articles sourced, articles read in full, articles scored.
 2. Screening and scoring rules.
 3. **Ranked list** — top 15 plus every name tied with the 15th score. Include a **BA 2y (1y)** column: the author's 2-year batting average as hits/n = %, else the 1-year tagged `(1y)`, else `n/a`. The column does not change the /6 score.
-4. Author batting top-5 tables, near misses, caveats.
+4. Author batting top-5 tables, near misses, then **Articles from top-record authors**, then caveats.
 5. **Appendix: one-pagers**, then **Appendix: detailed stats** (drop reasons, Seeking Alpha breakdown, counts by source type). Detailed stats stay in the appendix.
 
 ## Where things live
@@ -51,3 +51,9 @@ The /6 score still needs an explicit long disclosure. The 2-year batting average
 `p_lt_hits_by_chance` is `P(X <= hits - 1)` with `p = 0.5`. It is always stored as `ba2y_p_lt_hits`, shown on every proposal and in the report, and batting summaries sort by it, highest first.
 
 Median stock return and median excess return (1-year and 2-year) will be stored with the batting average and shown on proposals. Those columns are not in the stats file yet. The screen report already prints median excess for authors computed during a run.
+
+An approved add writes the batting average computed for that candidate into `state/source_stats.csv`.
+
+## Articles from top-record authors
+
+The generated report includes this section after the next-six list. It is every article in the report window from an author whose stored 2-year `ba2y_p_lt_hits` is at least 0.5 on at least 2 pitches. Read `state/source_stats.csv` when the report is written, and keep only URLs still in `config/sources.csv`. Show hits/pitches, the batting average, and `p_lt_hits_by_chance` next to the author, then each article's title, date, link, and score when one exists. Sort authors by that chance, highest first. Do not keep a separate author list. An approved source add stores the recomputed row, so the next report includes that author.
