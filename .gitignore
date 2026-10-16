@@ -21,6 +21,7 @@ reports/source_upkeep_*.json
 state/scored.json
 state/batting.json
 state/sa_breakdown.json
+state/sa_results.json
 state/returns.json
 state/backlog.json
 state/articles_scored.csv
