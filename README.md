@@ -39,8 +39,8 @@ The agent follows `AGENTS.md` and `.cursor/skills/`. A full run covers the last 
 | Path | Role |
 |---|---|
 | `config/sources.csv` | Active sources (Substack plus a few manual feeds) |
-| `config/sources_dormant_or_dead.csv` | Parked feeds. A dormant recheck must leave anyone on the never-readd list parked |
-| `config/sources_dropped_never_readd.csv` | Dropped authors (`name`, `url`, `dropped_on`, `reason`). Discovery skips them. Adds are refused |
+| `config/sources_dormant_or_dead.csv` | Parked feeds, including sources that were already dormant or dead. Automatic adds skip them. A dormant recheck may put a parked author back unless they are also on the never-readd list |
+| `config/sources_dropped_never_readd.csv` | Authors removed by an approved drop (`name`, `url`, `dropped_on`, `reason`). Currently the 17 drops from 2026-10-16. Discovery skips them. `--apply` refuses the add. A dormant recheck must not put them back |
 | `config/universe.csv` | Optional ticker list for earnings-drop search |
 | `state/seen_posts.csv` | URLs already swept. Dedupe key is `url`. Append-only |
 | `state/source_stats.csv` | Per-source upkeep stats. Seeking Alpha is excluded |
@@ -133,9 +133,8 @@ flowchart TD
   stock -->|no| skipTopic["Not a candidate"]
   stock -->|yes| known{"Already active, dormant, or on never-readd?"}
   known -->|yes| skipKnown["Skipped"]
-  known -->|no| bar{"2y BA above 50% on at least 5 pitches?"}
-  bar -->|"Fewer than 5"| skipFew["Skipped for now"]
-  bar -->|"50% or less"| notAdded["Not added"]
+  known -->|no| bar{"p > 0.23 and median excess 2y > 0?"}
+  bar -->|no| notAdded["Not added"]
   bar -->|yes| addProp["Add proposal"]
 
   approve{"The user sets approved true?"}
@@ -149,10 +148,10 @@ flowchart TD
   handCheck{"On the never-readd list?"}
   hand --> handCheck
   handCheck -->|yes| handNo["Not added. Only a hand edit of that file overrides it"]
-  handCheck -->|no| handYes["On the active list. The 50% on 5 pitches bar does not apply"]
+  handCheck -->|no| handYes["On the active list. The p and median-excess bar does not apply"]
 ```
 
-A blank last-post date is not a stale drop, and there is no probation. The 50% on 5 pitches test is only for an automatic add proposal. The three publications added on 2026-10-16 were hand-adds: they miss that bar, and none is on the never-readd list. A dormant recheck does not put a never-readd author back.
+A blank last-post date is not a stale drop, and there is no probation. The `p > 0.23` and median-excess test is only for an automatic add proposal. `p` is `ba2y_p_lt_hits`: binomial `P(X <= hits - 1)` with `n` equal to the 2-year pitch count and success probability 0.5, rounded to 4 decimals. `median_excess_2y` is `ba2y_median_excess`, the median of stock return minus benchmark return in that window. Median stock return for that same window is stored as `ba2y_med_ret`. The three publications added on 2026-10-16 were hand-adds: that bar does not apply to them, and none is on the never-readd list. Automatic adds also skip authors who are only on the dormant list. A dormant recheck may put those authors back. It must not put a never-readd author back.
 
 ## Source upkeep
 
@@ -182,7 +181,13 @@ The cap trim runs only when the list, after those drops and after counting propo
 
 ### When a source is proposed for addition
 
-An add is a Substack recommendation of an author who scored at least 4.5/6, and only when the candidate's own 2-year batting average is above 50% on at least 5 pitches. A candidate with fewer than 5 pitches is skipped for now. A candidate at or under 50% is recorded as not added.
+An add is a Substack recommendation of an author who scored at least 4.5/6, and only when the candidate's `p` is greater than 0.23 and `median_excess_2y` is greater than 0. A missing `p` or a missing median excess does not pass. A candidate who fails either test is recorded as not added.
+
+`p` is `ba2y_p_lt_hits`. `bat/calc.py` `p_lt_hits` computes the binomial probability `P(X <= hits - 1)` with `n` equal to the number of 2-year pitches and a success probability of 0.5, then rounds to 4 decimals. It is the chance of fewer hits than this author got if each pitch were a coin flip. It is 0 when hits is 0, and blank when `n` is missing. The same formula is described under **p_lt_hits_by_chance**. For 1 hit out of 2, `p` is 0.25. For 2 hits out of 2, it is 0.75.
+
+`median_excess_2y` is stored as `ba2y_median_excess`. It is the median of each 2-year pitch's stock total return minus its benchmark total return. The window is pitches published 2–3 years ago. The benchmark is XIC.TO for `.TO` and `.V`, and SPY otherwise. The stored number is a fraction, so 0.05 is 5 percentage points. Greater than 0 means the median pitch beat its benchmark.
+
+Median stock return for that same window is stored as `ba2y_med_ret`. `bat/lib.py` `score()` returns it as `median_return`: the median of the stock total returns, before subtracting the benchmark. It is a fraction, blank when there are no priced pitches.
 
 `--crawl` fetches those recommendations (the same walk as `scripts/crawl_sources.py`). Without it, `--plan` uses `cache/crawl.json` when that file exists.
 
@@ -192,11 +197,13 @@ Seeking Alpha is not a tracked source. It is left out of `state/source_stats.csv
 
 ### Never re-add
 
-`config/sources_dropped_never_readd.csv` is the persistent list of dropped authors. Discovery treats those URLs and Substack subdomains as already known and skips them. `--apply` prints `REFUSED` and does not add anyone on the list. A dormant recheck must not move that author back to `config/sources.csv`. The only override is a hand edit of the never-readd file.
+`config/sources_dropped_never_readd.csv` holds authors removed by an approved drop. It currently has the 17 drops from 2026-10-16. Discovery treats those URLs and Substack subdomains as already known and skips them. `--apply` prints `REFUSED` and does not add anyone on the list. A dormant recheck must not move that author back to `config/sources.csv`. The only override is a hand edit of the never-readd file.
+
+Authors who are only parked in `config/sources_dormant_or_dead.csv` are not on that list. Automatic adds skip them because the dormant list is already known. A dormant recheck may put them back.
 
 ### Manual-add exception
 
-The automatic add bar is above 50% on at least 5 pitches. The user can still approve a source by hand. On 2026-10-16 three publications were added that way. Each row's `how_discovered` records the exception. None of the three is on the never-readd list. Each is `type=substack`, `status=active`, with `feed_url` set to `<url>/feed`. The batting averages below are seeded with `ba_updated=2026-10-16` and `ba_method=v2-excl-TO`.
+The automatic add bar is `p > 0.23` and `median_excess_2y > 0`. The user can still approve a source by hand. On 2026-10-16 three publications were added that way. Each row's `how_discovered` records the exception. None of the three is on the never-readd list. Each is `type=substack`, `status=active`, with `feed_url` set to `<url>/feed`. The batting averages below are seeded with `ba_updated=2026-10-16` and `ba_method=v2-excl-TO`.
 
 | Source | URL | 2y BA | p_lt_hits_by_chance |
 |---|---|---|---|
@@ -215,6 +222,8 @@ Seeking Alpha is excluded. Every other active source records:
 - articles scored in the last 6 months, and the average score over those articles
 - 2-year batting average (`ba2y_hits`, `ba2y_n`, `ba2y_pct`, and `ba_2y` as a percent)
 - `ba2y_p_lt_hits`, which is `p_lt_hits_by_chance`
+- `ba2y_median_excess`, which is `median_excess_2y`
+- `ba2y_med_ret`, which is the median stock return over the same 2-year pitches
 - `ba_updated` and `ba_method` (the current method is `v2-excl-TO`)
 - title versus body pitch counts (`ba2y_n_title`, `ba2y_n_body`, also mirrored on `pitches_title` and `pitches_body`)
 - `ba2y_excl` (short, sell, and hold counts) and `ba2y_lost_px` versus `ba2y_lost_notfound`
@@ -275,11 +284,11 @@ A stored batting average has no expiry. `--plan` keeps the stored numbers and re
 
 `python3 scripts/make_report.py` writes `reports/<today>/REPORT.md`. `python3 scripts/make_report.py --pdf` writes `REPORT.pdf` from that Markdown. After the ranked list, the batting tables, and the next six, both files have **Articles from top-record authors**.
 
-That section lists every article published inside the report window by an author whose stored 2-year record has at least 2 pitches and `ba2y_p_lt_hits` of 0.5 or higher. The author list is read from `state/source_stats.csv` at report time and limited to URLs still in `config/sources.csv`. Next to each author: hits/pitches, the batting average, and `p_lt_hits_by_chance`. Each article shows the date, title, link, and the /6 score when that article was scored. Authors are ordered by that chance, highest first. An approved add is included on the next report because `--apply` stores the recomputed batting average.
+That section lists every article published inside the report window by an author whose stored 2-year record has at least 2 pitches and `ba2y_p_lt_hits` of 0.5 or higher. The author list is read from `state/source_stats.csv` at report time and limited to URLs still in `config/sources.csv`. An article is matched to that author by URL. Authors who are only in the stats file, or only on the dormant or never-readd lists, are not included. Next to each author: hits/pitches, the batting average, and `p_lt_hits_by_chance`. Each article shows the date, title, link, and the /6 score when that article was scored. Authors are ordered by that chance, highest first. An approved add is included on the next report because `--apply` stores the recomputed batting average.
 
 ## Coming
 
-Median stock return and median excess return, for both the 1-year and the 2-year windows, will be stored with the batting average and shown on source-upkeep proposals. Those columns are not in `state/source_stats.csv` yet. The screen report already prints median excess return for authors computed during a run; that display is separate from this planned storage.
+The 1-year median stock return and the 1-year median excess return are not stored yet. The 2-year median stock return is stored as `ba2y_med_ret`. The 2-year median excess is stored as `ba2y_median_excess` and is part of the automatic add bar. The screen report already prints median excess return for authors computed during a run.
 
 ## Rules that do not change
 

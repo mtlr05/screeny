@@ -1,6 +1,6 @@
 # Stock article scout: ranked report
 
-Window: articles published 2026-06-13 to 2026-10-13. Generated 2026-10-14.
+Window: articles published 2026-06-13 to 2026-10-13. Generated 2026-10-16.
 
 ## Stats
 
@@ -125,22 +125,22 @@ Measured on past single-stock long pitches only. 1-year window: pitches publishe
 
 ### By 1-year batting average
 
-| # | Author | Hits / N | Avg | Median excess | Best | Worst |
-|---|---|---|---|---|---|---|
-| 1 | Bret Jensen (SA) | 5/6 | 83% | +17 pts | AUPH +76% vs +14% | ALDX +6% vs +16% |
-| 2 | Laurentian Research (SA) | 9/12 | 75% | +56 pts | ABBRF +332% vs +14% | DEC -2% vs +22% |
-| 3 | Stephen Tobin (SA) | 9/16 | 56% | +4 pts | QBTS +3096% vs +19% | EVTL -87% vs +19% |
-| 4 | mvcinvesting | 7/15 | 47% | -15 pts | TWST +401% vs +17% | ALVO -56% vs +31% |
-| 5 | Grassroots Trading (SA) | 39/86 | 45% | -4 pts | TTMI +581% vs +31% | NTHI -77% vs +17% |
+| # | Author | Hits / N | Avg | P(fewer hits by chance) | Median excess | Best | Worst |
+|---|---|---|---|---|---|---|---|
+| 1 | Laurentian Research (SA) | 9/12 | 75% | 0.927 | +56 pts | ABBRF +332% vs +14% | DEC -2% vs +22% |
+| 2 | Bret Jensen (SA) | 5/6 | 83% | 0.8906 | +17 pts | AUPH +76% vs +14% | ALDX +6% vs +16% |
+| 3 | Stephen Tobin (SA) | 9/16 | 56% | 0.5982 | +4 pts | QBTS +3096% vs +19% | EVTL -87% vs +19% |
+| 4 | mvcinvesting | 7/15 | 47% | 0.3036 | -15 pts | TWST +401% vs +17% | ALVO -56% vs +31% |
+| 5 | Grassroots Trading (SA) | 39/86 | 45% | 0.1659 | -4 pts | TTMI +581% vs +31% | NTHI -77% vs +17% |
 
 ### By 2-year batting average
 
-| # | Author | Hits / N | Avg | Median excess | Best | Worst |
-|---|---|---|---|---|---|---|
-| 1 | Bret Jensen (SA) | 7/12 | 58% | +42 pts | HROW +284% vs +46% | RCKT -86% vs +30% |
-| 2 | Stephen Tobin (SA) | 13/26 | 50% | -4 pts | LUNR +401% vs +44% | EH -69% vs +41% |
-| 3 | Grassroots Trading (SA) | 8/18 | 44% | -8 pts | HRTG +118% vs +41% | PROP -95% vs +38% |
-| 4 | Laurentian Research (SA) | 2/6 | 33% | -37 pts | CNQ +51% vs +36% | PIFYF -31% vs +48% |
+| # | Author | Hits / N | Avg | P(fewer hits by chance) | Median excess | Best | Worst |
+|---|---|---|---|---|---|---|---|
+| 1 | Bret Jensen (SA) | 7/12 | 58% | 0.6128 | +42 pts | HROW +284% vs +46% | RCKT -86% vs +30% |
+| 2 | Stephen Tobin (SA) | 13/26 | 50% | 0.4225 | -4 pts | LUNR +401% vs +44% | EH -69% vs +41% |
+| 3 | Grassroots Trading (SA) | 8/18 | 44% | 0.2403 | -8 pts | HRTG +118% vs +41% | PROP -95% vs +38% |
+| 4 | Laurentian Research (SA) | 2/6 | 33% | 0.1094 | -37 pts | CNQ +51% vs +36% | PIFYF -31% vs +48% |
 
 ## Next six (ranks 16–21)
 
@@ -148,10 +148,231 @@ Measured on past single-stock long pitches only. 1-year window: pitches publishe
 |---|---|---|---|---|---|
 | 16 | ALM | 3.75 | [Almonty: The Market Is Pricing A Tungsten Crash That Hasn't Come](https://seekingalpha.com/article/4952737-almonty-stock-market-pricing-tungsten-crash-that-has-not-come) | The Bullionaire (SA) | Return ~40%/yr 0; CEO large holder 0; Moat or edge 0.75 |
 | 17 | GTLB | 3.75 | [GitLab Will Finally Break GitHub's Monopoly In 2027](https://seekingalpha.com/article/4953754-gitlab-stock-will-finally-break-githubs-monopoly-in-2027) | Ignacio Planas Gonzalez (SA) | Return ~40%/yr 0; CEO large holder 0; Moat or edge 0.75 |
-| 18 | KARO | 3.75 | [Karooooo: Why I own an expensive stock ](https://aktieblogg.substack.com/p/karooooo-why-i-own-an-expensive-stock) | Gustav | Return ~40%/yr 0; Moat or edge 0.75; Differential view 0.5; Dated catalyst 0.5 |
+| 18 | KARO | 3.75 | [Karooooo: Why I own an expensive stock](https://aktieblogg.substack.com/p/karooooo-why-i-own-an-expensive-stock) | Gustav | Return ~40%/yr 0; Moat or edge 0.75; Differential view 0.5; Dated catalyst 0.5 |
 | 19 | SIRI | 3.75 | [Sirius XM: This Living Dead Is Ready To Rise](https://seekingalpha.com/article/4953418-sirius-xm-this-living-dead-ready-to-rise) | Early Retiree (SA) | Thesis/runway 0.5; Return ~40%/yr 0.5; CEO large holder 0; Moat or edge 0.75 |
 | 20 | URGN | 3.75 | [UroGen Pharma: An Emerging GARP Stock](https://seekingalpha.com/article/4953717-urogen-pharma-an-emerging-garp-stock) | Bret Jensen (SA) | Return ~40%/yr 0; CEO large holder 0; Moat or edge 0.75 |
 | 21 | VBNK | 3.75 | [VersaBank: Expensive, But Growth Still Justifies A Buy](https://seekingalpha.com/article/4952205-versabank-expensive-but-growth-still-justifies-a-buy) | Grassroots Trading (SA) | Return ~40%/yr 0; CEO large holder 0.5; Moat or edge 0.75; Differential view 0.5 |
+
+## Articles from top-record authors
+
+Every article in this window from an author whose stored 2-year record has at least 2 pitches and `p_lt_hits_by_chance` (`ba2y_p_lt_hits`) of 0.5 or higher. The author list is read from `state/source_stats.csv` when the report is written, so it follows the source list. Hits/pitches, batting average, and that chance are shown next to the author. A score is shown only when the article was scored.
+
+### Acid Investments (3/3 = 100%, p_lt 0.875)
+
+| Date | Article | Score |
+|---|---|---|
+| 2026-09-22 | [Oxford Biomedica (OXB) - orphaned CDMO that maybe shouldn’t stay listed](https://acidinvestments.substack.com/p/oxford-biomedica-orphaned-cdmo-that) |  |
+| 2026-08-14 | [Some things of value (DECK, BGSI)](https://acidinvestments.substack.com/p/some-things-of-value-deck-bgsi) |  |
+| 2026-08-10 | [Some Korean Value (Global Tax Free, Geumhwa PSC)](https://acidinvestments.substack.com/p/some-korean-value-global-tax-free) |  |
+| 2026-08-03 | [A quick note on some old names and new names (SK Hynix, GFL)](https://acidinvestments.substack.com/p/a-quick-note-on-some-old-names-and) |  |
+| 2026-08-03 | [Quick deep value idea - Vaso Corp](https://acidinvestments.substack.com/p/quick-deep-value-idea-vaso-corp) |  |
+| 2026-07-14 | [Two incentive-based ideas (CODI, KYVO)](https://acidinvestments.substack.com/p/two-incentive-based-ideas-codi-kyvo) |  |
+| 2026-07-13 | [A seasonal low risk trade - Buckle (BKE)](https://acidinvestments.substack.com/p/a-seasonal-low-risk-trade-buckle) |  |
+| 2026-07-10 | [Solstice and Element? Buy the dislocation (SOLS)](https://acidinvestments.substack.com/p/solstice-and-element-buy-the-dislocation) |  |
+| 2026-06-27 | [Some weekend muses on long term contracts - do memory names now deserve a higher multiple?](https://acidinvestments.substack.com/p/some-weekend-muses-on-long-term-contracts) |  |
+| 2026-06-18 | [A quick speculative idea - Sovereign neocloud (SharonAI - SHAZ)?](https://acidinvestments.substack.com/p/a-quick-speculative-idea-sovereign) |  |
+
+### pettycash (9/13 = 69.2%, p_lt 0.8666)
+
+| Date | Article | Score |
+|---|---|---|
+| 2026-10-09 | [Getting to Yes by Roger Fisher and William Ury Book Review](https://pettycash.substack.com/p/getting-to-yes-by-roger-fisher-and) |  |
+| 2026-10-06 | [Opportunity Cost: Capital and Time](https://pettycash.substack.com/p/opportunity-cost-capital-and-time) |  |
+| 2026-10-02 | [Book Review: Iron John by Robert Bly](https://pettycash.substack.com/p/book-review-iron-john-by-robert-bly) |  |
+| 2026-09-29 | [Concentration vs Diversification](https://pettycash.substack.com/p/concentration-vs-diversification) |  |
+| 2026-09-25 | [The Way of Excellence by Brad Stulberg](https://pettycash.substack.com/p/the-way-of-excellence-by-brad-stulberg) |  |
+| 2026-09-22 | [Dads and Their Health](https://pettycash.substack.com/p/dads-and-their-health) |  |
+| 2026-09-16 | [Cash Levels](https://pettycash.substack.com/p/cash-levels) |  |
+| 2026-09-15 | [High Tide Q3 F2026 Update – $HITI, $HITI.v](https://pettycash.substack.com/p/high-tide-q3-f2026-update-hiti-hitiv) |  |
+| 2026-09-09 | [Thoughts on Benchmarking (Expanded)](https://pettycash.substack.com/p/thoughts-on-benchmarking-expanded) |  |
+| 2026-09-02 | [Learn to Play the Game at Work](https://pettycash.substack.com/p/learn-to-play-the-game-at-work) |  |
+| 2026-08-29 | [High Arctic Overseas Q2 2026 Update – $HOH.v](https://pettycash.substack.com/p/high-arctic-overseas-q2-2026-update) |  |
+| 2026-08-26 | [Book Review: The Champion’s Mind by Jim Afremow](https://pettycash.substack.com/p/book-review-the-champions-mind-by) |  |
+| 2026-08-21 | [Decibel Cannabis Q2 2026 Update – $DB.v](https://pettycash.substack.com/p/decibel-cannabis-q2-2026-update-dbv) |  |
+| 2026-08-19 | [Our Emperors Have No Clothes by Alan Weiss](https://pettycash.substack.com/p/our-emperors-have-no-clothes-by-alan) |  |
+| 2026-08-13 | [Auxly Cannabis Group Inc. Q2 2026 Update – XLY.to](https://pettycash.substack.com/p/auxly-cannabis-group-inc-q2-2026) |  |
+| 2026-08-13 | [Rubicon Organics Q2 2026 Update – ROMJ.v](https://pettycash.substack.com/p/rubicon-organics-q2-2026-update-romjv) |  |
+| 2026-08-13 | [Total Energy Services Q2 2026 Update – TOT](https://pettycash.substack.com/p/total-energy-services-q2-2026-update) |  |
+| 2026-08-12 | [ACCESS Newswire Q2 2026 Update – ACCS](https://pettycash.substack.com/p/access-newswire-q2-2026-update-accs) |  |
+| 2026-08-12 | [Cipher Pharmaceuticals Q2 2026 Update – CPH.TO](https://pettycash.substack.com/p/cipher-pharmaceuticals-q2-2026-update) |  |
+| 2026-08-12 | [Weaponized Lies by Daniel Levitin Book Review](https://pettycash.substack.com/p/weaponized-lies-by-daniel-levitin) |  |
+| 2026-08-10 | [Geodrill Limited Q2 2026 Update – GEO.to](https://pettycash.substack.com/p/geodrill-limited-q2-2026-update-geoto) |  |
+| 2026-08-09 | [Ensign Energy Services Q2 2026 Update – ESI.to](https://pettycash.substack.com/p/ensign-energy-services-q2-2026-update) |  |
+| 2026-08-09 | [McCoy Global Q2 2026 Update – MCB.TO](https://pettycash.substack.com/p/mccoy-global-q2-2026-update-mcbto) |  |
+
+### The Lead-Lag Report (2/2 = 100%, p_lt 0.75)
+
+No articles in this window.
+
+### Welfare Capital Research (2/2 = 100%, p_lt 0.75)
+
+No articles in this window.
+
+### Compounding Quality (3/4 = 75%, p_lt 0.6875)
+
+| Date | Article | Score |
+|---|---|---|
+| 2026-10-11 | [Adding to Our Portfolio](https://www.compoundingquality.net/p/adding-to-our-portfolio-284) |  |
+| 2026-10-08 | [Portfolio Update: October 2026](https://www.compoundingquality.net/p/portfolio-update-october-2026) |  |
+| 2026-10-06 | [6 Serial Acquirers for the Serial Acquirer Portfolio](https://www.compoundingquality.net/p/6-serial-acquirers-for-the-serial) |  |
+| 2026-10-04 | [Building a Serial Acquirer Portfolio](https://www.compoundingquality.net/p/building-a-serial-acquirer-portfolio) |  |
+| 2026-10-01 | [The 5-Minute Serial Acquirer Test](https://www.compoundingquality.net/p/how-to-find-the-best-serial-acquirers) |  |
+| 2026-09-29 | [It’s Serial Acquirer Week](https://www.compoundingquality.net/p/its-serial-acquirer-week) |  |
+| 2026-09-27 | [Selling one, buying two](https://www.compoundingquality.net/p/selling-one-buying-two) |  |
+| 2026-09-24 | [Buying a new ETF](https://www.compoundingquality.net/p/buying-a-new-etf-984) |  |
+| 2026-09-22 | [Who is Chuck Akre?](https://www.compoundingquality.net/p/who-is-chuck-akre-568) |  |
+| 2026-09-20 | [Buying more of this stock](https://www.compoundingquality.net/p/buying-more-of-this-stock) |  |
+| 2026-09-17 | [Buy-Hold-Sell List: September 2026](https://www.compoundingquality.net/p/buy-hold-sell-list-september-2026) |  |
+| 2026-09-15 | [The best investor you've never heard of](https://www.compoundingquality.net/p/the-best-investor-youve-never-heard-45a) |  |
+| 2026-09-13 | [The ultimate stock screener?](https://www.compoundingquality.net/p/the-ultimate-stock-screener) |  |
+| 2026-09-10 | [Is Nu Holdings An Interesting Stock?](https://www.compoundingquality.net/p/is-nu-holdings-an-interesting-stock) |  |
+| 2026-09-08 | [I'm Buying The Whole Business](https://www.compoundingquality.net/p/im-buying-the-whole-business) |  |
+| 2026-09-06 | [Selling One, Buying Another](https://www.compoundingquality.net/p/selling-one-buying-another) |  |
+| 2026-09-03 | [Our Portfolio Needs Surgery](https://www.compoundingquality.net/p/our-portfolio-needs-surgery) |  |
+| 2026-09-01 | [Time to Raise the Bar](https://www.compoundingquality.net/p/time-to-raise-the-bar-part-i-portfolio) |  |
+| 2026-08-30 | [Best Buys: August 2026](https://www.compoundingquality.net/p/best-buys-august-2026) |  |
+| 2026-08-27 | [Fairfax India: discount on discount?](https://www.compoundingquality.net/p/fairfax-india-discount-on-discount) |  |
+| 2026-08-25 | [Taking a break](https://www.compoundingquality.net/p/taking-a-break-b5d) |  |
+| 2026-08-23 | [Buy-Hold-Sell List: August 2026](https://www.compoundingquality.net/p/buy-hold-sell-list-august-2026) |  |
+| 2026-08-20 | [ETF Portfolio Update August 2026](https://www.compoundingquality.net/p/etf-portfolio-update-august-2026) |  |
+| 2026-06-16 | [🐑 Are You Just A Sheep?](https://www.compoundingquality.net/p/quality-vs-momentum) |  |
+| 2026-06-14 | [5 Stocks Superinvestors Are Buying](https://www.compoundingquality.net/p/5-stocks-superinvestors-are-buying) |  |
+
+### Scalper's Lounge (3/4 = 75%, p_lt 0.6875)
+
+| Date | Article | Score |
+|---|---|---|
+| 2026-10-11 | [RxSight: commercial medtech trading below net cash with a new CEO and new Alcon partnership](https://scalpavelli.substack.com/p/rxsight-commercial-medtech-trading) |  |
+| 2026-08-30 | [Sunday Market Prep (#20) + Korean Dividend Reform](https://scalpavelli.substack.com/p/sunday-market-prep-19-korean-dividend) |  |
+| 2026-08-23 | [Sunday Market Prep (#19)](https://scalpavelli.substack.com/p/sunday-market-prep-19) |  |
+| 2026-08-21 | [Natural Gas Services: Price Target Extended to 2030](https://scalpavelli.substack.com/p/natural-gas-services-price-target) |  |
+| 2026-08-16 | [Sunday Market Prep (#18)](https://scalpavelli.substack.com/p/sunday-market-prep-18) |  |
+| 2026-08-09 | [Sunday Market Prep (#17) plus Kion Group micro-pitch](https://scalpavelli.substack.com/p/sunday-market-prep-17-plus-kion-group) |  |
+| 2026-07-12 | [Indonesia has entered the Crisis Investing Zone](https://scalpavelli.substack.com/p/indonesia-has-entered-the-crisis) |  |
+| 2026-06-14 | [Your multivitamin sucks](https://scalpavelli.substack.com/p/your-multivitamin-sucks) |  |
+
+### sylencecapital (3/4 = 75%, p_lt 0.6875)
+
+| Date | Article | Score |
+|---|---|---|
+| 2026-10-07 | [A Qualitative Primer on the Nicotine Pouch Space](https://sylencecapital.substack.com/p/a-qualitative-primer-on-the-nicotine) |  |
+| 2026-09-13 | [Unpolished Thoughts on Stocks #1](https://sylencecapital.substack.com/p/unpolished-thoughts-on-stocks-1) |  |
+| 2026-09-07 | [Titan Mining Q2 Update](https://sylencecapital.substack.com/p/titan-mining-q2-update) |  |
+| 2026-08-27 | [Miami International Holdings (MIAX)](https://sylencecapital.substack.com/p/miami-international-holdings-miax) |  |
+| 2026-08-22 | [Summit Royalties (TSXV: SUM or OTC: SUMMF)](https://sylencecapital.substack.com/p/summit-royalties-tsxv-sum-or-otc) | 4 |
+| 2026-08-17 | [Transoceanic Investments (TSXV: OCEN or OTC: OCEEF)](https://sylencecapital.substack.com/p/transoceanic-investments-tsxv-ocen) |  |
+| 2026-08-15 | [The Tiniest Stock That Ever Made Me Money](https://sylencecapital.substack.com/p/the-tiniest-stock-that-ever-made) |  |
+| 2026-08-09 | [Genius Sports: Update Post Earnings](https://sylencecapital.substack.com/p/genius-sports-update-post-earnings) |  |
+| 2026-08-08 | [Weight Watchers: Update Post Earnings](https://sylencecapital.substack.com/p/weight-watchers-update-post-earnings) |  |
+| 2026-08-05 | [Genius Sports (GENI)](https://sylencecapital.substack.com/p/genius-sports-geni) |  |
+| 2026-07-08 | [Double Down Interactive (DDI): Update](https://sylencecapital.substack.com/p/double-down-interactive-ddi-update) |  |
+| 2026-07-06 | [Weight Watchers International (WW)](https://sylencecapital.substack.com/p/weight-watchers-international-ww) |  |
+| 2026-07-03 | [Titan Mining Company (TI or TII)](https://sylencecapital.substack.com/p/titan-mining-company-ti-or-tii) |  |
+| 2026-06-28 | [Its been a while](https://sylencecapital.substack.com/p/its-been-a-while) |  |
+
+### Nugget Capital Partner's Substack (5/8 = 62.5%, p_lt 0.6367)
+
+| Date | Article | Score |
+|---|---|---|
+| 2026-10-12 | [H&R REIT, an opportunity in a corrupt process](https://nuggetcapitalpartners.substack.com/p/h-and-r-reit-an-opportunity-in-a) |  |
+| 2026-09-14 | [Getting wrong and getting Trumped](https://nuggetcapitalpartners.substack.com/p/getting-wrong-and-getting-trumped) |  |
+| 2026-08-27 | [GO Residential REIT, can we trust these guys?](https://nuggetcapitalpartners.substack.com/p/go-residential-reit-can-we-trust) |  |
+| 2026-08-21 | [Is this what securities fraud looks like? A quick look into Tom Hofstedter’s H&R transaction](https://nuggetcapitalpartners.substack.com/p/is-this-what-securities-fraud-looks) |  |
+| 2026-08-19 | [Going against the grain on GO Residential](https://nuggetcapitalpartners.substack.com/p/going-against-the-grain-on-go-residential) |  |
+| 2026-08-13 | [H&R REIT & GO Residential deal, some thoughts](https://nuggetcapitalpartners.substack.com/p/h-and-r-reit-and-go-residential-deal) |  |
+| 2026-08-10 | [Updated thoughts on H&R REIT](https://nuggetcapitalpartners.substack.com/p/updated-thoughts-on-h-and-r-reit) |  |
+| 2026-07-31 | [Investment idea: Flowers Foods (FLO)](https://nuggetcapitalpartners.substack.com/p/investment-idea-flowers-foods-flo) |  |
+| 2026-07-22 | [New position: MTY Food Group](https://nuggetcapitalpartners.substack.com/p/new-position-mty-food-group) |  |
+| 2026-07-03 | [Adding a beer stock in size](https://nuggetcapitalpartners.substack.com/p/adding-a-beer-stock-in-size) |  |
+| 2026-06-27 | [Staying the course on H&R REIT](https://nuggetcapitalpartners.substack.com/p/staying-the-course-on-h-and-r-reit) |  |
+| 2026-06-14 | [10 utmost bearish oil signs on X](https://nuggetcapitalpartners.substack.com/p/10-utmost-bearish-oil-signs-on-x) |  |
+
+### HFI Research (4/7 = 57.1%, p_lt 0.5)
+
+| Date | Article | Score |
+|---|---|---|
+| 2026-10-12 | [(Public) Brent Crude Oil Positioning Leaves Me With More Questions Than Answers](https://www.hfir.com/p/public-brent-crude-oil-positioning) |  |
+| 2026-10-12 | [(Public) Peak Hormuz](https://www.hfir.com/p/public-peak-hormuz) |  |
+| 2026-10-12 | [Here's My Game Plan For The Oil Trade (October 12)](https://www.hfir.com/p/heres-my-game-plan-for-the-oil-trade-0c2) |  |
+| 2026-10-09 | [Too Much Gas](https://www.hfir.com/p/too-much-natural-gas) |  |
+| 2026-10-08 | [It's Here](https://www.hfir.com/p/its-here) |  |
+| 2026-10-08 | [Memo - AI Fatigue](https://www.hfir.com/p/memo-ai-fatigue) |  |
+| 2026-10-07 | [Peak Hormuz](https://www.hfir.com/p/peak-hormuz) |  |
+| 2026-10-06 | [(WCTW) Releasing SPR Now Is Like Throwing Water Bottles At A Burning House](https://www.hfir.com/p/wctw-releasing-spr-now-is-like-throwing) |  |
+| 2026-10-01 | [China Cancels Product Exports And What It Means For The Global Oil Market](https://www.hfir.com/p/china-cancels-product-exports-and) |  |
+| 2026-09-30 | [Here's My Game Plan For The Oil Trade (Sept 30)](https://www.hfir.com/p/heres-my-game-plan-for-the-oil-trade-593) |  |
+| 2026-09-28 | [The Oman Lane Flow Is Giving The Oil Market A False Sense Of Stability](https://www.hfir.com/p/the-oman-lane-flow-is-giving-the) |  |
+| 2026-09-25 | [(Idea) How Would US Diesel Export Restrictions Impact Energy Stocks?](https://www.hfir.com/p/idea-how-would-us-diesel-export-restrictions) |  |
+| 2026-09-25 | [(Public) Mach Natural Resources - A Buying Opportunity](https://www.hfir.com/p/public-mach-natural-resources-a-buying) |  |
+| 2026-09-24 | [Oil Math - Understanding The Crude Deficit Better](https://www.hfir.com/p/oil-math-understanding-the-crude) |  |
+| 2026-09-23 | [Here's My Game Plan For The Oil Trade (Sept 23)](https://www.hfir.com/p/heres-my-game-plan-for-the-oil-trade-89f) |  |
+| 2026-09-21 | [(WCTW) Out Of Time](https://www.hfir.com/p/wctw-out-of-time) |  |
+| 2026-09-18 | [(Important) What Is The Endgame For The Oil Market?](https://www.hfir.com/p/important-what-is-the-endgame-for) |  |
+| 2026-09-17 | [Memo - The Most Hated Oil Rally](https://www.hfir.com/p/memo-the-most-hated-oil-rally) |  |
+| 2026-09-16 | [What To Make Of The Saudi/Houthi Situation And How It Relates To The Oil Math](https://www.hfir.com/p/what-to-make-of-the-saudihouthi-situation) |  |
+| 2026-09-15 | [(WCTW) The Final Countdown](https://www.hfir.com/p/wctw-the-final-countdown) |  |
+| 2026-09-11 | [(Idea) GeoPark’s Venezuela Deal Creates More Upside—And A More Difficult Valuation](https://www.hfir.com/p/idea-geoparks-venezuela-deal-creates) |  |
+| 2026-09-10 | [(WOMM) What’s On My Mind - The Venezuela Land Grab](https://www.hfir.com/p/womm-whats-on-my-mind-the-venezuela) |  |
+| 2026-09-10 | [What Can "They" Do To Push Oil Prices Lower In The Near-Term?](https://www.hfir.com/p/what-can-they-do-to-push-oil-prices) |  |
+| 2026-07-23 | [(Public) The Strait Of Hormuz Isn't Going Back To The Way It Was](https://www.hfir.com/p/public-the-strait-of-hormuz-isnt) |  |
+| 2026-07-23 | [The Only Way Out Is Through](https://www.hfir.com/p/the-only-way-out-is-through) |  |
+| 2026-07-22 | [Memo - I'm Not That Smart, But I'm Not Going To Make The Same Mistake Twice](https://www.hfir.com/p/memo-im-not-that-smart-but-im-not) |  |
+| 2026-07-20 | [(Idea) Suncor Energy - Elevated Refining Margins Support A Higher Valuation](https://www.hfir.com/p/idea-suncor-energy-elevated-refining) |  |
+| 2026-07-20 | [(WCTW) Oil Math - The Endgame](https://www.hfir.com/p/wctw-oil-math-the-endgame) |  |
+| 2026-07-18 | [What Are My Plans For The Oil Trade?](https://www.hfir.com/p/what-are-my-plans-for-the-oil-trade) |  |
+| 2026-07-17 | [My Quick Thoughts On The Oil Market](https://www.hfir.com/p/my-quick-thoughts-on-the-oil-market) |  |
+| 2026-07-15 | [(WCTW) This Is The Biggest Oil Market Disconnect Between Price And Reality In History](https://www.hfir.com/p/wctw-this-is-the-biggest-oil-market) |  |
+| 2026-07-13 | [(Public) The Oil Market Is In The Twilight Zone](https://www.hfir.com/p/public-the-oil-market-is-in-the-twilight) |  |
+| 2026-07-10 | [(MEMO) Memo - Insane Asylum](https://www.hfir.com/p/memo-memo-insane-asylum) |  |
+| 2026-07-08 | [Oil Market Update - Finding Clarity Amidst The Chaos](https://www.hfir.com/p/oil-market-update-finding-clarity) |  |
+| 2026-07-07 | [The Consensus Is Wrong About The Oil Market](https://www.hfir.com/p/the-consensus-is-wrong-about-the) |  |
+| 2026-07-05 | [(MEMO) Memo - It's Now Or Never](https://www.hfir.com/p/memo-memo-its-now-or-never) |  |
+| 2026-07-03 | [(Idea) Investors Are Underappreciating How Positive Espriella Will Be For The Colombian Energy Sector](https://www.hfir.com/p/idea-investors-are-underappreciating) |  |
+| 2026-07-02 | [Ants In A Field Full Of Giants](https://www.hfir.com/p/ants-in-a-field-full-of-giants) |  |
+| 2026-06-30 | [(WCTW) Today's Oil Price Disconnect Is History In The Making](https://www.hfir.com/p/wctw-todays-oil-price-disconnect) |  |
+| 2026-06-26 | [We Are 'Still' Going Full Speed Into The Wall](https://www.hfir.com/p/we-are-still-going-full-speed-into) |  |
+| 2026-06-25 | [(Idea) Parex Resources: High Torque Oil Leverage At A Double-Digit Yield](https://www.hfir.com/p/idea-parex-resources-high-torque) |  |
+| 2026-06-24 | [The Strait Of Hormuz Isn't Going Back To The Way It Was](https://www.hfir.com/p/the-strait-of-hormuz-isnt-going-back) |  |
+| 2026-06-22 | [(Idea) Espriella Becomes The Next Colombian President, This Is Very Bullish For Colombian Oil Producers](https://www.hfir.com/p/idea-espriella-becomes-the-next-colombian) |  |
+| 2026-06-22 | [(WCTW) Powder Keg](https://www.hfir.com/p/wctw-powder-keg) |  |
+| 2026-06-18 | [(WCTW) The New Oil Order](https://www.hfir.com/p/wctw-the-new-oil-order) |  |
+| 2026-06-16 | [Natural Gas Enters The Pivotal Cooling Demand Season](https://www.hfir.com/p/natural-gas-enters-the-pivotal-cooling) |  |
+| 2026-06-15 | [Oil Market Update - Strait Of Hormuz Reopens On June 19?](https://www.hfir.com/p/oil-market-update-strait-of-hormuz) |  |
+| 2026-06-14 | [Memo - Walk Down Memory Lane](https://www.hfir.com/p/memo-walk-down-memory-lane) |  |
+
+### Invariant (5/9 = 55.6%, p_lt 0.5)
+
+| Date | Article | Score |
+|---|---|---|
+| 2026-10-11 | [Imperial Brands: Collapse](https://invariant.substack.com/p/imperial-brands-collapse) |  |
+| 2026-10-04 | [British American Tobacco: Harvest](https://invariant.substack.com/p/british-american-tobacco-harvest) |  |
+| 2026-09-27 | [Why Nicotine Pouches Win](https://invariant.substack.com/p/why-nicotine-pouches-win) |  |
+| 2026-09-20 | [Far Beyond](https://invariant.substack.com/p/far-beyond) |  |
+| 2026-09-13 | [Imperial Brands: On the Table](https://invariant.substack.com/p/imperial-brands-on-the-table) |  |
+| 2026-09-06 | [Escalation: Altria Steps Up to the FDA](https://invariant.substack.com/p/escalation-altria-steps-up-to-the) |  |
+| 2026-08-30 | [Scandinavian Tobacco Group: Shear](https://invariant.substack.com/p/scandinavian-tobacco-group-shear) |  |
+| 2026-08-23 | [Logista: Another Seed](https://invariant.substack.com/p/logista-another-seed) |  |
+| 2026-08-16 | [Haypp Group: Welcome to the Jungle](https://invariant.substack.com/p/haypp-group-welcome-to-the-jungle) |  |
+| 2026-08-09 | [Altria: Gradient](https://invariant.substack.com/p/altria-gradient) |  |
+| 2026-08-02 | [British American Tobacco: Narrowed](https://invariant.substack.com/p/british-american-tobacco-narrowed) |  |
+| 2026-07-26 | [Philip Morris International: Juggernaut](https://invariant.substack.com/p/philip-morris-international-juggernaut) |  |
+| 2026-07-19 | [The Black Patch Tobacco Wars](https://invariant.substack.com/p/the-black-patch-tobacco-wars) |  |
+| 2026-07-12 | [Flash in the Pan](https://invariant.substack.com/p/flash-in-the-pan) |  |
+| 2026-07-05 | [Pouches Poised for Prime Position](https://invariant.substack.com/p/pouches-poised-for-prime-position) |  |
+| 2026-06-28 | [The Nicotine Window](https://invariant.substack.com/p/the-nicotine-window) |  |
+| 2026-06-21 | [The Only Thing That Matters](https://invariant.substack.com/p/the-only-thing-that-matters) |  |
+| 2026-06-14 | [Maker of Men](https://invariant.substack.com/p/maker-of-men-buck-duke-american-tobacco) |  |
+
+### Nat Stewart - Stock Picking Newsletter (2/3 = 66.7%, p_lt 0.5)
+
+| Date | Article | Score |
+|---|---|---|
+| 2026-10-06 | [Cheap Midstream With Catalysts](https://stockpicking.substack.com/p/cheap-midstream-with-catalysts) |  |
+| 2026-09-25 | [Updates](https://stockpicking.substack.com/p/updates-a0c) |  |
+| 2026-09-01 | [EVC Update](https://stockpicking.substack.com/p/evc-update) |  |
+| 2026-08-31 | [Interesting Again](https://stockpicking.substack.com/p/interesting-again) |  |
+| 2026-08-25 | [GARP + Data Center Development Call Option](https://stockpicking.substack.com/p/garp-data-center-development-call) |  |
+| 2026-07-29 | [The Next Texas Pacific Land (TPL)?](https://stockpicking.substack.com/p/the-next-texas-pacific-land-tpl) |  |
 
 ## Caveats
 
@@ -528,7 +749,7 @@ _Stored notes were thin for this name, so the justifications were reconstructed 
 
 ### 18. KARO (Karooooo): 3.75 / 6
 
-[Karooooo: Why I own an expensive stock ](https://aktieblogg.substack.com/p/karooooo-why-i-own-an-expensive-stock). Gustav, 2026-06-18. ~4,800 words. Read in full. Long disclosure: Author states "I own the stock".
+[Karooooo: Why I own an expensive stock](https://aktieblogg.substack.com/p/karooooo-why-i-own-an-expensive-stock). Gustav, 2026-06-18. ~4,800 words. Read in full. Long disclosure: Author states "I own the stock".
 
 **Author batting average:** 1y n/a; 2y n/a [archive starts 2026-01-24]
 

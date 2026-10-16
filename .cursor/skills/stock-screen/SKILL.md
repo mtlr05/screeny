@@ -208,7 +208,7 @@ Show every proposal to David before changing the list. Each line has the source 
 python3 scripts/source_upkeep.py --apply reports/source_upkeep_<date>.json
 ```
 
-Approved drops move that row to `config/sources_dormant_or_dead.csv` and append `name`, `url`, `dropped_on`, and `reason` to `config/sources_dropped_never_readd.csv`. Approved adds append a row to `config/sources.csv` and write the batting average computed for that candidate into `state/source_stats.csv`. `--apply` prints `REFUSED` and does not add anyone already on the never-readd list. A dormant recheck must not reactivate them either. Unapproved entries stay as proposals. Every proposal line shows `ba2y_p_lt_hits` and `ba_updated`.
+Approved drops move that row to `config/sources_dormant_or_dead.csv` and append `name`, `url`, `dropped_on`, and `reason` to `config/sources_dropped_never_readd.csv`. Approved adds append a row to `config/sources.csv` and write the batting average computed for that candidate into `state/source_stats.csv`. `--apply` prints `REFUSED` and does not add anyone already on the never-readd list. A dormant recheck must not reactivate a never-readd author. An author who is only on the dormant list is skipped as an automatic add and may be put back by a dormant recheck. Unapproved entries stay as proposals. Every proposal line shows `ba2y_p_lt_hits` and `ba_updated`.
 
 Rules:
 
@@ -217,7 +217,7 @@ Rules:
 - Drop when the last known article is older than 6 months. A blank last-post date stays.
 - Drop when the feed failed to load on 4 consecutive runs. A run counts only when `weekly_sweep.py` recorded that source in its stats file. The fourth failure is enough. There is no probation.
 - A source that produced no scored articles stays.
-- Add a source only when it is a Substack recommendation of an author who scored at least 4.5/6, the publication reads as stock research, the candidate's own 2-year batting average is above 50% on at least 5 pitches, and the author is not on the never-readd list. Candidates with fewer than 5 pitches are skipped for now.
+- Add a source only when it is a Substack recommendation of an author who scored at least 4.5/6, the publication reads as stock research, the candidate's `ba2y_p_lt_hits` is greater than 0.23, `ba2y_median_excess` is greater than 0, and the author is not on the never-readd list. A missing chance or a missing median excess does not pass.
 - David can approve a hand add that misses that bar. Three were added on 2026-10-16 and stay active: Intrinsic Value System (https://intrinsicvaluesystem.substack.com, 15/31, `p_lt_hits_by_chance` 0.3601), Welfare Capital Research (https://welfarecapital.substack.com, 2/2, 0.75), and The Lead-Lag Report (https://leadlagreport.substack.com, 2/2, 0.75). Each `how_discovered` records the exception. Later drops still use the rules above.
 - Median stock return and median excess return for the 1-year and 2-year windows will be stored with the batting average and shown on these proposals. Those columns are not in the stats file yet.
 
