@@ -846,7 +846,7 @@ def plan(args):
     if not score_path:
         print("No scored-article file. articles_scored and avg_score_6m stay empty until state/scored.json exists.")
     if not os.path.exists(args.batting):
-        print("No state/batting.json. Pitch counts come from bat/pitches.py; percentages stay blank until bat/calc.py has run. A blank percentage is not a drop and not an add.")
+        print("No state/batting.json. Stored ba2y_* columns are kept. A blank percentage is not a drop and not an add.")
     tagged = sum(1 for row in stats_rows if row.get("pitches_title") or row.get("pitches_body"))
     print(f"Pitch methods: title/body counts filled for {tagged} sources. Blank means bat/pitches.py has not detected that author yet.")
     if not seeds:
