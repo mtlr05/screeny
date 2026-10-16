@@ -14,6 +14,7 @@ import json
 import os
 import re
 import sys
+import threading
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -104,19 +105,28 @@ OTC_NAMES = re.compile(r"OTC|PINK", re.I)
 FOREIGN_SUFFIX = re.compile(r"\.(L|AX|HK|T|TW|KS|KQ|SW|DE|PA|AS|ST|OL|CO|MX|SA|SI|NZ|BK)$", re.I)
 
 
+# author_pitches fills this. Each entry is (ticker, date, title, reason).
+EXCL_LOG = []
+# compute_ba sets this to time.time() + budget. 1e18 means no budget.
+DEADLINE = [1e18]
+PXSTAT = {}
+
+
 class Limiter:
-    """Wait between network calls. Cache hits do not wait."""
+    """Wait between network starts. Cache hits do not wait. Safe to share across threads."""
 
     def __init__(self, interval=1.0):
         self.interval = interval
         self._last = 0.0
+        self._lock = threading.Lock()
 
     def wait(self):
-        now = time.monotonic()
-        delay = self.interval - (now - self._last)
-        if delay > 0:
-            time.sleep(delay)
-        self._last = time.monotonic()
+        with self._lock:
+            now = time.monotonic()
+            delay = self.interval - (now - self._last)
+            if delay > 0:
+                time.sleep(delay)
+            self._last = time.monotonic()
 
 
 def html_to_text(body):
@@ -380,16 +390,24 @@ def _resolve_scores(scores, kinds, search, verify_bare):
     return resolved, resolved_kinds
 
 
-def analyze(title, subtitle, body, search):
-    """Decide whether a post is one long pitch.
+def analyze(title, subtitle, body, search, require_long=True):
+    """Decide whether a post is one pitch.
 
     body is None when the body has not been fetched. Returns a dict with
     status pitch, skip, or need_body.
+
+    require_long=True (the article score) keeps only an explicit long.
+    require_long=False (the 2-year batting average) keeps an unclear stance.
+    Short, sell, and hold are decided afterwards by bat/longcheck.py.
+    Recap, macro, watchlist, foreign, and closed-exit notes are still skipped.
     """
-    if FOREIGN_TAG.search(f"{title or ''} {subtitle or ''}"):
+    head = f"{title or ''} {subtitle or ''}"
+    if FOREIGN_TAG.search(head):
         return {"status": "skip", "reason": "not US/Canada listed"}
+    if SKIP_TITLE.search(head) or EXIT_TITLE.search(head):
+        return {"status": "skip", "reason": "not a long pitch (recap, macro, hold, or exit)"}
     head_stance = stance(title, subtitle, None)
-    if head_stance == "exclude":
+    if require_long and head_stance == "exclude":
         return {"status": "skip", "reason": "not a long pitch (recap, macro, hold, or exit)"}
     scores, kinds = title_symbols(title, subtitle)
     # Bare tickers in the title still need a listing check.
@@ -430,7 +448,9 @@ def analyze(title, subtitle, body, search):
     ticker, kind = _dominant(scores, kinds)
     ambiguous = kind == "ambiguous" or (len(scores) >= 2 and ticker is None)
     if ticker and not ambiguous:
-        if head_stance == "long":
+        if not require_long and body and EXIT_BODY.search(body) and not STILL_LONG.search(body):
+            return {"status": "skip", "reason": "not a long pitch (recap, macro, hold, or exit)"}
+        if not require_long or head_stance == "long":
             conf = 0.9 if kind in {"exchange", "cashtag", "ticker"} else 0.8
             return {"status": "pitch", "ticker": ticker, "method": "title", "confidence": conf, "reason": "title names one ticker"}
         if body is None:
@@ -441,9 +461,12 @@ def analyze(title, subtitle, body, search):
         return {"status": "skip", "reason": "no long stance"}
     if body is None:
         return {"status": "need_body", "have_ticker": False, "reason": "no or ambiguous ticker in the title"}
-    full = stance(title, subtitle, body)
-    if full != "long":
-        return {"status": "skip", "reason": "no long stance" if full == "unclear" else "not a long pitch (recap, macro, hold, or exit)"}
+    if body and EXIT_BODY.search(body) and not STILL_LONG.search(body):
+        return {"status": "skip", "reason": "not a long pitch (recap, macro, hold, or exit)"}
+    if require_long:
+        full = stance(title, subtitle, body)
+        if full != "long":
+            return {"status": "skip", "reason": "no long stance" if full == "unclear" else "not a long pitch (recap, macro, hold, or exit)"}
     bscores, bkinds = body_symbols(body)
     bscores, bkinds = _resolve_scores(bscores, bkinds, search, verify_bare=True)
     ticker, kind = _dominant(bscores, bkinds)
@@ -527,14 +550,17 @@ def fetch_archive_page(host, offset, limiter, cache_dir):
     cached = _cache_json(path)
     if cached is not None:
         return cached
+    if time.time() > DEADLINE[0]:
+        raise TimeoutError("author budget exceeded")
     limiter.wait()
-    import requests
+    from prices import hard_get
 
-    response = requests.get(
+    response = hard_get(
         f"https://{host}/api/v1/archive",
         params={"sort": "new", "offset": offset, "limit": 50},
         headers={"User-Agent": user_agent()},
-        timeout=30,
+        wall=20,
+        timeout=(5, 8),
     )
     response.raise_for_status()
     data = response.json()
@@ -550,13 +576,16 @@ def fetch_post(host, slug, limiter, cache_dir):
     cached = _cache_json(path)
     if cached is not None:
         return cached
+    if time.time() > DEADLINE[0]:
+        raise TimeoutError("author budget exceeded")
     limiter.wait()
-    import requests
+    from prices import hard_get
 
-    response = requests.get(
+    response = hard_get(
         f"https://{host}/api/v1/posts/{slug}",
         headers={"User-Agent": user_agent()},
-        timeout=30,
+        wall=20,
+        timeout=(5, 8),
     )
     response.raise_for_status()
     data = response.json()
@@ -676,19 +705,207 @@ def _yahoo(query, limiter, cache_dir):
     cached = _cache_json(path)
     if cached is not None:
         return cached
+    if time.time() > DEADLINE[0]:
+        raise TimeoutError("author budget exceeded")
     limiter.wait()
-    import requests
+    from prices import hard_get
 
-    response = requests.get(
+    response = hard_get(
         "https://query1.finance.yahoo.com/v1/finance/search",
         params={"q": query, "quotesCount": 8, "newsCount": 0},
         headers={"User-Agent": user_agent()},
-        timeout=20,
+        wall=20,
+        timeout=(5, 8),
     )
     response.raise_for_status()
     data = response.json()
     _write_json(path, data)
     return data
+
+
+def window(name, today=None):
+    """(start, end, months) for '1y' or '2y'. End is exclusive."""
+    return batcalc.window_bounds(today)[name]
+
+
+def _past_deadline():
+    return time.time() > DEADLINE[0]
+
+
+def author_pitches(sub, detail=True, today=None):
+    """Pitches in the 2-year window for one Substack subdomain.
+
+    Returns None when the archive itself does not load. Bodies are fetched
+    for every post in the window so a hold or short in the body is visible.
+    Unclear stance counts. bat.longcheck.exclude_reason drops short, sell,
+    and hold-without-ownership into EXCL_LOG.
+    """
+    import longcheck
+    from concurrent.futures import ThreadPoolExecutor
+
+    EXCL_LOG.clear()
+    host = sub if "." in (sub or "") else f"{sub}.substack.com"
+    limiter = Limiter(0.4)
+    start, end, _months = window("2y", today)
+    try:
+        page = fetch_archive_page(host, 0, limiter, CACHE)
+    except TimeoutError:
+        raise
+    except Exception:
+        return None
+    if not isinstance(page, list):
+        return None
+    posts = []
+    try:
+        for post in iter_archive(host, limiter, CACHE, 0, start):
+            if _past_deadline():
+                raise TimeoutError("author budget exceeded")
+            day = (post.get("post_date") or "")[:10]
+            if start <= day < end:
+                posts.append(post)
+    except TimeoutError:
+        raise
+    except Exception:
+        return None
+
+    def body_for(post):
+        if _past_deadline():
+            raise TimeoutError("author budget exceeded")
+        slug = post.get("slug") or ""
+        if not slug:
+            return ""
+        try:
+            payload = fetch_post(host, slug, limiter, CACHE)
+        except TimeoutError:
+            if _past_deadline():
+                raise
+            return ""
+        except Exception:
+            return ""
+        text, _preview = body_from_post(payload)
+        return text or ""
+
+    if posts:
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            bodies = list(pool.map(body_for, posts))
+    else:
+        bodies = []
+
+    def search(query):
+        if _past_deadline():
+            raise TimeoutError("author budget exceeded")
+        try:
+            data = _yahoo(query, limiter, CACHE)
+        except TimeoutError:
+            raise
+        except Exception:
+            return []
+        return (data or {}).get("quotes") or []
+
+    found = []
+    order = sorted(zip(posts, bodies), key=lambda item: (item[0].get("post_date") or ""))
+    for post, text in order:
+        if _past_deadline():
+            raise TimeoutError("author budget exceeded")
+        title = post.get("title") or ""
+        subtitle = post.get("subtitle") or ""
+        decision = analyze(title, subtitle, text, search, require_long=False)
+        if decision.get("status") != "pitch":
+            continue
+        reason = longcheck.exclude_reason(title, text)
+        day = (post.get("post_date") or "")[:10]
+        if reason:
+            EXCL_LOG.append((decision.get("ticker") or "", day, title, reason))
+            continue
+        url = post.get("canonical_url") or f"https://{host}/p/{post.get('slug')}"
+        found.append(
+            {
+                "ticker": decision["ticker"],
+                "date": day,
+                "url": url,
+                "title": title,
+                "method": decision.get("method") or "",
+                "confidence": decision.get("confidence"),
+            }
+        )
+    kept = []
+    seen = set()
+    for row in found:
+        if row["ticker"] in seen:
+            continue
+        seen.add(row["ticker"])
+        kept.append(row)
+    if not detail:
+        return [(row["ticker"], row["date"], row["url"], row["title"]) for row in kept]
+    return kept
+
+
+def score(pitches, window_name="2y", today=None):
+    """Price the kept pitches. Timeouts are lost_fail, not part of n, and not delisted."""
+    import statistics
+    from concurrent.futures import ThreadPoolExecutor
+
+    import prices
+
+    global PXSTAT
+    PXSTAT = prices.PXSTAT
+    _start, _end, months = window(window_name, today)
+    rows = list(pitches or [])
+
+    def one(pitch):
+        if _past_deadline():
+            raise TimeoutError("author budget exceeded")
+        symbol = pitch.get("ticker") or ""
+        status, ret = prices.total_return(symbol, pitch.get("date") or "", months, today=today, fallback=True)
+        if status != "ok":
+            return pitch, status, None
+        bench = prices.benchmark(symbol)
+        bstatus, bret = prices.total_return(bench, pitch.get("date") or "", months, today=today, fallback=False)
+        if bstatus != "ok":
+            # A benchmark timeout is a price failure, not a delisted stock.
+            if bstatus == "notfound":
+                return pitch, "nodata", None
+            return pitch, bstatus if bstatus != "ok" else "nodata", None
+        return pitch, "ok", (ret, bret)
+
+    if rows:
+        with ThreadPoolExecutor(max_workers=4) as pool:
+            priced = list(pool.map(one, rows))
+    else:
+        priced = []
+    hits = n = n_title = n_body = lost_fail = lost_notfound = 0
+    excess = []
+    for pitch, status, pair in priced:
+        if status == "incomplete":
+            continue
+        if status == "notfound":
+            lost_notfound += 1
+            continue
+        if status != "ok":
+            lost_fail += 1
+            continue
+        ret, bret = pair
+        n += 1
+        method = pitch.get("method") or ""
+        if method == "title":
+            n_title += 1
+        elif method == "body":
+            n_body += 1
+        if ret > bret:
+            hits += 1
+        excess.append(ret - bret)
+    pct = None if n == 0 else hits / n
+    median = None if not excess else statistics.median(excess)
+    return {
+        "hits": hits,
+        "n": n,
+        "pct": pct,
+        "n_title": n_title,
+        "n_body": n_body,
+        "lost_fail": lost_fail,
+        "lost_notfound": lost_notfound,
+        "median_excess": 0 if median is None else median,
+    }
 
 
 def _self_test():
@@ -781,6 +998,10 @@ def _self_test():
     assert one["status"] == "pitch" and one["ticker"] == "Q" and one["method"] == "title", one
     japan = analyze("Nintendo (TYO: 7974)", "I own shares", None, search)
     assert japan["status"] == "skip" and japan["reason"] == "not US/Canada listed", japan
+    unclear = analyze("JVA- Coffee Holding Co", "", None, search, require_long=False)
+    assert unclear["status"] == "pitch" and unclear["ticker"] == "JVA", unclear
+    held = analyze("JVA- Coffee Holding Co", "", "Recommendation: Hold.", search, require_long=False)
+    assert held["status"] == "pitch" and held["ticker"] == "JVA", held
 
     pitches = dedupe_windows(
         [

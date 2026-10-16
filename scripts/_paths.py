@@ -12,6 +12,7 @@ EXAMPLES = os.path.join(ROOT, "examples")
 PRICES = os.path.join(CACHE, "prices")
 SOURCES = os.path.join(CONFIG, "sources.csv")
 DORMANT = os.path.join(CONFIG, "sources_dormant_or_dead.csv")
+NEVER = os.path.join(CONFIG, "sources_dropped_never_readd.csv")
 SEEN = os.path.join(STATE, "seen_posts.csv")
 
 

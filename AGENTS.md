@@ -26,9 +26,9 @@ On-demand scout for single-stock investment write-ups. David runs it from the Cu
 
 ## Where things live
 
-- `config/sources.csv` — active sources. `config/sources_dormant_or_dead.csv` — parked; recheck about monthly.
+- `config/sources.csv` — active sources. `config/sources_dormant_or_dead.csv` — parked. `config/sources_dropped_never_readd.csv` — authors who have been dropped. Do not add them back. A dormant recheck must not reactivate anyone on that list. Only a hand edit of the never-readd file overrides it.
 - `state/seen_posts.csv` — dedupe key is `url`. Append-only.
-- `state/source_stats.csv` — per tracked source: last post, consecutive failed loads, articles scored in the last 6 months, 6-month average score, 2-year batting average and pitch count, plus `pitches_title` and `pitches_body` (those pitches split by detection method). Seeking Alpha is not in this file.
+- `state/source_stats.csv` — per tracked source: last post, consecutive failed loads, articles scored in the last 6 months, 6-month average score, 2-year batting average and pitch count, `ba2y_p_lt_hits`, `ba_updated`, exclusion and price-loss counts, plus title versus body pitch counts. Seeking Alpha is not in this file. A stored batting average has no expiry. Recalculate it only for an add candidate or a removal proposal, unless someone asks for `--full-ba`.
 - `state/scored.json`, `state/batting.json` — this run's scores and batting averages.
 - `reports/` — dated outputs. Sample: `reports/2026-10-14/`.
 - `fulltext/` and `cache/` — local only, not committed.
@@ -40,4 +40,6 @@ X links are optional. The user pastes them. Do not call the X MCP and do not kee
 
 ## Source upkeep
 
-After a screen, run `python3 scripts/source_upkeep.py --plan` and show the proposals. Apply a proposal only after approval (`--apply` on entries marked approved). Tracked active sources have a soft cap of 600. Drop a source only for a 2-year batting average under 30% on at least 5 pitches, no post in 6 months, or 4 failed loads in a row. Do not drop a source only because it has no scored articles. Add a Substack recommendation only when that author scored at least 4.5/6 and the new author has a 2-year batting average above 50% on at least 5 pitches. Seeking Alpha stays on its own weekly pull and is not a tracked source.
+After a screen, run `python3 scripts/source_upkeep.py --plan` and show the proposals. Every proposal includes `ba2y_p_lt_hits` and the date the batting average was calculated. Apply a proposal only after approval (`--apply` on entries marked approved). Tracked active sources have a soft cap of 600. Drop a source only for a 2-year batting average of 33% or less on at least 5 pitches, no post in 6 months, or 4 failed loads in a row. Do not drop a source only because it has no scored articles. Add a Substack recommendation only when that author scored at least 4.5/6 and the new author has a 2-year batting average above 50% on at least 5 pitches. Never add back an author who is on `config/sources_dropped_never_readd.csv`. Seeking Alpha stays on its own weekly pull and is not a tracked source.
+
+The /6 score still needs an explicit long disclosure. The 2-year batting average is separate: skip a short, a sell, or a hold without clear ownership; keep a hold when the author owns the shares; keep a pitch whose stance is unclear. Price timeouts are not delistings. A symbol with no price data is retried as `.TO` then `.V`. The batting-average benchmark is XIC.TO for `.TO` and `.V`, and SPY otherwise.

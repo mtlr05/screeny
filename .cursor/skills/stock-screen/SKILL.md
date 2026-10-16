@@ -130,6 +130,8 @@ For every author on the top list and the next six, follow `.cursor/skills/author
 
 Substack detection is `python3 bat/pitches.py subdomain`. A title that names one US or Canada ticker is method `title`. When the title has no ticker, or more than one company, the script fetches the public post body (`/api/v1/posts/<slug>`, cached, one call at a time) and infers the single primary ticker. Each pitch is tagged `title` or `body` with a confidence. The next source-upkeep `--plan` writes the 2-year counts to `pitches_title` and `pitches_body` in `state/source_stats.csv`.
 
+The /6 score still requires an explicit long. The 2-year batting average uses `bat/longcheck.py`: drop short, sell, and hold-without-ownership; keep hold-with-ownership and an unclear stance. Summaries sort by `ba2y_p_lt_hits` (binomial chance of fewer hits, p=0.5), highest first, and the report shows that value.
+
 ## 10. Write the report
 
 Build `state/scored.json` (do not invent fields you did not verify):
@@ -192,9 +194,9 @@ Do this after the report is written. Runs are on request, so the rules use dates
 python3 scripts/source_upkeep.py --plan
 ```
 
-That refreshes `state/source_stats.csv` and writes `reports/source_upkeep_<date>.json`. It does not edit `config/sources.csv` or `config/sources_dormant_or_dead.csv`.
+That refreshes `state/source_stats.csv` and writes `reports/source_upkeep_<date>.json`. It does not edit `config/sources.csv`, `config/sources_dormant_or_dead.csv`, or `config/sources_dropped_never_readd.csv`. It does not recompute every batting average. A stored average is recalculated only for a removal proposal or an add candidate, and only when `ba_updated` is not today. There is no 30-day expiry. `--full-ba` is the resumable pass (saves every 10 authors; `--force` redoes them; `--ba-limit N` bounds it).
 
-Stats per tracked source: last post date, consecutive failed loads, articles scored in the last 6 months, average score over those articles, the 2-year batting average with its pitch count, and how many of those pitches were detected from the title versus the body (`pitches_title`, `pitches_body`). Batting averages use `bat/calc.py` windows. Percentages come from `state/batting.json` when that file exists (`python3 bat/pitches.py` then `python3 bat/calc.py`). Until then the pitch count can still be filled from `bat/pitches.py`, and a blank percentage is not a drop and not an add. `--compute-ba` calls `bat/calc.py` for saved pitch lists. `--crawl` fetches Substack recommendations (same keyword walk as `scripts/crawl_sources.py`) of authors who scored at least 4.5/6.
+Stats per tracked source: last post date, consecutive failed loads, articles scored in the last 6 months, average score over those articles, the 2-year batting average with its pitch count, `ba2y_p_lt_hits`, `ba_updated`, exclusion counts, price-loss counts, and how many of those pitches were detected from the title versus the body. A blank percentage is not a drop and not an add. `--crawl` fetches Substack recommendations (same keyword walk as `scripts/crawl_sources.py`) of authors who scored at least 4.5/6. Anyone on the never-readd list is skipped.
 
 Show every proposal to the user before changing the list. Each line has the source name, whether it is a drop or an add, the reason, and the numbers behind it. Apply only the entries the user approves. Set `"approved": true` on those entries, then:
 
@@ -202,16 +204,16 @@ Show every proposal to the user before changing the list. Each line has the sour
 python3 scripts/source_upkeep.py --apply reports/source_upkeep_<date>.json
 ```
 
-Approved drops move that row to `config/sources_dormant_or_dead.csv`. Approved adds append a row to `config/sources.csv`. Unapproved entries stay as proposals.
+Approved drops move that row to `config/sources_dormant_or_dead.csv` and append `name`, `url`, `dropped_on`, and `reason` to `config/sources_dropped_never_readd.csv`. Approved adds append a row to `config/sources.csv`. `--apply` prints `REFUSED` and does not add anyone already on the never-readd list. A dormant recheck must not reactivate them either. Unapproved entries stay as proposals. Every proposal line shows `ba2y_p_lt_hits` and `ba_updated`.
 
 Rules:
 
 - Soft cap: 600 tracked active sources. Only if the list would be over 600, propose dropping the lowest average score over the last 6 months, and only among sources with at least 3 scored articles in that window, until the list fits.
-- Drop when the 2-year batting average is under 30% on at least 5 pitches.
+- Drop when the 2-year batting average is 33% or less on at least 5 pitches.
 - Drop when the last known article is older than 6 months. A blank last-post date is unknown, not a drop.
 - Drop when the feed failed to load on 4 consecutive runs. A run counts only when `weekly_sweep.py` recorded that source in its stats file. There is no probation.
 - Do not drop a source merely because it produced no scored articles.
-- Add a source only when it is a Substack recommendation of an author who scored at least 4.5/6, and the candidate's own 2-year batting average is above 50% on at least 5 pitches. Candidates with fewer than 5 pitches are skipped for now.
+- Add a source only when it is a Substack recommendation of an author who scored at least 4.5/6, and the candidate's own 2-year batting average is above 50% on at least 5 pitches, and the author is not on the never-readd list. Candidates with fewer than 5 pitches are skipped for now.
 
 ## 12. What to tell the user
 

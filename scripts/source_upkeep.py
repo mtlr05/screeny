@@ -3,9 +3,14 @@
 
 --plan refreshes state/source_stats.csv and writes a proposal file. It does not
 edit config/sources.csv or config/sources_dormant_or_dead.csv.
+It does not recompute every batting average. A stored BA is recalculated only
+when that author is proposed for removal or is an add candidate, and only when
+ba_updated is not today. --full-ba is the one-off resumable pass.
 
 --apply PROPOSAL applies only entries with approved set true.
-Drops move the row onto the dormant list. Adds append a Substack row.
+Drops move the row onto the dormant list and append it to
+config/sources_dropped_never_readd.csv. Adds append a Substack row.
+An add whose URL is on the never-readd list is refused.
 
 Seeking Alpha rows are not tracked and are never dropped or added here.
 """
@@ -20,7 +25,7 @@ import sys
 from urllib.parse import urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _paths import CACHE, CONFIG, DORMANT, REPORTS, ROOT, SEEN, SOURCES, STATE, ensure
+from _paths import CACHE, CONFIG, DORMANT, NEVER, REPORTS, ROOT, SEEN, SOURCES, STATE, ensure
 
 BAT = os.path.join(ROOT, "bat")
 sys.path.insert(0, BAT)
@@ -28,12 +33,15 @@ import calc as batcalc
 import pitches as batpitches
 
 CAP = 600
-BA_DROP = 30.0
+# Drop when the 2-year average is under 33.4% (a one-third record, 0.333..., is included).
+BA_DROP_FRAC = 0.334
 BA_ADD = 50.0
 MIN_PITCHES = 5
 MIN_SCORED_FOR_TRIM = 3
 SCORE_FLOOR = 4.5
 FAILS_TO_DROP = 4
+BA_METHOD = "v2-excl-TO"
+BA_BUDGET = 300
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 STATS_FIELDS = [
     "name",
@@ -49,6 +57,32 @@ STATS_FIELDS = [
     "pitches_body",
     "as_of",
     "last_sweep_file",
+    "ba2y_hits",
+    "ba2y_n",
+    "ba2y_pct",
+    "ba2y_p_lt_hits",
+    "ba2y_n_title",
+    "ba2y_n_body",
+    "ba2y_excl",
+    "ba2y_lost_px",
+    "ba2y_lost_notfound",
+    "ba_updated",
+    "ba_method",
+    "last_run",
+]
+BA_KEEP = [
+    "ba2y_hits",
+    "ba2y_n",
+    "ba2y_pct",
+    "ba2y_p_lt_hits",
+    "ba2y_n_title",
+    "ba2y_n_body",
+    "ba2y_excl",
+    "ba2y_lost_px",
+    "ba2y_lost_notfound",
+    "ba_updated",
+    "ba_method",
+    "last_run",
 ]
 SOURCE_FIELDS = [
     "name",
@@ -116,7 +150,143 @@ def subdomain(url):
 
 
 def scrub(text):
-    return re.sub(r"\s{2,}", " ", EMAIL.sub("", text or "")).strip()
+    text = EMAIL.sub("", text or "")
+    text = re.sub(r"https?://(?:www\.)?(?:x|twitter)\.com/\S+", "", text, flags=re.I)
+    text = re.sub(r"(?<!\w)@[A-Za-z0-9_]{2,}", "", text)
+    return re.sub(r"\s{2,}", " ", text).strip()
+
+
+def blank(value):
+    return value is None or str(value).strip() == ""
+
+
+def ba_view(row):
+    """Return (fraction or None, n or None, hits or None). Fraction is 0–1."""
+    n = None
+    for key in ("ba2y_n", "ba_2y_n"):
+        if not blank(row.get(key)):
+            n = int(float(row[key]))
+            break
+    frac = None
+    if not blank(row.get("ba2y_pct")):
+        frac = float(row["ba2y_pct"])
+    elif not blank(row.get("ba_2y")):
+        frac = float(row["ba_2y"]) / 100.0
+    hits = None if blank(row.get("ba2y_hits")) else int(float(row["ba2y_hits"]))
+    return frac, n, hits
+
+
+def p_lt_cell(row):
+    if not blank(row.get("ba2y_p_lt_hits")):
+        return row["ba2y_p_lt_hits"]
+    _frac, n, hits = ba_view(row)
+    if n and hits is not None:
+        return batcalc.p_lt_hits(hits, n)
+    return "n/a"
+
+
+def ba_date_cell(row):
+    return row.get("ba_updated") or "never"
+
+
+def removal_bits(row, cutoff):
+    """Reason code and sentence for a removal, or None. Cap trim is separate."""
+    frac, n, _hits = ba_view(row)
+    if n is not None and n >= MIN_PITCHES and frac is not None and frac < BA_DROP_FRAC:
+        return "ba_2y", "(a) 2-year batting average 33% or less on 5+ pitches"
+    if row.get("last_post") and row["last_post"] < cutoff:
+        return "stale", f"(b) no article published in 6 months (last post {row['last_post']}, before {cutoff})"
+    fails = int(row.get("consecutive_failed_loads") or 0)
+    if fails >= FAILS_TO_DROP:
+        return "failed_loads", f"(c) feed failed to load on {fails} consecutive runs"
+    return None
+
+
+def compute_ba(row, sub, as_of):
+    """Fill one stats row. False means the archive failed or the budget ran out; nothing is saved by the caller."""
+    import time
+
+    import lib
+
+    lib.DEADLINE[0] = time.time() + BA_BUDGET
+    try:
+        pitches = lib.author_pitches(sub, detail=True, today=as_of)
+        if pitches is None:
+            return False
+        res = lib.score(pitches, "2y", today=as_of)
+        start, end, _months = lib.window("2y", as_of)
+    except TimeoutError:
+        return False
+    finally:
+        over = time.time() > lib.DEADLINE[0]
+        lib.DEADLINE[0] = 1e18
+    if over:
+        return False
+    hits, n = res["hits"], res["n"]
+    pct = res["pct"]
+    row["ba_updated"] = as_of.isoformat()
+    row["ba_method"] = BA_METHOD
+    row["last_run"] = as_of.isoformat()
+    row["ba2y_hits"] = "" if n == 0 and hits == 0 else str(hits)
+    if n == 0:
+        row["ba2y_hits"] = "0"
+    row["ba2y_n"] = str(n)
+    row["ba_2y_n"] = str(n)
+    row["ba2y_pct"] = "" if pct is None else f"{pct:.4f}"
+    row["ba_2y"] = "" if pct is None else f"{pct * 100:.1f}"
+    row["ba2y_p_lt_hits"] = "" if not n else batcalc.p_lt_hits(hits, n)
+    row["ba2y_n_title"] = str(res["n_title"])
+    row["ba2y_n_body"] = str(res["n_body"])
+    row["pitches_title"] = str(res["n_title"])
+    row["pitches_body"] = str(res["n_body"])
+    excluded = [entry for entry in lib.EXCL_LOG if start <= entry[1] < end]
+    short_n = sum(entry[3] == "short" for entry in excluded)
+    sell_n = sum(entry[3] == "sell" for entry in excluded)
+    hold_n = sum(entry[3] == "hold" for entry in excluded)
+    row["ba2y_excl"] = f"{len(excluded)} (short {short_n}, sell {sell_n}, hold {hold_n})"
+    row["ba2y_lost_px"] = str(res["lost_fail"])
+    row["ba2y_lost_notfound"] = str(res["lost_notfound"])
+    return True
+
+
+def never_rows(path):
+    _fields, rows = read_csv(path)
+    return rows
+
+
+def never_blocked(url, path):
+    """True when this URL, or its Substack subdomain, was dropped and must not return."""
+    target = (url or "").rstrip("/").lower()
+    sub = subdomain(url or "")
+    for row in never_rows(path):
+        other = (row.get("url") or "").rstrip("/").lower()
+        if target and other == target:
+            return True
+        if sub and subdomain(row.get("url") or "") == sub:
+            return True
+    return False
+
+
+def may_activate(url, path=None):
+    """False for a never-readd URL. A dormant recheck must not put that author back."""
+    return not never_blocked(url, path or NEVER)
+
+
+def log_never(row, reason, when, path):
+    fields = ["name", "url", "dropped_on", "reason"]
+    rows = never_rows(path)
+    url = (row.get("url") or "").rstrip("/")
+    if any((item.get("url") or "").rstrip("/") == url for item in rows):
+        return
+    rows.append(
+        {
+            "name": scrub(row.get("name") or ""),
+            "url": row.get("url") or "",
+            "dropped_on": when,
+            "reason": scrub(reason),
+        }
+    )
+    write_csv(path, fields, rows)
 
 
 def load_seen_latest(path):
@@ -333,23 +503,37 @@ def build_stats(sources, seen_latest, articles, pitches, batting_by_key, prev, s
         sub = subdomain(url)
         pct, n = ba_for_sub(sub, pitches, batting_by_key, as_of, compute)
         title_n, body_n = method_counts(pitches.get(sub) if sub else None, as_of)
-        rows.append(
-            {
-                "name": src.get("name") or sub or url,
-                "type": src.get("type") or "",
-                "url": src.get("url") or "",
-                "last_post": last_post_for(src, seen_latest),
-                "consecutive_failed_loads": str(fails),
-                "articles_scored": str(len(mine)) if scores_loaded else "",
-                "avg_score_6m": f"{statistics.mean(mine):.2f}" if mine else "",
-                "ba_2y": fmt_num(pct),
-                "ba_2y_n": "" if n is None else str(n),
-                "pitches_title": "" if title_n is None else str(title_n),
-                "pitches_body": "" if body_n is None else str(body_n),
-                "as_of": as_of.isoformat(),
-                "last_sweep_file": last_file,
-            }
-        )
+        built = {
+            "name": src.get("name") or sub or url,
+            "type": src.get("type") or "",
+            "url": src.get("url") or "",
+            "last_post": last_post_for(src, seen_latest),
+            "consecutive_failed_loads": str(fails),
+            "articles_scored": str(len(mine)) if scores_loaded else "",
+            "avg_score_6m": f"{statistics.mean(mine):.2f}" if mine else "",
+            "ba_2y": fmt_num(pct),
+            "ba_2y_n": "" if n is None else str(n),
+            "pitches_title": "" if title_n is None else str(title_n),
+            "pitches_body": "" if body_n is None else str(body_n),
+            "as_of": as_of.isoformat(),
+            "last_sweep_file": last_file,
+        }
+        stored = any(not blank(prev_row.get(key)) for key in ("ba_method", "ba_updated", "ba2y_pct", "ba2y_hits"))
+        for key in BA_KEEP:
+            built[key] = prev_row.get(key, "") if stored else ""
+        if stored and not blank(prev_row.get("ba2y_pct")):
+            built["ba_2y"] = fmt_num(float(prev_row["ba2y_pct"]) * 100)
+        if stored and not blank(prev_row.get("ba2y_n")):
+            built["ba_2y_n"] = str(prev_row["ba2y_n"])
+        if stored and not blank(prev_row.get("ba2y_n_title")):
+            built["pitches_title"] = str(prev_row["ba2y_n_title"])
+        if stored and not blank(prev_row.get("ba2y_n_body")):
+            built["pitches_body"] = str(prev_row["ba2y_n_body"])
+        if blank(built.get("ba2y_p_lt_hits")):
+            _frac, stored_n, stored_hits = ba_view(built)
+            if stored_n and stored_hits is not None:
+                built["ba2y_p_lt_hits"] = batcalc.p_lt_hits(stored_hits, stored_n)
+        rows.append(built)
     rows.sort(key=lambda r: (r["name"].lower(), r["url"]))
     return rows
 
@@ -402,12 +586,23 @@ def consider_adds(crawl, seeds, known_subs, pitches, batting_by_key, as_of, comp
         if sub in known_subs or sub in seeds:
             continue
         pct, n = ba_for_sub(sub, pitches, batting_by_key, as_of, compute)
+        plt = "n/a"
+        fresh = "never"
+        # Add candidates are recalculated now. A failed archive leaves the stored numbers.
+        temp = {"url": f"https://{sub}.substack.com", "name": info.get("name") or sub}
+        if compute_ba(temp, sub, as_of):
+            frac, n, _hits = ba_view(temp)
+            pct = None if frac is None else round(frac * 100, 1)
+            plt = p_lt_cell(temp)
+            fresh = ba_date_cell(temp)
         name = info.get("name") or sub
         numbers = {
             "subdomain": sub,
             "recommended_by": m.group(1),
             "ba_2y": pct,
             "ba_2y_n": n,
+            "ba2y_p_lt_hits": plt,
+            "ba_updated": fresh,
             "bar": f">{BA_ADD:g}% on >={MIN_PITCHES} pitches",
         }
         item = {
@@ -444,6 +639,7 @@ def propose(stats_rows, tracked, cutoff, cap):
     for row in stats_rows:
         reasons = []
         codes = []
+        frac, n, _hits = ba_view(row)
         numbers = {
             "last_post": row["last_post"],
             "consecutive_failed_loads": int(row["consecutive_failed_loads"] or 0),
@@ -451,20 +647,21 @@ def propose(stats_rows, tracked, cutoff, cap):
             "avg_score_6m": row["avg_score_6m"],
             "ba_2y": row["ba_2y"],
             "ba_2y_n": row["ba_2y_n"],
+            "ba2y_pct": row.get("ba2y_pct") or "",
+            "ba2y_p_lt_hits": p_lt_cell(row),
+            "ba_updated": ba_date_cell(row),
+            "ba2y_excl": row.get("ba2y_excl") or "",
             "stale_before": cutoff,
         }
-        n = int(row["ba_2y_n"]) if row["ba_2y_n"] != "" else None
-        pct = float(row["ba_2y"]) if row["ba_2y"] != "" else None
-        if pct is not None and n is not None and n >= MIN_PITCHES and pct < BA_DROP:
-            codes.append("ba_2y")
-            reasons.append(f"2-year batting average {pct:g}% on {n} pitches (under 30%)")
-        if row["last_post"] and row["last_post"] < cutoff:
-            codes.append("stale")
-            reasons.append(f"no article published in 6 months (last post {row['last_post']}, before {cutoff})")
-        fails = int(row["consecutive_failed_loads"] or 0)
-        if fails >= FAILS_TO_DROP:
-            codes.append("failed_loads")
-            reasons.append(f"feed failed to load on {fails} consecutive runs")
+        bit = removal_bits(row, cutoff)
+        if bit:
+            codes.append(bit[0])
+            reasons.append(bit[1])
+            if bit[0] in {"stale", "failed_loads"}:
+                numbers["ba_note"] = (
+                    f"BA 2y {row.get('ba2y_hits') or '?'}/{row.get('ba2y_n') or row.get('ba_2y_n') or '?'}, "
+                    f"P(fewer hits by chance) {p_lt_cell(row)}, as of {ba_date_cell(row)}"
+                )
         if not reasons:
             continue
         drops.append(
@@ -510,6 +707,8 @@ def propose(stats_rows, tracked, cutoff, cap):
                         "articles_scored": int(row["articles_scored"] or 0),
                         "active_before_trim": tracked,
                         "cap": cap,
+                        "ba2y_p_lt_hits": p_lt_cell(row),
+                        "ba_updated": ba_date_cell(row),
                     },
                 }
             )
@@ -588,11 +787,18 @@ def plan(args):
         scores_loaded=bool(score_path),
     )
     write_csv(args.stats, STATS_FIELDS, stats_rows)
+    if args.full_ba:
+        run_full_ba(stats_rows, args.force, args.ba_limit, as_of, args.stats)
+    recalc_removals(stats_rows, cutoff, as_of, args.stats)
     seeds, seed_details = high_scorers(tracked_rows, articles, cutoff)
     _, dormant = read_csv(args.dormant)
-    known = known_subdomains(sources) | known_subdomains(dormant)
-    crawl = load_crawl(args.crawl_cache, seeds, args.crawl)
-    adds, skipped, declined = consider_adds(crawl, seeds, known, pitches, bidx, as_of, args.compute_ba)
+    known = known_subdomains(sources) | known_subdomains(dormant) | known_subdomains(never_rows(args.never))
+    if args.no_candidates:
+        crawl = {}
+        adds, skipped, declined = [], [], []
+    else:
+        crawl = load_crawl(args.crawl_cache, seeds, args.crawl)
+        adds, skipped, declined = consider_adds(crawl, seeds, known, pitches, bidx, as_of, args.compute_ba)
     # Count adds toward the cap. Rule drops (batting, stale, failed loads) come off first.
     all_drops = propose(stats_rows, len(tracked_rows) + len(adds), cutoff, args.cap)
     base_drops = [d for d in all_drops if "cap" not in d["reason_codes"]]
@@ -610,7 +816,8 @@ def plan(args):
         "sweep_stats": sweep_note,
         "high_scorers": seed_details,
         "rules": {
-            "drop_ba": f"2-year batting average < {BA_DROP:g}% on >= {MIN_PITCHES} pitches",
+            "drop_ba": f"2-year batting average 33% or less (under {BA_DROP_FRAC}) on >= {MIN_PITCHES} pitches",
+            "never_readd": "a dropped author is appended to sources_dropped_never_readd.csv and is not added or reactivated",
             "drop_stale": "no article published in 6 months (known last-post date only)",
             "drop_fails": f"feed failed to load on {FAILS_TO_DROP} consecutive runs",
             "no_drop_for": "producing no scored articles",
@@ -649,10 +856,91 @@ def plan(args):
     for item in proposals:
         nums = ", ".join(f"{k}={v}" for k, v in item["numbers"].items() if v not in ("", None))
         print(f"- {item['action'].upper()} {item['name']}: {item['reason']} ({nums})")
+    print_ba_summary(stats_rows)
     print(out_path)
     print("Source lists were not changed. Set approved to true on the entries to keep, then:")
     print(f"  python3 scripts/source_upkeep.py --apply {out_path}")
     return out_path
+
+
+def run_full_ba(stats_rows, force, limit, as_of, stats_path):
+    """One-off pass. Skips authors already stored with the current method unless force. Saves every 10."""
+    pending = []
+    total = 0
+    for row in stats_rows:
+        sub = subdomain(row.get("url") or "")
+        if (row.get("type") or "") != "substack" or not sub:
+            continue
+        total += 1
+        if force or row.get("ba_method") != BA_METHOD:
+            pending.append(row)
+    already = total - len(pending)
+    if limit:
+        pending = pending[:limit]
+    print(f"full BA pass: {len(pending)} to do, {already} already done (of {total})")
+    for i, row in enumerate(pending, 1):
+        sub = subdomain(row.get("url") or "")
+        ok = compute_ba(row, sub, as_of)
+        if ok:
+            print(
+                f"[{already + i}/{total}] {row['name']}: {row.get('ba2y_hits')}/{row.get('ba2y_n')} "
+                f"pct={row.get('ba2y_pct')} p_lt={row.get('ba2y_p_lt_hits')} ba_updated={row.get('ba_updated')}"
+            )
+        else:
+            print(f"[{already + i}/{total}] {row['name']}: archive failed to load or author budget exceeded (will retry next run)")
+        if i % 10 == 0:
+            write_csv(stats_path, STATS_FIELDS, stats_rows)
+            print(f"  (saved {stats_path} at {already + i}/{total})")
+    write_csv(stats_path, STATS_FIELDS, stats_rows)
+
+
+def recalc_removals(stats_rows, cutoff, as_of, stats_path):
+    """A removal proposal whose BA is not from today is recalculated, then judged again by the caller."""
+    changed = False
+    for row in stats_rows:
+        if not removal_bits(row, cutoff):
+            continue
+        sub = subdomain(row.get("url") or "")
+        if (row.get("type") or "") != "substack" or not sub:
+            continue
+        if (row.get("ba_updated") or "") == as_of.isoformat():
+            continue
+        print(f"Recalculating batting average for removal proposal: {row['name']}")
+        ok = compute_ba(row, sub, as_of)
+        changed = True
+        if not ok:
+            print(
+                f"  BA not saved for {row['name']} (archive failed or budget exceeded). "
+                f"ba2y_p_lt_hits={p_lt_cell(row)} ba_updated={ba_date_cell(row)}"
+            )
+    if changed:
+        write_csv(stats_path, STATS_FIELDS, stats_rows)
+
+
+def print_ba_summary(stats_rows):
+    """Every plan lists stored BAs by P(fewer hits by chance), highest first."""
+    ranked = []
+    for row in stats_rows:
+        if all(blank(row.get(key)) for key in ("ba2y_n", "ba_2y_n", "ba2y_pct", "ba_2y", "ba_updated")):
+            continue
+        ranked.append(row)
+
+    def sort_key(row):
+        try:
+            return float(row.get("ba2y_p_lt_hits"))
+        except (TypeError, ValueError):
+            return -1
+
+    ranked.sort(key=lambda row: (-sort_key(row), (row.get("name") or "").lower()))
+    print("Stored batting averages, highest ba2y_p_lt_hits first:")
+    if not ranked:
+        print("  none yet: ba2y_p_lt_hits=n/a ba_updated=never")
+        return
+    for row in ranked:
+        print(
+            f"  {row['name']}: ba2y_p_lt_hits={p_lt_cell(row)} ba_updated={ba_date_cell(row)} "
+            f"ba2y_n={row.get('ba2y_n') or row.get('ba_2y_n') or ''}"
+        )
 
 
 def approved(item):
@@ -660,9 +948,10 @@ def approved(item):
     return v is True or str(v).strip().lower() in {"1", "true", "yes", "y"}
 
 
-def apply_proposal(path, sources_path, dormant_path):
+def apply_proposal(path, sources_path, dormant_path, never_path):
     doc = json.load(open(path, encoding="utf-8"))
     chosen = [p for p in doc.get("proposals") or [] if approved(p)]
+    when = doc.get("as_of") or dt.date.today().isoformat()
     if not chosen:
         print("No approved entries. Source lists were not changed.")
         return
@@ -695,8 +984,12 @@ def apply_proposal(path, sources_path, dormant_path):
                 dormant.append(moved)
                 dormant_urls.add(url)
             remove.add(url)
+            log_never(moved, item.get("reason") or "", when, never_path)
             dropped.append(moved.get("name") or url)
         elif item.get("action") == "add":
+            if not may_activate(url, never_path):
+                print("REFUSED add (previously dropped, never re-add):", item.get("name"))
+                continue
             if url in by_url or url in dormant_urls:
                 print("already listed:", item.get("name"), url)
                 continue
@@ -738,6 +1031,7 @@ def main():
     ap.add_argument("--apply", default="", metavar="PROPOSAL")
     ap.add_argument("--sources", default=SOURCES)
     ap.add_argument("--dormant", default=DORMANT)
+    ap.add_argument("--never", default=NEVER)
     ap.add_argument("--stats", default=os.path.join(STATE, "source_stats.csv"))
     ap.add_argument("--seen", default=SEEN)
     ap.add_argument("--scored", default="")
@@ -750,12 +1044,16 @@ def main():
     ap.add_argument("--cap", type=int, default=CAP)
     ap.add_argument("--crawl", action="store_true", help="fetch Substack recommendations of authors who scored >= 4.5")
     ap.add_argument("--compute-ba", action="store_true", help="call bat/calc.py for authors with saved pitches")
+    ap.add_argument("--full-ba", action="store_true", help="compute the 2-year batting average for every Substack source (resumable)")
+    ap.add_argument("--force", action="store_true", help="with --full-ba, recompute authors already stored with the current method")
+    ap.add_argument("--ba-limit", type=int, default=0, help="with --full-ba, stop after this many authors")
+    ap.add_argument("--no-candidates", action="store_true", help="do not look for Substack recommendations to add")
     args = ap.parse_args()
     if args.plan and args.apply:
         print("Pass only one of --plan or --apply")
         sys.exit(2)
     if args.apply:
-        apply_proposal(args.apply, args.sources, args.dormant)
+        apply_proposal(args.apply, args.sources, args.dormant, args.never)
     elif args.plan:
         plan(args)
     else:

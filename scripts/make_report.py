@@ -19,7 +19,9 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "bat"))
 from _paths import CACHE, EXAMPLES, REPORTS, RERUN, ROOT, STATE, ensure
+import calc as batcalc
 
 LBL = ["Thesis/runway", "Return ~40%/yr", "CEO large holder", "Moat or edge", "Differential view", "Dated catalyst"]
 FULL = [1, 1, 1, 1, 1, 1]
@@ -41,12 +43,23 @@ def tot(sc):
     return round(sum(sc), 2)
 
 
+def _chance(summary):
+    if not summary:
+        return ""
+    if summary.get("p_lt") not in (None, ""):
+        return summary["p_lt"]
+    return batcalc.p_lt_hits(summary.get("hits") or 0, summary.get("n") or 0)
+
+
 def fmt_bat(bat):
     def one(w):
         x = (bat.get("summary") or {}).get(w)
         if not x:
             return f"{w} n/a"
-        return f"{w} {x['hits']}/{x['n']} = {x['pct']*100:.0f}% (med excess {x['median_excess']*100:+.0f} pts)"
+        line = f"{w} {x['hits']}/{x['n']} = {x['pct']*100:.0f}% (med excess {x['median_excess']*100:+.0f} pts)"
+        if w == "2y":
+            line += f", P(fewer hits by chance) {_chance(x)}"
+        return line
 
     note = bat.get("note")
     extra = f" [{note}]" if note else ""
@@ -66,7 +79,7 @@ def cell_bat(article, batting):
     s = bat.get("summary") or {}
     y2, y1 = s.get("2y"), s.get("1y")
     if y2:
-        return f"{y2['hits']}/{y2['n']} = {y2['pct']*100:.0f}%"
+        return f"{y2['hits']}/{y2['n']} = {y2['pct']*100:.0f}% (p_lt {_chance(y2)})"
     if y1:
         return f"{y1['hits']}/{y1['n']} = {y1['pct']*100:.0f}% (1y)"
     return "n/a"
@@ -86,7 +99,7 @@ def top_bat(authors, batting, window, n=5, min_n=5):
         if not x or x["n"] < min_n:
             continue
         rows.append((a, x))
-    rows.sort(key=lambda ax: (-ax[1]["pct"], ax[0]))
+    rows.sort(key=lambda ax: (-float(_chance(ax[1]) or 0), ax[0]))
     return rows[:n]
 
 
@@ -212,13 +225,15 @@ def render(doc, onepagers, live):
     for window_name, title in (("1y", "### By 1-year batting average"), ("2y", "### By 2-year batting average")):
         A(title)
         A("")
-        A("| # | Author | Hits / N | Avg | Median excess | Best | Worst |")
-        A("|---|---|---|---|---|---|---|")
+        A("| # | Author | Hits / N | Avg | P(fewer hits by chance) | Median excess | Best | Worst |")
+        A("|---|---|---|---|---|---|---|---|")
         got = top_bat(authors, batting, window_name)
         for i, (a, x) in enumerate(got, 1):
-            A(f"| {i} | {a} | {x['hits']}/{x['n']} | {x['pct']*100:.0f}% | {x['median_excess']*100:+.0f} pts | {x['best']} | {x['worst']} |")
+            A(
+                f"| {i} | {a} | {x['hits']}/{x['n']} | {x['pct']*100:.0f}% | {_chance(x)} | {x['median_excess']*100:+.0f} pts | {x['best']} | {x['worst']} |"
+            )
         if not got:
-            A("| — | none with ≥5 pitches | | | | | |")
+            A("| — | none with ≥5 pitches | | | | | | |")
         A("")
     A("## Next six (ranks 16–21)")
     A("")
