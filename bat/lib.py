@@ -947,6 +947,7 @@ def score(pitches, window_name="2y", today=None):
         prefetch_px(symbols)
     seen = set()
     excess = []
+    stock_rets = []
     hits = n_title = n_body = lost_fail = lost_notfound = lost_nodata = 0
     for row in sorted(pitches or [], key=lambda item: item[1]):
         symbol, day = row[0], row[1]
@@ -970,6 +971,7 @@ def score(pitches, window_name="2y", today=None):
         if stock_ret is None or bench_ret is None:
             lost_nodata += 1
             continue
+        stock_rets.append(stock_ret)
         excess.append(stock_ret - bench_ret)
         hits += stock_ret > bench_ret
         n_title += method == "title"
@@ -978,6 +980,7 @@ def score(pitches, window_name="2y", today=None):
         "hits": int(hits),
         "n": len(excess),
         "pct": round(float(hits) / len(excess), 3) if excess else None,
+        "median_return": round(float(statistics.median(stock_rets)), 4) if stock_rets else None,
         "median_excess": round(float(statistics.median(excess)), 4) if excess else None,
         "n_title": n_title,
         "n_body": n_body,

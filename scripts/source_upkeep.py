@@ -63,6 +63,7 @@ STATS_FIELDS = [
     "ba2y_pct",
     "ba2y_p_lt_hits",
     "ba2y_median_excess",
+    "ba2y_med_ret",
     "ba2y_n_title",
     "ba2y_n_body",
     "ba2y_excl",
@@ -78,6 +79,7 @@ BA_KEEP = [
     "ba2y_pct",
     "ba2y_p_lt_hits",
     "ba2y_median_excess",
+    "ba2y_med_ret",
     "ba2y_n_title",
     "ba2y_n_body",
     "ba2y_excl",
@@ -240,6 +242,8 @@ def compute_ba(row, sub, as_of):
     row["ba2y_p_lt_hits"] = "" if not n else batcalc.p_lt_hits(hits, n)
     excess = res.get("median_excess")
     row["ba2y_median_excess"] = "" if excess is None else f"{float(excess):.4f}"
+    med_ret = res.get("median_return")
+    row["ba2y_med_ret"] = "" if med_ret is None else f"{float(med_ret):.4f}"
     row["ba2y_n_title"] = str(res["n_title"])
     row["ba2y_n_body"] = str(res["n_body"])
     row["pitches_title"] = str(res["n_title"])
@@ -273,7 +277,11 @@ def never_blocked(url, path):
 
 
 def may_activate(url, path=None):
-    """False for a never-readd URL. A dormant recheck must not put that author back."""
+    """False for a never-readd URL. A dormant recheck must not put that author back.
+
+    An author who is only on the dormant list is not blocked here. Automatic adds
+    still skip that author because discovery treats the dormant list as already known.
+    """
     return not never_blocked(url, path or NEVER)
 
 
@@ -613,6 +621,7 @@ def consider_adds(crawl, seeds, known_subs, pitches, batting_by_key, as_of, comp
                     "ba_2y_n",
                     "ba2y_p_lt_hits",
                     "ba2y_median_excess",
+                    "ba2y_med_ret",
                     "ba2y_n_title",
                     "ba2y_n_body",
                     "pitches_title",
@@ -642,6 +651,7 @@ def consider_adds(crawl, seeds, known_subs, pitches, batting_by_key, as_of, comp
             "ba_2y_n": n,
             "ba2y_p_lt_hits": plt,
             "ba2y_median_excess": "" if med_num is None else med_num,
+            "ba2y_med_ret": temp.get("ba2y_med_ret") or "",
             "ba_updated": fresh,
             "bar": f"p>{P_ADD} and median_excess_2y>0",
         }

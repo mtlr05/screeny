@@ -70,7 +70,7 @@ The report column **BA 2y (1y)** prefers the 2-year average (`hits/n = %`, with 
 
 The report section **Articles from top-record authors** lists every article in the report window from an author whose stored `ba2y_p_lt_hits` is at least 0.5 on at least 2 pitches. The generator reads `state/source_stats.csv` when it writes the report. Show hits/pitches, the percent, and `p_lt_hits_by_chance` next to the author, and the title, date, link, and score (when scored) for each article. An approved source add stores that recomputed row, so the section updates without a separate author list.
 
-An author who has been dropped is listed in `config/sources_dropped_never_readd.csv` (`name`, `url`, `dropped_on`, `reason`). Discovery skips that author. `--apply` refuses the add. Do not reactivate that author from the dormant list. Only a hand edit of the never-readd file overrides it.
+An author removed by an approved drop is listed in `config/sources_dropped_never_readd.csv` (`name`, `url`, `dropped_on`, `reason`). Discovery skips that author. `--apply` refuses the add. Do not reactivate that author from the dormant list. Only a hand edit of the never-readd file overrides it. An author who is only parked on the dormant list is not on never-readd. Automatic adds skip them. A dormant recheck may put them back.
 
 David approved three manual additions on 2026-10-16 that miss the automatic add bar. They stay on the active list with these seeded 2-year numbers: Intrinsic Value System 15/31 (`p_lt_hits_by_chance` 0.3601), Welfare Capital Research 2/2 (0.75), The Lead-Lag Report 2/2 (0.75). Later removal proposals still use the drop rules.
 
