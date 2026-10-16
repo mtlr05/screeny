@@ -51,40 +51,44 @@ Each run, check VIC public ideas that have newly come off the ~45-day embargo (p
 
 ## 4. Seeking Alpha
 
-Seeking Alpha is one pull for this run. It is not a tracked source and it is not a row in `state/source_stats.csv`. Never use Seeking Alpha investing groups. Do not paste cookies, do not store a login, and do not put credentials in the repo. Use the machine's signed-in browser. If the session has expired, ask the user to sign in, then continue. Do not ask for the password or the cookie.
+Seeking Alpha is one pull for this run. It is not a tracked source and it is not a row in `state/source_stats.csv` or `state/seen_posts.csv`. Never open investing groups, marketplace, or Alpha Picks. Do not paste, request, or store a password, a token, or a cookie.
 
-Past pitches, for batting average only, stay on the public author API: `python3 bat/sa_one.py "Author Name" author-slug`. Title, date, ticker, and sentiment are enough. Do not fetch full bodies for old pitches.
+Use the machine's signed-in browser. Open https://seekingalpha.com and check that the account menu is visible and an article page shows full text. If the session has expired, stop and ask the user to sign in, then check again. Do not log in yourself. Free-in-full articles only.
 
-New Long Ideas this run:
+Past pitches, for batting average only, stay on the public author API: `python3 bat/sa_one.py "Author Name" author-slug`. Title, date, ticker, and sentiment are enough.
 
-1. In the signed-in browser, open the Long Ideas list for the window (last 7 days, or 4 months on a full run). Save it as `reports/sa_list_<date>.csv` with columns `id,url,title,author,date,ticker,exchange,market_cap,summary`. Do not save the page's cookies.
-2. Cheap screen, no full read yet:
+New articles this run, after the Substack sweep and before the full-text triage:
 
-```bash
-python3 scripts/sa_ingest.py screen --list reports/sa_list_<date>.csv --since YYYY-MM-DD
-```
-
-That writes `reports/sa_candidates_<date>.csv`. The candidates file extends the `seen_posts` columns with `sa_id`, `ticker`, `author`, `screen`, and `reason`. Investing groups, non-US/Canada listings, caps above about US$10B, ETFs, recaps, holds, multi-stock posts, and rows with no ticker are dropped.
-3. Read each candidate in the browser, about 20–30 seconds apart. An article counts as read only when the body is well past the summary, about 600 words or more, and does not end on a paywall or subscribe prompt. Record `id`, `url`, `words`, and `ending` in `reports/sa_obs_<date>.json`. If a Press & Hold bot check appears, set `bot_check` true on that row and stop. Do not retry and do not bypass it.
+1. Page the Long Ideas list for the window. Also page an author or ticker feed when one is in scope. For each row save title, author, the date text, the primary ticker, and the URL. Convert dates to YYYY-MM-DD (`Today`, `Yesterday`, and `Fri, Oct 9` all become a real date). Skip `/symbol/`, `/author/`, marketplace, and `/alpha-picks/` URLs. Stop at the first row older than the window, or after three scrolls with nothing new. Write `reports/sa_list_<date>.csv` with columns `url,article_id,source,author,date,title,ticker,date_text`. `source` is `SA Long Ideas`, `SA author feed`, or `SA ticker feed`.
+2. Cheap screen. No body yet. The script applies the same recap, multi-stock, and fund patterns as the reference screen, then asks Yahoo for quote type, exchange, and market cap. It keeps a single US or Canada equity under US$10B at publish.
 
 ```bash
-python3 scripts/sa_ingest.py check --obs reports/sa_obs_<date>.json
+python3 scripts/sa_ingest.py screen reports/sa_list_<date>.csv
 ```
 
-A bot check makes this command exit with status 3. Score only what was already read in full.
-4. Merge the full articles into the triage list. Dedupe is `state/sa_results.json`.
+That writes `reports/sa_candidates_<date>.csv`. Columns extend `seen_posts` with `author,ticker,mcap_usd,exchange,sa_status,drop_reason`. `source` is `Seeking Alpha`. A kept row has `sa_status` `screened`.
+3. Full read, candidates only, 20–30 seconds apart. Open the article, scroll to the disclosure, and save `fulltext/sa_<id>.txt` with `URL`, `TITLE`, `AUTHOR`, `DATE`, `TICKERS`, a `=== SUMMARY ===` section, `=== ARTICLE BODY ===`, and `=== ANALYST'S DISCLOSURE ===`.
+4. Classify each saved file:
 
 ```bash
-python3 scripts/sa_ingest.py merge --candidates reports/sa_candidates_<date>.csv --triage reports/triage_<date>.json
+python3 scripts/sa_ingest.py check fulltext/sa_<id>.txt
 ```
 
-That also appends the new URLs to `state/seen_posts.csv` and writes `state/sa_breakdown.json` (`li`, `li_from`, `li_to`, `kept`, `read`, `previews`, `skipped_unread`, `passed`, `scored`). The report appendix reads that file. After scoring, set `scored` to the number actually scored. Previews are not scored. Say how many were skipped because the full text could not be read.
+`full` means the body is at least 600 words, there is no paywall marker, and the disclosure says a beneficial long position in the shares of that ticker. A short body, a paywall marker (`Subscribe to continue`, `To continue reading`, `only available to Premium`, `Sign up to continue`), or a missing disclosure is `preview` and is not scored. A disclosure that does not name the ticker is `not_long`.
+5. If the page is a Press & Hold bot check, a captcha, or HTTP 403 or 429, pause and try that article once more. If it fails again, stop. Score only what was already read in full. `check` exits 3 on a bot-check page.
+6. Merge the articles that passed into the triage list. Dedupe is `state/sa_results.json` (skip ids already recorded). Do not add these URLs to `state/seen_posts.csv`.
+
+```bash
+python3 scripts/sa_ingest.py merge reports/sa_candidates_<date>.csv reports/triage_<date>.json
+```
+
+That writes `state/sa_breakdown.json` (`li`, `li_from`, `li_to`, `kept`, `read`, `previews`, `skipped_unread`, `passed`, `scored`) for the report appendix. Section 7 screening and section 8 scoring then apply as they do for any other article. After scoring, set `scored` to the number actually scored.
 
 ```bash
 python3 scripts/sa_ingest.py self-test
 ```
 
-That checks the screen, the preview and bot-check rules, and dedupe on fake rows. It does not touch the network.
+That runs the screen, the preview and long-disclosure checks, the bot-check stop, and dedupe on fake rows. It does not touch the network.
 
 ## 5. X
 

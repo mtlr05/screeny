@@ -7,7 +7,7 @@ On-demand scout for single-stock investment write-ups. David runs it from the Cu
 - Cite every source (title and URL). Never invent numbers, tickers, dates, or URLs. Mark anything unverified.
 - Score only articles read in full. A paywalled or preview-only post is dropped. Never score from a title, summary, or preview. Do not bypass a paywall.
 - Never use Seeking Alpha investing groups.
-- If Seeking Alpha shows a bot check, stop gathering and score what was already read in full. The new-article pull is the signed-in browser plus `scripts/sa_ingest.py`. Do not store a login or a cookie. If the session has expired, ask the user to sign in.
+- If Seeking Alpha shows a bot check, pause and try that article once more. If it fails again, stop gathering and score what was already read in full. The new-article pull is the signed-in browser plus `scripts/sa_ingest.py`. Do not store a login or a cookie. If the session has expired, ask the user to sign in.
 - The author must disclose a long position (a Seeking Alpha "beneficial long position" disclosure, or an explicit "I own / I am long / I hold a position" statement). A Buy/LONG rating alone, or "may hold" boilerplate, does not count. Drop reason: `author not long`.
 
 ## Preferences
