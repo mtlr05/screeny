@@ -16,7 +16,14 @@ Commands assume the repo root. Scripts find `config/`, `state/`, and `reports/` 
 
 Optional: set `SCREENY_USER_AGENT` if you want a specific User-Agent. The default is a plain browser string. Do not put an email address in the repo.
 
-PDF output is optional. Markdown is the report. For a PDF, install `markdown` and `weasyprint`, then pass `--pdf`.
+Markdown is the report. The PDF is that same file, including **Articles from top-record authors**. Install the optional packages, then pass `--pdf`:
+
+```bash
+pip install markdown weasyprint
+python3 scripts/make_report.py --pdf
+```
+
+That writes `REPORT.pdf` next to `REPORT.md`. If those packages are missing, the script keeps the Markdown and prints that the PDF was skipped.
 
 ## Ask Cursor
 
@@ -71,8 +78,8 @@ python3 scripts/sa_public.py article https://seekingalpha.com/article/123
 python3 bat/sa_one.py "Author Name" author-slug
 python3 bat/pitches.py subdomain --limit 20
 python3 bat/calc.py
-python3 scripts/make_report.py --prices
-python3 scripts/make_report.py --example
+python3 scripts/make_report.py --prices --pdf
+python3 scripts/make_report.py --example --pdf
 python3 scripts/crawl_sources.py
 python3 scripts/source_upkeep.py --plan
 python3 scripts/source_upkeep.py --plan --crawl
@@ -205,7 +212,7 @@ A stored batting average has no expiry. `--plan` keeps the stored numbers and re
 
 ## Report
 
-`python3 scripts/make_report.py` writes `reports/<today>/REPORT.md`. After the ranked list, the batting tables, and the next six, the report has **Articles from top-record authors**.
+`python3 scripts/make_report.py` writes `reports/<today>/REPORT.md`. `python3 scripts/make_report.py --pdf` writes `REPORT.pdf` from that Markdown. After the ranked list, the batting tables, and the next six, both files have **Articles from top-record authors**.
 
 That section lists every article published inside the report window by an author whose stored 2-year record has at least 2 pitches and `ba2y_p_lt_hits` of 0.5 or higher. The author list is read from `state/source_stats.csv` at report time and limited to URLs still in `config/sources.csv`. Next to each author: hits/pitches, the batting average, and `p_lt_hits_by_chance`. Each article shows the date, title, link, and the /6 score when that article was scored. Authors are ordered by that chance, highest first. An approved add is included on the next report because `--apply` stores the recomputed batting average.
 

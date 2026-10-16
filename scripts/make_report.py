@@ -520,14 +520,20 @@ def write_outputs(md, rows, ranked, out_path):
 
 
 def try_pdf(md_path):
+    """Write REPORT.pdf from the same Markdown, including Articles from top-record authors."""
     try:
         import markdown
         import weasyprint
     except Exception as e:
         print("PDF skipped (optional markdown/weasyprint not installed):", e)
         return
-    h = markdown.markdown(open(md_path, encoding="utf-8").read(), extensions=["tables"])
-    css = "@page{size:Letter landscape;margin:1.4cm} body{font-family:sans-serif;font-size:9.5pt} table{border-collapse:collapse;font-size:8pt} td,th{border:1px solid #bbb;padding:3px} .pb{page-break-before:always} h3{margin-top:0} a{color:#1a4fa0}"
+    source = open(md_path, encoding="utf-8").read()
+    h = markdown.markdown(source, extensions=["tables"])
+    heading = "Articles from top-record authors"
+    if heading in source and heading not in h:
+        print(f"PDF not written: the Markdown has {heading!r} but the HTML conversion dropped it")
+        sys.exit(1)
+    css = "@page{size:Letter landscape;margin:1.4cm} body{font-family:sans-serif;font-size:9.5pt} table{border-collapse:collapse;font-size:8pt} td,th{border:1px solid #bbb;padding:3px} .pb{page-break-before:always} h2,h3{break-after:avoid} h3{margin-top:0} tr{break-inside:avoid} a{color:#1a4fa0}"
     pdf_path = os.path.splitext(md_path)[0] + ".pdf"
     weasyprint.HTML(string=f"<html><head><meta charset='utf-8'><style>{css}</style></head><body>{h}</body></html>").write_pdf(pdf_path)
     print(pdf_path)

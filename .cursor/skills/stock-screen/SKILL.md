@@ -177,10 +177,10 @@ Leave `ba`, `bat_line`, and `since_publish` empty to have the report fill them f
 One-pagers go in `state/onepagers.json`, keyed by ticker: `company`, `words`, `read`, `long`, `c1`–`c6`, `flags` (list), optional `thin`. Model the prose on `reports/2026-10-14/onepagers.json` (the Nyxoah page is the style sample: score, linked article, author, date, length, long disclosure, batting line, each criterion in 1–3 sentences, then red flags).
 
 ```bash
-python3 scripts/make_report.py --prices
+python3 scripts/make_report.py --prices --pdf
 ```
 
-That writes `reports/<today>/REPORT.md` and `articles.csv`. Confirm both exist before you tell the user the run is done. PDF is optional: `python3 scripts/make_report.py --pdf` (needs `markdown` and `weasyprint`). If they are missing, ship the Markdown.
+That writes `reports/<today>/REPORT.md`, `articles.csv`, and `REPORT.pdf`. The PDF is the Markdown converted in full, so **Articles from top-record authors** is in both. `--pdf` needs `markdown` and `weasyprint` (`pip install markdown weasyprint`). If those imports fail, the script keeps the Markdown and prints that the PDF was skipped. Confirm `REPORT.md` exists before you tell the user the run is done, and confirm `REPORT.pdf` when the PDF step printed its path.
 
 After the next-six list, the report has **Articles from top-record authors**. `scripts/make_report.py` builds it from `state/source_stats.csv` at report time: every active source whose stored 2-year `ba2y_p_lt_hits` is at least 0.5 on at least 2 pitches. Next to the author, show hits/pitches, the batting average, and that chance. Under each author, list every article in the report window (from `state/seen_posts.csv`, plus any scored article in this run) with title, date, link, and the /6 score when the article was scored. Authors are ordered by `ba2y_p_lt_hits`, highest first. Do not keep a hand list of these authors. An approved `--apply` add stores the recomputed batting average, so the next report includes that author.
 
