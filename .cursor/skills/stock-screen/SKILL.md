@@ -132,7 +132,6 @@ Apply this before a name can be scored:
 - Small/mid cap, under about US$10B.
 - Listed in the US or Canada.
 - Not already scored.
-- Has a moat or an edge (graded later; screening only requires that one exists).
 - The author discloses a long position. Drop reason `author not long` otherwise.
 
 Record an ambiguous disclosure (the "may hold" kind of line) and drop it. Prioritise posts with a price target, a valuation section, and a management discussion.
@@ -146,7 +145,7 @@ One point each. Partial credit is as stated. Small/mid cap and US/Canada listing
 1. Thesis with a secular runway or growth driver. Cheap but no growth (asset value, cash pile, wind-down, low multiple only) = 0.5.
 2. Return ~40%/yr from the publish-day close using the author's target and timeframe (default 2 years). Compute it with `scripts/px.py` and print the formula (target, publish close, horizon) in the one-pager `notes.return_formula`. 25–40%/yr = 0.5. Below 25%/yr = 0.
 3. CEO is a large shareholder. Judge this only from the article or a cited filing. Roughly 5%+ = 1; 1–5% = 0.5. If neither source states the stake, score 0 and write "not stated". Do not use unstated knowledge.
-4. Moat or edge (best of the two). Moat is judged on the business model against the five types (intangibles, switching costs, network effects, cost advantage, efficient scale), with mechanism, trend, and main threat: Strong 1 / Moderate 0.75 / Narrow 0.5. Edge = a proven operator, capital allocator, or dealmaker with evidence, or an obsessive founder-builder (built from scratch, product-led, evidence-backed). A good guidance record supports an edge.
+4. Moat (4a) and edge (4b), each from 0 to 1. Criterion 4 is the higher of the two, so the total stays out of 6. Neither is a reason to drop the article. The scales are in the stock-screen-scoring skill.
 5. Differential view, written by you: the specific reason the market is wrong (stigma or category label, a temporary or mundane issue, neglect) and why it should correct, compared with what the price implies and with other coverage. Score 1 only when the article states both the cause of the mispricing and why it corrects. Otherwise 0.5. Matches consensus = 0. An overreaction to temporary news supports it.
 6. Dated catalyst: 1 only for a named event with a date inside 24 months. Named but undated = 0.5. None = 0.
 

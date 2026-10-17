@@ -44,6 +44,33 @@ def tot(sc):
     return round(sum(sc), 2)
 
 
+def c4_view(article):
+    """Criterion 4 is the higher of moat (4a) and edge (4b).
+
+    A stored score with only the old criterion 4 is 4a. 4b is then unset.
+    """
+    sc = article.get("sc") or []
+    legacy = sc[3] if len(sc) > 3 else None
+    if "c4a" in article or "c4b" in article:
+        c4a = 0 if article.get("c4a") is None else article.get("c4a")
+        c4b = 0 if article.get("c4b") is None else article.get("c4b")
+        return c4a, c4b, max(c4a, c4b)
+    return legacy, None, legacy
+
+
+def with_c4(article):
+    """Copy an article and set sc[3] to max(4a, 4b) when those fields exist."""
+    item = dict(article)
+    sc = list(item.get("sc") or [])
+    c4a, c4b, c4 = c4_view(item)
+    if len(sc) > 3 and c4 is not None:
+        sc[3] = c4
+    item["sc"] = sc
+    item["c4a"] = c4a
+    item["c4b"] = c4b
+    return item
+
+
 def _chance(summary):
     if not summary:
         return ""
@@ -212,7 +239,7 @@ def top_record_lines(doc, authors, seen_path=None):
     scores = {}
     for article in doc.get("articles") or []:
         url = (article.get("url") or "").rstrip("/")
-        sc = article.get("sc") or []
+        sc = with_c4(article).get("sc") or []
         if url and len(sc) >= 6:
             scores[url] = tot(sc[:6])
     posts = {}
@@ -302,8 +329,8 @@ def rank(articles):
         sc = r.get("sc") or []
         if len(sc) < 6:
             continue
-        item = dict(r)
-        item["sc"] = list(sc[:6])
+        item = with_c4(r)
+        item["sc"] = list(item["sc"][:6])
         item["score"] = tot(item["sc"])
         rows.append(item)
     best = {}
@@ -352,7 +379,7 @@ def render(doc, onepagers, live):
     A("## 1. Screening")
     A("")
     A(
-        'A post must be: free to read in full (paywalled or preview-only posts are dropped); a single-stock bullish pitch (updates and earnings reviews count); on a small/mid-cap company; listed in the US or Canada; on a business with a moat or an edge; and the author must disclose holding a long position (a Seeking Alpha "beneficial long position" disclosure, or an explicit "I own / I am long / I hold a position" statement; "may hold" boilerplate does not count). Any length qualifies.'
+        'A post must be: free to read in full (paywalled or preview-only posts are dropped); a single-stock bullish pitch (updates and earnings reviews count); on a small/mid-cap company; listed in the US or Canada; and the author must disclose holding a long position (a Seeking Alpha "beneficial long position" disclosure, or an explicit "I own / I am long / I hold a position" statement; "may hold" boilerplate does not count). Any length qualifies. Lacking a moat or an edge is not a drop.'
     )
     A("")
     A("## 2. Reported, not scored")
@@ -366,7 +393,7 @@ def render(doc, onepagers, live):
     A("1. **Thesis with secular runway**: cheap with no growth = 0.5.")
     A("2. **Return ~40%/yr**: from the publish-day close to the author's target over the author's timeframe (2 years if none given). 25-40%/yr = 0.5; under 25%/yr = 0.")
     A("3. **CEO is a large shareholder** (roughly 5%+ = 1; 1-5% = 0.5).")
-    A("4. **Moat or edge**: moat graded on the five moat types (Strong 1 / Moderate 0.75 / Narrow 0.5), or an edge: proven operator, allocator or dealmaker, or an obsessive founder-builder (a good guidance record supports it).")
+    A("4. **Moat (4a) or edge (4b)**: each is 0 to 1; criterion 4 is the higher of the two. No moat and no edge scores 0. It is not a reason to drop the article.")
     A("5. **Differential view**: names why the market is wrong (stigma or label, temporary or mundane issue, neglect) and why it corrects; an overreaction to temporary news supports it.")
     A("6. **Dated catalyst within ~24 months**: undated = 0.5.")
     A("")
@@ -477,6 +504,20 @@ def render(doc, onepagers, live):
             evidence = notes.get("c%d" % k) or (o or {}).get("c%d" % k) or "not recorded"
             if k == 3 and evidence == "not recorded":
                 evidence = "not stated"
+            if k == 4:
+                c4a = r.get("c4a")
+                c4b = r.get("c4b")
+                ev_a = notes.get("c4a") or (o or {}).get("c4a") or evidence
+                ev_b = notes.get("c4b") or (o or {}).get("c4b")
+                A(f"4. **{lab}: {v:g}.** Higher of 4a and 4b.")
+                a_txt = "not recorded" if c4a is None else f"{c4a:g}"
+                A(f"4a. **Moat: {a_txt}.** {ev_a}")
+                if c4b is None and not ev_b:
+                    A("4b. **Edge: not recorded.**")
+                else:
+                    b_txt = "not recorded" if c4b is None else f"{c4b:g}"
+                    A(f"4b. **Edge: {b_txt}.** {ev_b or 'not recorded'}")
+                continue
             A(f"{k}. **{lab}: {v:g}.** {evidence}")
         if notes.get("return_formula"):
             A("")
@@ -550,9 +591,11 @@ def write_outputs(md, rows, ranked, out_path):
     rk = {id(r) for r in ranked}
     with open(csv_path, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["ticker", "score", "T", "R", "C", "M", "D", "K", "title", "url", "source", "date", "ranked"])
+        w.writerow(["ticker", "score", "T", "R", "C", "M", "D", "K", "title", "url", "source", "date", "ranked", "M4a", "M4b"])
         for r in sorted(rows, key=lambda r: (-r["score"], r["sym"])):
-            w.writerow([r["sym"], r["score"], *r["sc"], r["title"], r["url"], r["source"], r["date"], id(r) in rk])
+            c4a = "" if r.get("c4a") is None else r.get("c4a")
+            c4b = "" if r.get("c4b") is None else r.get("c4b")
+            w.writerow([r["sym"], r["score"], *r["sc"], r["title"], r["url"], r["source"], r["date"], id(r) in rk, c4a, c4b])
     print(out_path)
     print(csv_path)
 

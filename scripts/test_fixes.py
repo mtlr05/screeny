@@ -201,9 +201,28 @@ def test_report_drop_counts_come_from_the_screen_file():
     print("report counts come from the screen file")
 
 
+def test_old_criterion_4_is_moat_and_new_scores_use_the_higher():
+    import make_report
+
+    old = {"sc": [1, 1, 1, 0.75, 1, 1]}
+    kept = make_report.with_c4(old)
+    assert kept["c4a"] == 0.75
+    assert kept["c4b"] is None
+    assert kept["sc"][3] == 0.75
+    assert make_report.tot(kept["sc"]) == 5.75
+    fresh = {"sc": [1, 0, 0, 0.5, 0.5, 0.5], "c4a": 0, "c4b": 0}
+    scored = make_report.with_c4(fresh)
+    assert scored["sc"][3] == 0
+    assert make_report.tot(scored["sc"]) == 2
+    higher = {"sc": [1, 1, 0, 0, 1, 1], "c4a": 0.5, "c4b": 0.75}
+    assert make_report.with_c4(higher)["sc"][3] == 0.75
+    print("criterion 4 is the higher of 4a and 4b")
+
+
 if __name__ == "__main__":
     test_in_window_sourced_count()
     test_pitch_titles_stay_and_recap_drops()
     test_macro_phrase_and_single_listing()
     test_content_screen_drops_only_clear_cases()
     test_report_drop_counts_come_from_the_screen_file()
+    test_old_criterion_4_is_moat_and_new_scores_use_the_higher()
