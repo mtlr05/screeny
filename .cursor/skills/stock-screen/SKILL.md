@@ -123,7 +123,7 @@ Fetch Substack text (no jq):
 python3 scripts/grab_fulltext.py reports/triage_YYYY-MM-DD.json
 ```
 
-A paywall, a truncated body, or a preview means drop. Saved files land in `fulltext/` (gitignored).
+A paywall, a truncated body, or a preview means drop. Saved files land in `fulltext/` (gitignored). Do not fetch a URL that already has a usable file there.
 
 `python3 scripts/triage2.py` can order the reading queue from saved text. Its number is not the /7 score.
 
