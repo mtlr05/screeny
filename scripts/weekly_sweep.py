@@ -2,11 +2,13 @@
 
 Default window is the last 7 days. Paths are repo-relative (config/, state/, reports/).
 
-A free post is dropped on the title only when it is a recap, macro note, or list
-(whole words). Every other free post is fetched (first 1500 words) and dropped
-only when that text is clearly not a single-stock pitch, or the author is short,
-selling, or on hold. Unclear posts stay candidates. Every in-window post is
-recorded in reports/substack_screen_<date>.csv.
+A free post is dropped on the title only when it is a recap, a macro phrase
+(not the bare word), or a list, matched on whole words. A title that names one
+ticker or one exchange is not title-dropped; the body screen decides. Every
+other free post is fetched (first 1500 words) and dropped only when that text
+is clearly not a single-stock pitch, or the author is short, selling, or on
+hold. Unclear posts stay candidates. Every in-window post is recorded in
+reports/substack_screen_<date>.csv.
 """
 import argparse
 import collections
@@ -29,10 +31,21 @@ from _paths import CACHE, REPORTS, ROOT, SEEN, SOURCES, ensure, user_agent
 from longcheck import exclude_reason
 
 # Whole words only, so "chart" does not match Charter and "letter" does not match newsletter.
+# "macro" alone is not a drop: a pitch can be "our best macro idea".
 NEG = re.compile(
-    r"\b(?:portfolio update|monthly|weekly|roundup|recap|letter|macro|podcast|links|reading list|week in|digest|market update|watchlist|thread|interview|chart)\b",
+    r"\b(?:portfolio update|monthly|weekly|roundup|recap|letter|podcast|links|reading list|week in|digest|market update|watchlist|thread|interview|chart"
+    r"|macro\s+(?:update|outlook|view|notes?|letter|weekly|monthly|recap|roundup|thoughts))\b",
     re.I,
 )
+# One $TICKER, exchange-qualified symbol (AXL.V), or exchange tag. Two names stay a title drop.
+_LISTING = re.compile(
+    r"\$([A-Za-z]{1,6}(?:\.[A-Za-z]{1,3})?)"
+    r"|\((?:NYSE|NASDAQ|Nasdaq|AMEX|TSX|TSXV|TSX-V|CSE|OTCQX|OTCQB|OTC)\s*:\s*([A-Za-z][A-Za-z0-9.]{0,8})\)"
+    r"|\b(?:NYSE|NASDAQ|Nasdaq|AMEX|TSX|TSXV|TSX-V|CSE|OTC)\s*:\s*([A-Za-z][A-Za-z0-9.]{0,8})\b"
+    r"|\b([A-Za-z]{2,6}\.(?:V|TO|CN|NE))\b",
+    re.I,
+)
+_BARE_EXCHANGE = re.compile(r"\b(NYSE|NASDAQ|TSX|TSXV|TSX-V|AMEX)\b", re.I)
 BOOK = re.compile(
     r"\bbook review\b|\breview of (?:the |this )?(?:book|memoir)\b|\bi (?:just |recently )?finished (?:reading )?(?:the |this )?book\b",
     re.I,
@@ -91,13 +104,37 @@ def title_blob(post):
     return ((post.get("title") or "") + " " + (post.get("subtitle") or "")).strip()
 
 
+def _listing_bases(text):
+    bases = []
+    for match in _LISTING.finditer(text or ""):
+        raw = next(group for group in match.groups() if group)
+        base = re.sub(r"\.(?:V|TO|CN|NE)$", "", raw.upper())
+        if base and base not in bases:
+            bases.append(base)
+    return bases
+
+
+def single_listing_title(text):
+    """True when the title names one ticker or one exchange. The body screen decides."""
+    bases = _listing_bases(text)
+    if len(bases) == 1:
+        return True
+    if bases:
+        return False
+    exchanges = {match.group(1).upper() for match in _BARE_EXCHANGE.finditer(text or "")}
+    return len(exchanges) == 1
+
+
 def title_drop_reason(post):
     """Paywall, or a recap/macro/list title. A missing pitch keyword is not a drop."""
     # A swept post always has audience. Only "everyone" is free. A backlog row
     # with no audience key is not treated as paywalled.
     if "audience" in post and post.get("audience") != "everyone":
         return "paywalled"
-    if NEG.search(title_blob(post)):
+    blob = title_blob(post)
+    if single_listing_title(blob):
+        return ""
+    if NEG.search(blob):
         return "not a single-stock pitch (recap/macro/list)"
     return ""
 
