@@ -27,7 +27,7 @@ import concurrent.futures as cf
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "bat"))
-from _paths import CACHE, REPORTS, ROOT, SEEN, SOURCES, ensure, user_agent
+from _paths import CACHE, FULLTEXT, REPORTS, ROOT, SEEN, SOURCES, ensure, user_agent
 from longcheck import exclude_reason
 
 # Whole words only, so "chart" does not match Charter and "letter" does not match newsletter.
@@ -82,6 +82,7 @@ COMPANY_WORD = re.compile(
 POSSESSIVE_NAME = re.compile(r"\b[A-Z][\w.-]*(?:'s|’s)\b")
 SCREEN_FIELDS = ("url", "title", "decision", "reason")
 BODY_WORDS = 1500
+BOT_PAGE = re.compile(r"press\s*&\s*hold|bot check|captcha", re.I)
 
 
 def posts_in_window(res):
@@ -202,6 +203,63 @@ def first_words(text, n=BODY_WORDS):
     return " ".join((text or "").split()[:n])
 
 
+def text_usable(text):
+    """A stored body can be reused. Empty text and a bot-check page cannot."""
+    if BOT_PAGE.search(text or ""):
+        return False
+    return len((text or "").split()) >= 20
+
+
+def post_slug(post):
+    match = re.search(r"/p/([^/?#]+)", urlparse(post.get("url") or "").path)
+    return unquote(match.group(1)) if match else ""
+
+
+def body_store_path(post, store_dir):
+    slug = re.sub(r"[^A-Za-z0-9._-]+", "-", post_slug(post))[:80]
+    if not slug:
+        return ""
+    return os.path.join(store_dir, slug + ".txt")
+
+
+def stored_body_paths(post, store_dir=None):
+    paths = []
+    if store_dir:
+        path = body_store_path(post, store_dir)
+        if path:
+            paths.append(path)
+        return paths
+    slug = post_slug(post)
+    if not slug:
+        return paths
+    paths.append(os.path.join(FULLTEXT, slug[:60] + ".txt"))
+    paths.append(body_store_path(post, os.path.join(CACHE, "screen_bodies")))
+    return paths
+
+
+def load_stored_body(post, store_dir=None):
+    for path in stored_body_paths(post, store_dir):
+        if not path or not os.path.isfile(path):
+            continue
+        try:
+            text = open(path, encoding="utf-8").read()
+        except OSError:
+            continue
+        if text_usable(text):
+            return first_words(text)
+    return ""
+
+
+def save_stored_body(post, text, store_dir=None):
+    directory = store_dir or os.path.join(CACHE, "screen_bodies")
+    path = body_store_path(post, directory)
+    if not path or not text_usable(text):
+        return
+    ensure(os.path.dirname(path))
+    with open(path, "w", encoding="utf-8") as handle:
+        handle.write(text)
+
+
 def post_api(post):
     url = post.get("url") or ""
     parts = urlparse(url)
@@ -219,8 +277,11 @@ def post_api(post):
     return f"https://{host}/api/v1/posts/{slug}"
 
 
-def fetch_body(post, headers, getter=None):
-    """Plain text of the post, first 1500 words. Empty string if the fetch fails."""
+def fetch_body(post, headers, getter=None, store_dir=None):
+    """Plain text of the post, first 1500 words. Reuse a usable stored file."""
+    stored = load_stored_body(post, store_dir)
+    if stored:
+        return stored
     api = post_api(post)
     if not api:
         return ""
@@ -231,9 +292,11 @@ def fetch_body(post, headers, getter=None):
         if not isinstance(payload, dict):
             return ""
         raw = payload.get("body_html") or payload.get("truncated_body_text") or ""
-        return first_words(html_to_text(raw))
+        text = first_words(html_to_text(raw))
     except Exception:
         return ""
+    save_stored_body(post, text, store_dir)
+    return text
 
 
 def _row(post, decision, reason):

@@ -9,6 +9,8 @@ On-demand scout for single-stock investment write-ups. David runs it from the Cu
 - Never use Seeking Alpha investing groups.
 - If Seeking Alpha shows a bot check, pause and try that article once more. If it fails again, stop gathering and score what was already read in full. The new-article pull is the signed-in browser plus `scripts/sa_ingest.py`. Do not store a login or a cookie. If the session has expired, ask the user to sign in.
 - The author must disclose a long position (a Seeking Alpha "beneficial long position" disclosure, or an explicit "I own / I am long / I hold a position" statement). A Buy/LONG rating alone, or "may hold" boilerplate, does not count. Drop reason: `author not long`.
+- During a long step (a sweep or article reads), check its progress log every 1 to 2 minutes. The check takes a second or two. Restart the step immediately if it has stalled or died. On a Content Error, back off and resume.
+- Do not re-download article text. Keep fetched text in `fulltext/` and in `state/`. On any run, including after a failed run, check stored texts and seen or result records first. Reuse them. Fetch only a missing article, or one whose stored file is unusable (a bot-check page or an empty file).
 
 ## Preferences
 

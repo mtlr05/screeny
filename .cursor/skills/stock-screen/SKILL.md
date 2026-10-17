@@ -16,6 +16,11 @@ Standing rules in `AGENTS.md` win if this file and the chat disagree. Do not cha
 
 Run commands from the repo root.
 
+## Run checks
+
+- **Progress.** During a long step, such as a sweep or a run of article reads, check its progress log every 1 to 2 minutes. The check itself takes a second or two. If the step has stalled or the process has died, restart it immediately. On a Content Error, back off and resume.
+- **No re-download.** Fetched article text stays in `fulltext/` and in `state/`. On every run, including one after a failed run, look at stored texts and seen or result records first. Reuse what is there. Fetch only an article that is missing, or whose stored file is unusable (a bot-check page or an empty file). `weekly_sweep.py` reuses a usable stored body instead of fetching it again. `sa_ingest.py resume` leaves a usable `fulltext/sa_<id>.txt` off the fetch list.
+
 ## 1. Sweep sources
 
 ```bash
