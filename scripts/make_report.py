@@ -521,6 +521,12 @@ def render(doc, onepagers, live):
             A(f"  - Read in full: {sa.get('read', 0)} ({sa.get('previews', 0)} were previews and were not scored)")
             A(f"  - Skipped because the full text could not be read: {sa.get('skipped_unread', skipped or 0)}")
             A(f"  - Scored: {sa.get('scored', 0)}")
+            others = sa.get("long_other_security") or []
+            if others:
+                detail = ", ".join(
+                    f"{item.get('article') or ''} ({item.get('disclosed') or ''})".strip() for item in others
+                )
+                A(f"- **Long in another security of the same issuer:** {len(others)} ({detail}). These are not scored; the user can judge them.")
             unread = sa.get("unread") or []
             if unread:
                 tickers = ", ".join(item.get("ticker") or item.get("id") or "" for item in unread)

@@ -376,30 +376,107 @@ def parse_fulltext(text):
     }
 
 
-def ticker_named(disclosure, ticker, tickers_line):
-    wanted = (ticker or "").upper()
-    if not wanted:
-        match = re.search(r"\(([A-Z]{1,6})\)", tickers_line or "")
-        wanted = match.group(1) if match else ""
-    if not wanted:
+def _base_symbol(symbol):
+    token = (symbol or "").upper().strip()
+    token = token.split(":")[-1]
+    for suffix in (".TO", ".V", ".CN", ".NE"):
+        if token.endswith(suffix):
+            return token[: -len(suffix)]
+    return token.split(".")[0]
+
+
+def _norm_company(name):
+    text = re.sub(r"\b(incorporated|inc|corp|corporation|ltd|limited|lp|l\.p|plc|company|co)\b", " ", name or "", flags=re.I)
+    text = re.sub(r"[^a-z0-9 ]", " ", text.lower())
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _issuer_name(name):
+    head = re.split(r"\b(notes?|preferred|preference|bond|debenture|due)\b", name or "", maxsplit=1, flags=re.I)[0]
+    return _norm_company(head)
+
+
+def _is_other_security(symbol, quote):
+    name = (quote or {}).get("longName") or ""
+    if (quote or {}).get("quoteType") in ("PREFERRED", "BOND"):
+        return True
+    if re.search(r"\b(notes?|preferred|preference|bond|debenture|baby bond)\b", name, re.I):
+        return True
+    if re.search(r"(?:\.PR|PR[A-Z]?|[-.]P[A-Z]?)$", (symbol or "").upper()):
+        return True
+    return False
+
+
+def _same_company_name(left, right):
+    a = _issuer_name((left or {}).get("longName") or "")
+    b = _issuer_name((right or {}).get("longName") or "")
+    if not a or not b:
         return False
-    return bool(re.search(rf"\b{re.escape(wanted)}\b", disclosure or "", re.I))
+    if a == b:
+        return True
+    shorter, longer = (a, b) if len(a) <= len(b) else (b, a)
+    return len(shorter.split()) >= 2 and longer.startswith(shorter)
 
 
-def classify_text(text, ticker=""):
-    """full, preview, not_long, or blocked. A bot-check page is blocked."""
+def disclosed_symbols(disclosure):
+    match = LONG.search(disclosure or "")
+    if not match:
+        return []
+    tail = (disclosure or "")[match.end():]
+    tail = re.split(r"\.\s", tail, maxsplit=1)[0]
+    found = re.findall(r"\b[A-Z]{1,5}(?:\.[A-Z]{1,3})?\b", tail)
+    stop = {"I", "A", "AN", "AND", "THE", "OF", "IN", "OR", "SA", "ET", "US", "USA"}
+    return [item for item in found if item not in stop]
+
+
+def long_relation(article, disclosed, quotes=None):
+    """match, long_other_security, or unrelated. quotes maps a symbol to a Yahoo quote."""
+    quotes = quotes or {}
+    article_key = ysym(article) or (article or "").upper()
+    article_quote = quotes.get(article_key) or quotes.get(article or "")
+    other = []
+    for raw in disclosed or []:
+        disclosed_key = ysym(raw) or raw.upper()
+        disclosed_quote = quotes.get(disclosed_key) or quotes.get(raw)
+        other_security = _is_other_security(raw, disclosed_quote)
+        bases_equal = _base_symbol(article) == _base_symbol(raw) and bool(_base_symbol(article))
+        names_equal = _same_company_name(article_quote, disclosed_quote)
+        exact = article_key and article_key == disclosed_key
+        if other_security and (names_equal or bases_equal or (article_key and disclosed_key.startswith(article_key))):
+            other.append(raw)
+            continue
+        if exact or (bases_equal and not other_security) or (names_equal and not other_security):
+            if bases_equal and article_quote and disclosed_quote and not names_equal and not exact:
+                continue
+            return "match", ""
+    if other:
+        return "long_other_security", "long_other_security: " + ", ".join(other)
+    return "unrelated", ""
+
+
+def classify_text(text, ticker="", quotes=None):
+    """full, preview, not_long, long_other_security, or blocked. A bot-check page is blocked."""
     if BOT.search(text or ""):
         return "blocked", "bot check"
     parsed = parse_fulltext(text or "")
     words = len(unwrap_lines(parsed["body"]).split())
     if words < MIN_WORDS or PAYWALL.search(text or "") or not parsed["disclosure"]:
         return "preview", "preview or missing analyst disclosure"
-    if not LONG.search(parsed["disclosure"]) or not ticker_named(parsed["disclosure"], ticker, parsed["tickers"]):
+    if not LONG.search(parsed["disclosure"]):
         return "not_long", "author not long"
-    return "full", ""
+    article = ticker or ""
+    if not article:
+        match = re.search(r"\(([A-Z]{1,6}(?:\.[A-Z]{1,3})?)\)", parsed.get("tickers") or "")
+        article = match.group(1) if match else ""
+    relation, detail = long_relation(article, disclosed_symbols(parsed["disclosure"]), quotes)
+    if relation == "match":
+        return "full", ""
+    if relation == "long_other_security":
+        return "long_other_security", detail
+    return "not_long", "author not long"
 
 
-def check(path, results_path, candidates_path=""):
+def check(path, results_path, candidates_path="", quotes=None):
     text = open(path, encoding="utf-8").read()
     parsed = parse_fulltext(text)
     aid = article_id(parsed["url"] or os.path.basename(path))
@@ -408,7 +485,19 @@ def check(path, results_path, candidates_path=""):
     if existing.get("status") == "scored":
         print(f"{aid} already scored")
         return 0
-    status, reason = classify_text(text, existing.get("ticker") or "")
+    article = existing.get("ticker") or ""
+    if quotes is None:
+        symbols = []
+        for raw in [article] + disclosed_symbols(parsed.get("disclosure") or ""):
+            key = ysym(raw) if raw.endswith(":CA") else (raw or "").upper()
+            if key and key not in symbols:
+                symbols.append(key)
+        try:
+            quotes = fetch_quotes(symbols)
+        except QuoteFetchError as exc:
+            print(f"WARNING: {exc}")
+            quotes = {}
+    status, reason = classify_text(text, article, quotes)
     words = len((parsed["body"] or "").split())
     record = {
         "url": parsed["url"] or existing.get("url") or "",
@@ -430,7 +519,13 @@ def check(path, results_path, candidates_path=""):
             if article_id(row.get("url") or "") == aid:
                 row["wordcount"] = str(words)
                 row["audience"] = "preview" if status == "preview" else "everyone"
-                row["sa_status"] = {"full": "full", "preview": "preview", "not_long": "not_long", "blocked": "blocked"}[status]
+                row["sa_status"] = {
+                    "full": "full",
+                    "preview": "preview",
+                    "not_long": "not_long",
+                    "long_other_security": "long_other_security",
+                    "blocked": "blocked",
+                }[status]
                 row["drop_reason"] = reason
         write_csv(candidates_path, CAND_FIELDS, rows)
     print(f"{aid} {status}")
@@ -442,18 +537,20 @@ def check(path, results_path, candidates_path=""):
 
 def merge_counts(candidates):
     """Count from sa_status. drop_reason does not change the counts."""
-    previews = not_long = unread = read = 0
+    previews = not_long = unread = read = other = 0
     for row in candidates:
         status = (row.get("sa_status") or "").strip()
         if status == "preview":
             previews += 1
         elif status == "not_long":
             not_long += 1
+        elif status == "long_other_security":
+            other += 1
         elif status == "full":
             read += 1
         elif status in ("screened", "blocked"):
             unread += 1
-    return {"read": read, "previews": previews, "skipped_unread": unread, "not_long": not_long}
+    return {"read": read, "previews": previews, "skipped_unread": unread, "not_long": not_long, "long_other_security": other}
 
 
 def merge(candidates_path, triage_path, results_path, breakdown_path):
@@ -507,6 +604,11 @@ def merge(candidates_path, triage_path, results_path, breakdown_path):
         "previews": counts["previews"],
         "skipped_unread": counts["skipped_unread"],
         "not_long": counts["not_long"],
+        "long_other_security": [
+            {"article": row.get("ticker") or "", "disclosed": row.get("drop_reason") or "", "url": row.get("url") or ""}
+            for row in candidates
+            if (row.get("sa_status") or "") == "long_other_security"
+        ],
         "unread": [
             {"id": article_id(row.get("url") or ""), "ticker": row.get("ticker") or ""}
             for row in candidates
@@ -751,13 +853,43 @@ def self_test():
             _fulltext("https://seekingalpha.com/article/13", "Other", "Author A", "ACME", body, "No position is disclosed here.")
         )
         open(blocked, "w", encoding="utf-8").write("Press & Hold to continue\n")
-        assert check(good, results_path, cand_path) == 0
+        assert check(good, results_path, cand_path, quotes={}) == 0
         assert load_json(results_path, {})["1"]["status"] == "needs_score"
-        assert check(short, results_path) == 0
+        assert check(short, results_path, quotes={}) == 0
         assert load_json(results_path, {})["12"]["status"] == "drop"
-        assert check(wrong, results_path) == 0
+        assert check(wrong, results_path, quotes={}) == 0
         assert load_json(results_path, {})["13"]["reason"] == "author not long"
-        assert check(blocked, results_path) == 3
+        assert check(blocked, results_path, quotes={}) == 3
+        company_quotes = {
+            "ESVIF": {"longName": "Ensign Energy Services Inc.", "quoteType": "EQUITY"},
+            "ESI.TO": {"longName": "Ensign Energy Services Inc.", "quoteType": "EQUITY"},
+            "NIO": {"longName": "NIO Inc.", "quoteType": "EQUITY"},
+            "LI": {"longName": "Li Auto Inc.", "quoteType": "EQUITY"},
+            "XPEV": {"longName": "XPeng Inc.", "quoteType": "EQUITY"},
+            "DMLP": {"longName": "Dorchester Minerals, L.P.", "quoteType": "EQUITY"},
+            "BSM": {"longName": "Black Stone Minerals, L.P.", "quoteType": "EQUITY"},
+            "KRP": {"longName": "Kimbell Royalty Partners, LP", "quoteType": "EQUITY"},
+            "TXO": {"longName": "TXO Partners, L.P.", "quoteType": "EQUITY"},
+            "MFIC": {"longName": "MidCap Financial Investment Corporation", "quoteType": "EQUITY"},
+            "MFICL": {"longName": "MidCap Financial Investment Corporation 8.00% Notes due 2028", "quoteType": "EQUITY"},
+        }
+        long_body = " ".join(["word"] * 700)
+
+        def verdict(article, disclosed):
+            sample = _fulltext(
+                "https://seekingalpha.com/article/99",
+                "A note",
+                "Author A",
+                article,
+                long_body,
+                f"I have a beneficial long position in the shares of {disclosed}.",
+            )
+            return classify_text(sample, article, company_quotes)[0]
+
+        assert verdict("ESI.TO", "ESVIF") == "full"
+        assert verdict("XPEV", "NIO and LI") == "not_long"
+        assert verdict("TXO", "DMLP, BSM and KRP") == "not_long"
+        assert verdict("MFIC", "MFICL") == "long_other_security"
         merge(cand_path, triage_path, results_path, breakdown_path)
         triage = load_json(triage_path, [])
         assert len(triage) == 1 and triage[0]["source"] == "Seeking Alpha" and triage[0]["ticker"] == "ACME", triage
