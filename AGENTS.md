@@ -13,6 +13,7 @@ On-demand scout for single-stock investment write-ups. David runs it from the Cu
 ## Preferences
 
 - US or Canada listings. Small or mid cap, under about US$10B. One stock per pitch. Updates and earnings reviews count. The business needs a moat or an edge.
+- The Substack sweep drops a free post on the title only when it is a recap, a macro note, or a list (whole words). It then reads about the first 1,500 words and drops the post only when that text is clearly not a single-stock pitch, or the author is short, selling, or on hold. Unclear posts stay. Every in-window post is a row in `reports/substack_screen_<date>.csv`. Triage drop counts in the report are read from that file.
 - Full run: last 4 months. "This week": last 7 days.
 - Cap and listing are screening filters, not points on the /6 score.
 

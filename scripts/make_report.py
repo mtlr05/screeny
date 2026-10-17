@@ -22,6 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "bat"))
 from _paths import CACHE, EXAMPLES, REPORTS, RERUN, ROOT, SEEN, SOURCES, STATE, ensure
 import calc as batcalc
+import weekly_sweep
 
 LBL = ["Thesis/runway", "Return ~40%/yr", "CEO large holder", "Moat or edge", "Differential view", "Dated catalyst"]
 FULL = [1, 1, 1, 1, 1, 1]
@@ -326,7 +327,7 @@ def rank(articles):
 
 
 def render(doc, onepagers, live):
-    st = doc.get("stats") or {}
+    st = weekly_sweep.apply_screen_counts(doc.get("stats") or {})
     batting = doc.get("batting") or {}
     if os.path.exists(os.path.join(STATE, "batting.json")):
         stored = json.load(open(os.path.join(STATE, "batting.json"), encoding="utf-8"))
@@ -506,6 +507,11 @@ def render(doc, onepagers, live):
         if unr:
             A(f"  - Sources that could not be read: {len(unr)} (" + "; ".join(unr) + ")")
         A(f"- **Passed screening:** {st.get('passed', st.get('scored', len(rows)))} articles ({st.get('tickers', len({r['sym'] for r in rows}))} tickers)")
+        triage = st.get("dropped") or {}
+        if triage:
+            A("- **Substack triage drops (counted from the screen file):**")
+            for k, v in triage.items():
+                A(f"  - {k}: {v:,}")
         A("- **Dropped, by screening reason:**")
         for k, v in (st.get("drops") or {}).items():
             A(f"  - {k}: {v:,}")

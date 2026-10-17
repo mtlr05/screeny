@@ -1,4 +1,8 @@
-"""Cheap title triage of a swept-posts JSON file. Screening rules are applied later, by hand, after the full read."""
+"""Cheap title triage of a swept-posts JSON file. The body screen lives in weekly_sweep.py.
+
+A free post is dropped on the title only when it is a recap, macro note, or list (whole words).
+A missing pitch keyword is not a drop. Screening rules are applied later, after the full read.
+"""
 import collections
 import csv
 import json
@@ -18,11 +22,7 @@ if os.path.exists(scored):
 c = collections.Counter()
 out = []
 NEG = re.compile(
-    r"portfolio update|monthly|weekly|roundup|recap|letter|macro|podcast|links|reading list|week in|digest|market update|watchlist|thread|interview|chart",
-    re.I,
-)
-POS = re.compile(
-    r"thesis|deep.?dive|undervalued|upside|multibagger|why i (own|bought)|initiat|long |\(\$?[A-Z]{2,5}\)|\$[A-Z]{2,5}|tsx|nasdaq|nyse|otc|spin.?off|compounder|bagger|mispriced|cheap",
+    r"\b(?:portfolio update|monthly|weekly|roundup|recap|letter|macro|podcast|links|reading list|week in|digest|market update|watchlist|thread|interview|chart)\b",
     re.I,
 )
 for p in P:
@@ -36,9 +36,6 @@ for p in P:
     t = p["title"] + " " + p.get("subtitle", "")
     if NEG.search(t):
         c["recap/macro"] += 1
-        continue
-    if not POS.search(t):
-        c["no_pitch_signal"] += 1
         continue
     c["candidate"] += 1
     out.append(p)

@@ -14,6 +14,7 @@ rerun/*.json
 # Generated intermediates. Dated REPORT.md files under reports/ are kept.
 reports/triage_*.json
 reports/stats_*.json
+reports/substack_screen_*.csv
 reports/earnings_drops_*.json
 reports/source_upkeep_*.json
 
