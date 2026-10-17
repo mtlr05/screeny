@@ -4,7 +4,7 @@ SUB is a worked list of Substack pitches (ticker, date, url, title) used when an
 author has not been detected yet. `python3 bat/pitches.py SUBDOMAIN` reads the
 archive and tags each pitch with method title or body (see bat/lib.py).
 
-SA pitches come from bat/sa_auth.json when that file exists (public API metadata only).
+SA pitches come from bat/sa_author_cache.json when that file exists (public API metadata only).
 """
 import json
 import os
@@ -116,7 +116,7 @@ def main(argv=None):
     ap.add_argument("--out", default="", help="output JSON (default bat/pitches.json)")
     args = ap.parse_args(argv)
     out_path = args.out or os.path.join(HERE, "pitches.json")
-    sa_path = os.path.join(HERE, "sa_auth.json")
+    sa_path = os.path.join(HERE, "sa_author_cache.json")
     sa = json.load(open(sa_path, encoding="utf-8")) if os.path.exists(sa_path) else {}
     SAP = sa_from_auth(sa)
     sub = {k: list(v) for k, v in SUB.items()}

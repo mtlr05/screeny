@@ -41,7 +41,7 @@ If the API returns a bot check (HTTP 401, 403, or 429), stop. Do not retry with 
 
 Blogs: use the public archive or sitemap and the same long-pitch rules. Include deleted or moved posts when you can find them (for example the Wayback Machine) so survivorship bias stays limited.
 
-`python3 bat/pitches.py` with no subdomain writes `bat/pitches.json` from the hand list plus `bat/sa_auth.json`. Passing a subdomain detects that author and replaces their hand-entered rows. Do not invent pitches.
+`python3 bat/pitches.py` with no subdomain writes `bat/pitches.json` from the hand list plus `bat/sa_author_cache.json`. Passing a subdomain detects that author and replaces their hand-entered rows. Do not invent pitches.
 
 ## 2. Windows (relative to today)
 

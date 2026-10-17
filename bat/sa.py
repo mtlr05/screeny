@@ -64,4 +64,4 @@ for n, s in SL.items():
         time.sleep(2)
     out[n] = dict(slug=s, status=st, arts=arts)
     print(n, st, len(arts), arts[-1]["d"] if arts else "")
-json.dump(out, open(os.path.join(HERE, "sa_auth.json"), "w", encoding="utf-8"), indent=0)
+json.dump(out, open(os.path.join(HERE, "sa_author_cache.json"), "w", encoding="utf-8"), indent=0)

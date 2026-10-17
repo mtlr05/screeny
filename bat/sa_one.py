@@ -16,7 +16,7 @@ from _paths import user_agent
 
 H = {"User-Agent": user_agent()}
 HERE = os.path.dirname(os.path.abspath(__file__))
-path = os.path.join(HERE, "sa_auth.json")
+path = os.path.join(HERE, "sa_author_cache.json")
 out = json.load(open(path, encoding="utf-8")) if os.path.exists(path) else {}
 if len(sys.argv) < 3:
     print('usage: python3 bat/sa_one.py "Author Name" author-slug')
