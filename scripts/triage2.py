@@ -1,4 +1,4 @@
-"""Second-pass skim of saved full text. Ranking here is a reading queue, not the /6 score."""
+"""Second-pass skim of saved full text. Ranking here is a reading queue, not the /7 score."""
 import json
 import os
 import re

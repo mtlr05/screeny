@@ -26,6 +26,7 @@ from urllib.parse import urlparse
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _paths import CACHE, CONFIG, DORMANT, NEVER, REPORTS, ROOT, SEEN, SOURCES, STATE, ensure
+import make_report
 
 BAT = os.path.join(ROOT, "bat")
 sys.path.insert(0, BAT)
@@ -39,7 +40,10 @@ BA_DROP_FRAC = 0.334
 P_ADD = 0.23
 MIN_PITCHES = 5
 MIN_SCORED_FOR_TRIM = 3
-SCORE_FLOOR = 4.5
+# 4.5/6 and 5.25/7 are the same 75% bar. A stored total still marked out of 6
+# is compared with 4.5 so it is not judged against the 7-point number.
+SCORE_FLOOR_6 = 4.5
+SCORE_FLOOR_7 = 5.25
 FAILS_TO_DROP = 4
 BA_METHOD = "v2-excl-TO"
 BA_BUDGET = 300
@@ -330,11 +334,29 @@ def last_post_for(row, latest):
     return max(dates) if dates else ""
 
 
-def article_score(article):
-    if article.get("score") not in (None, ""):
-        return float(article["score"])
+def article_points(article):
+    """Return (points, scale). Six stored criteria stay out of 6; seven are out of 7."""
     sc = article.get("sc") or []
-    return float(sum(float(x) for x in sc[:6]))
+    if len(sc) >= 6:
+        expanded, scale = make_report.expand_sc(article)
+        return float(sum(expanded)), scale
+    if article.get("score") not in (None, ""):
+        scale = int(article.get("score_out_of") or 6)
+        return float(article["score"]), scale
+    raise ValueError("no score")
+
+
+def on_seven_point_scale(points, scale):
+    """Put a /6 total on the /7 scale. A /7 total is unchanged."""
+    if scale == 6:
+        return points * 7 / 6
+    return points
+
+
+def clears_recommend_bar(points, scale):
+    if scale == 6:
+        return points >= SCORE_FLOOR_6
+    return points >= SCORE_FLOOR_7
 
 
 def load_articles(path):
@@ -495,10 +517,10 @@ def build_stats(sources, seen_latest, articles, pitches, batting_by_key, prev, s
         if not day:
             continue
         try:
-            score = article_score(article)
+            points, scale = article_points(article)
         except (TypeError, ValueError):
             continue
-        scored.append((article.get("source") or "", score))
+        scored.append((article.get("source") or "", on_seven_point_scale(points, scale)))
 
     rows = []
     for src in sources:
@@ -552,7 +574,7 @@ def build_stats(sources, seen_latest, articles, pitches, batting_by_key, prev, s
 
 
 def high_scorers(sources, articles, cutoff):
-    """Subdomains with at least one article scored >= 4.5 inside the window."""
+    """Subdomains with a score of at least 5.25/7, or 4.5/6 if the total is still out of 6."""
     subs = set()
     details = {}
     keyed = [(row_keys(s), subdomain(s.get("url") or ""), s.get("name") or "") for s in sources if not is_sa(s) and (s.get("type") == "substack")]
@@ -563,11 +585,12 @@ def high_scorers(sources, articles, cutoff):
         if not day or day < cutoff:
             continue
         try:
-            score = article_score(article)
+            points, scale = article_points(article)
         except (TypeError, ValueError):
             continue
-        if score < SCORE_FLOOR:
+        if not clears_recommend_bar(points, scale):
             continue
+        score = points
         label = article.get("source") or ""
         for keys, sub, name in keyed:
             if sub and label_hits(label, keys):
@@ -581,7 +604,7 @@ def load_crawl(path, seeds, do_crawl):
     if do_crawl and seeds:
         import crawl_sources
 
-        return crawl_sources.crawl(sorted(seeds), seed_how="seed: author scored at least 4.5/6")
+        return crawl_sources.crawl(sorted(seeds), seed_how="seed: author scored at least 5.25/7")
     if path and os.path.exists(path):
         return json.load(open(path, encoding="utf-8"))
     return {}
@@ -673,7 +696,7 @@ def consider_adds(crawl, seeds, known_subs, pitches, batting_by_key, as_of, comp
         elif p_num > P_ADD and med_num > 0:
             item["reason"] = (
                 f"p_lt_hits {p_num:g} > {P_ADD} and median excess 2y {med_num:g} > 0, "
-                f"recommended by {m.group(1)} who scored >= 4.5/6"
+                f"recommended by {m.group(1)} who scored >= {SCORE_FLOOR_7}/7"
             )
             item["reason_code"] = "p_and_excess"
             adds.append(item)
@@ -873,7 +896,7 @@ def plan(args):
             "drop_stale": "no article published in 6 months (known last-post date only)",
             "drop_fails": f"feed failed to load on {FAILS_TO_DROP} consecutive runs",
             "no_drop_for": "producing no scored articles",
-            "add": f"Substack recommendation of an author who scored >= {SCORE_FLOOR}/6, and the candidate's ba2y_p_lt_hits > {P_ADD} and ba2y_median_excess > 0",
+            "add": f"Substack recommendation of an author who scored >= {SCORE_FLOOR_7}/7 (or >= {SCORE_FLOOR_6}/6 when the stored total is still out of 6), and the candidate's ba2y_p_lt_hits > {P_ADD} and ba2y_median_excess > 0",
             "cap": f"only when active tracked sources would exceed {args.cap}, trim lowest 6-month average among sources with >= {MIN_SCORED_FOR_TRIM} scored articles",
             "seeking_alpha": "not tracked; the weekly Seeking Alpha pull is unchanged",
         },
@@ -902,7 +925,7 @@ def plan(args):
     tagged = sum(1 for row in stats_rows if row.get("pitches_title") or row.get("pitches_body"))
     print(f"Pitch methods: title/body counts filled for {tagged} sources. Blank means bat/pitches.py has not detected that author yet.")
     if not seeds:
-        print("No Substack author with a score >= 4.5/6 in the score file, so no recommendation candidates were considered.")
+        print("No Substack author with a score >= 5.25/7 (or >= 4.5/6 on a total still stored out of 6) in the score file, so no recommendation candidates were considered.")
     elif not crawl:
         print("High-scoring authors are present, but there is no crawl cache. Re-run with --crawl to fetch their Substack recommendations.")
     for item in proposals:
@@ -1132,7 +1155,7 @@ def main():
     ap.add_argument("--out", default="")
     ap.add_argument("--as-of", default="")
     ap.add_argument("--cap", type=int, default=CAP)
-    ap.add_argument("--crawl", action="store_true", help="fetch Substack recommendations of authors who scored >= 4.5")
+    ap.add_argument("--crawl", action="store_true", help="fetch Substack recommendations of authors who scored >= 5.25/7")
     ap.add_argument("--compute-ba", action="store_true", help="call bat/calc.py for authors with saved pitches")
     ap.add_argument("--full-ba", action="store_true", help="compute the 2-year batting average for every Substack source (resumable)")
     ap.add_argument("--force", action="store_true", help="with --full-ba, recompute authors already stored with the current method")

@@ -201,9 +201,31 @@ def test_report_drop_counts_come_from_the_screen_file():
     print("report counts come from the screen file")
 
 
+def test_old_six_point_scores_stay_marked_out_of_6():
+    import make_report
+    import source_upkeep
+
+    old = {"sc": [1, 1, 1, 0.75, 0.5, 1]}
+    got = make_report.normalize(old)
+    assert got["sc"] == [1, 1, 1, 0.75, 0, 0.5, 1]
+    assert got["score_out_of"] == 6
+    assert got["score"] == 5.25
+    new = {"sc": [1, 1, 0, 0.5, 0.75, 1, 1]}
+    got = make_report.normalize(new)
+    assert got["score_out_of"] == 7
+    assert got["score"] == 5.25
+    assert got["sc"][3] == 0.5 and got["sc"][4] == 0.75
+    assert source_upkeep.clears_recommend_bar(4.5, 6)
+    assert not source_upkeep.clears_recommend_bar(4.5, 7)
+    assert source_upkeep.clears_recommend_bar(5.25, 7)
+    assert source_upkeep.on_seven_point_scale(4.5, 6) == 5.25
+    print("old totals stay out of 6; the add bar is 5.25/7")
+
+
 if __name__ == "__main__":
     test_in_window_sourced_count()
     test_pitch_titles_stay_and_recap_drops()
     test_macro_phrase_and_single_listing()
     test_content_screen_drops_only_clear_cases()
     test_report_drop_counts_come_from_the_screen_file()
+    test_old_six_point_scores_stay_marked_out_of_6()

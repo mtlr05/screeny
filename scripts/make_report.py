@@ -24,13 +24,14 @@ from _paths import CACHE, EXAMPLES, REPORTS, RERUN, ROOT, SEEN, SOURCES, STATE, 
 import calc as batcalc
 import weekly_sweep
 
-LBL = ["Thesis/runway", "Return ~40%/yr", "CEO large holder", "Moat or edge", "Differential view", "Dated catalyst"]
-FULL = [1, 1, 1, 1, 1, 1]
+LBL = ["Thesis/runway", "Return ~40%/yr", "CEO large holder", "Moat", "Edge", "Differential view", "Dated catalyst"]
+FULL = [1, 1, 1, 1, 1, 1, 1]
 CN = [
     "Thesis with secular runway",
     "Return ~40%/yr",
     "CEO is a large shareholder",
-    "Moat or edge",
+    "Moat",
+    "Edge",
     "Differential view",
     "Dated catalyst within ~24 months",
 ]
@@ -42,6 +43,56 @@ def miss(sc):
 
 def tot(sc):
     return round(sum(sc), 2)
+
+
+def expand_sc(article):
+    """Return (seven scores, points the total is out of).
+
+    Six stored numbers are the old rubric. Criterion 4 stays moat, edge is 0,
+    and the old fifth and sixth numbers become criteria 6 and 7. That total
+    stays out of 6. Seven stored numbers are the current rubric, out of 7.
+    """
+    sc = [float(x) for x in (article.get("sc") or [])]
+    if len(sc) >= 7:
+        return sc[:7], 7
+    if len(sc) >= 6:
+        return [sc[0], sc[1], sc[2], sc[3], 0.0, sc[4], sc[5]], 6
+    return None, None
+
+
+def normalize(article):
+    """Copy an article onto the seven-criterion vector and mark the scale."""
+    item = dict(article)
+    sc, out_of = expand_sc(item)
+    if sc is None:
+        return item
+    item["sc"] = sc
+    item["score_out_of"] = out_of
+    item["score"] = tot(sc)
+    return item
+
+
+def score_cell(article):
+    out_of = article.get("score_out_of") or 7
+    return f"{article['score']:g}/{out_of}"
+
+
+def criterion_evidence(k, article, onepager):
+    """Evidence for criterion k (1-7). Old notes use c5/c6 for what are now 6 and 7."""
+    notes = article.get("notes") or {}
+    op = onepager or {}
+    legacy = article.get("score_out_of") == 6
+    if legacy and k == 5:
+        return "0. Edge was not a separate criterion on this out-of-6 score."
+    key = f"c{k}"
+    if legacy and k == 6:
+        key = "c5"
+    elif legacy and k == 7:
+        key = "c6"
+    evidence = notes.get(key) or op.get(key) or "not recorded"
+    if k == 3 and evidence == "not recorded":
+        evidence = "not stated"
+    return evidence
 
 
 def _chance(summary):
@@ -212,9 +263,10 @@ def top_record_lines(doc, authors, seen_path=None):
     scores = {}
     for article in doc.get("articles") or []:
         url = (article.get("url") or "").rstrip("/")
-        sc = article.get("sc") or []
-        if url and len(sc) >= 6:
-            scores[url] = tot(sc[:6])
+        norm = normalize(article)
+        sc = norm.get("sc") or []
+        if url and len(sc) == 7:
+            scores[url] = (norm["score"], norm["score_out_of"])
     posts = {}
 
     def add(url, title, date, source):
@@ -274,7 +326,9 @@ def top_record_lines(doc, authors, seen_path=None):
         lines.append("| Date | Article | Score |")
         lines.append("|---|---|---|")
         for row in rows:
-            score = "" if row["score"] is None else f"{row['score']:g}"
+            score = ""
+            if isinstance(row["score"], tuple):
+                score = f"{row['score'][0]:g}/{row['score'][1]}"
             title = _md_cell(row["title"])
             lines.append(f"| {row['date']} | [{title}]({row['url']}) | {score} |")
         lines.append("")
@@ -299,12 +353,9 @@ def since_publish(r, live):
 def rank(articles):
     rows = []
     for r in articles:
-        sc = r.get("sc") or []
-        if len(sc) < 6:
+        if expand_sc(r)[0] is None:
             continue
-        item = dict(r)
-        item["sc"] = list(sc[:6])
-        item["score"] = tot(item["sc"])
+        item = normalize(r)
         rows.append(item)
     best = {}
     for r in rows:
@@ -352,7 +403,7 @@ def render(doc, onepagers, live):
     A("## 1. Screening")
     A("")
     A(
-        'A post must be: free to read in full (paywalled or preview-only posts are dropped); a single-stock bullish pitch (updates and earnings reviews count); on a small/mid-cap company; listed in the US or Canada; on a business with a moat or an edge; and the author must disclose holding a long position (a Seeking Alpha "beneficial long position" disclosure, or an explicit "I own / I am long / I hold a position" statement; "may hold" boilerplate does not count). Any length qualifies.'
+        'A post must be: free to read in full (paywalled or preview-only posts are dropped); a single-stock bullish pitch (updates and earnings reviews count); on a small/mid-cap company; listed in the US or Canada; and the author must disclose holding a long position (a Seeking Alpha "beneficial long position" disclosure, or an explicit "I own / I am long / I hold a position" statement; "may hold" boilerplate does not count). Any length qualifies. Lacking a moat or an edge is not a drop.'
     )
     A("")
     A("## 2. Reported, not scored")
@@ -361,32 +412,35 @@ def render(doc, onepagers, live):
         "Fact-check of key claims, author batting average (share of past long pitches that beat SPY, or XIC.TO for Canadian listings, over 1-year and 2-year windows; see the Author batting average skill), management guidance record, balance-sheet flags, and soft notes. Shown per name; they do not change the score."
     )
     A("")
-    A("## 3. Scoring (out of 6, 1 point each)")
+    A("## 3. Scoring (out of 7, 1 point each)")
     A("")
     A("1. **Thesis with secular runway**: cheap with no growth = 0.5.")
     A("2. **Return ~40%/yr**: from the publish-day close to the author's target over the author's timeframe (2 years if none given). 25-40%/yr = 0.5; under 25%/yr = 0.")
     A("3. **CEO is a large shareholder** (roughly 5%+ = 1; 1-5% = 0.5).")
-    A("4. **Moat or edge**: moat graded on the five moat types (Strong 1 / Moderate 0.75 / Narrow 0.5), or an edge: proven operator, allocator or dealmaker, or an obsessive founder-builder (a good guidance record supports it).")
-    A("5. **Differential view**: names why the market is wrong (stigma or label, temporary or mundane issue, neglect) and why it corrects; an overreaction to temporary news supports it.")
-    A("6. **Dated catalyst within ~24 months**: undated = 0.5.")
+    A("4. **Moat**: five moat types, Strong 1 / Moderate 0.75 / Narrow 0.5; none described = 0.")
+    A("5. **Edge**: checkable evidence about the people, Strong 1 / Moderate 0.75 / Narrow 0.5; assertion only = 0.")
+    A("6. **Differential view**: names why the market is wrong (stigma or label, temporary or mundane issue, neglect) and why it corrects; an overreaction to temporary news supports it.")
+    A("7. **Dated catalyst within ~24 months**: undated = 0.5.")
+    A("")
+    A("A score stored on the old six-point rubric is marked /6. On that rubric criterion 4 is moat, edge is 0, and the old criteria 5 and 6 are shown as 6 and 7.")
     A("")
     A(f"Ranking: best article per ticker; top 15 plus all ties at 15th (cut = {cut:g}), ties alphabetical.")
     A("")
     A("## Ranked list")
     A("")
-    A("| # | Ticker | Score /6 | Article | Source | Published | BA 2y (1y) | Below full credit | Since publish vs benchmark |")
+    A("| # | Ticker | Score | Article | Source | Published | BA 2y (1y) | Below full credit | Since publish vs benchmark |")
     A("|---|---|---|---|---|---|---|---|---|")
     out = []
     for n, r in enumerate(ranked, 1):
         ps = since_publish(r, live)
-        A(f"| {n} | {r['sym']} | {r['score']:g} | [{r['title']}]({r['url']}) | {r['source']} | {r['date']} | {cell_bat(r, batting)} | {miss(r['sc'])} | {ps} |")
+        A(f"| {n} | {r['sym']} | {score_cell(r)} | [{r['title']}]({r['url']}) | {r['source']} | {r['date']} | {cell_bat(r, batting)} | {miss(r['sc'])} | {ps} |")
         out.append((n, r))
     A("")
     A("### Per-name notes (reported, not scored)")
     A("")
     for n, r in out:
         nt = r.get("notes") or {}
-        A(f"**{n}. {r['sym']}** ({r['score']:g}): {r.get('note') or ''}.")
+        A(f"**{n}. {r['sym']}** ({score_cell(r)}): {r.get('note') or ''}.")
         for k, label in (("fact", "Fact-check"), ("guidance", "Guidance"), ("balance", "Balance"), ("soft", "Soft")):
             if nt.get(k):
                 A(f"- {label}: {nt[k]}")
@@ -417,10 +471,10 @@ def render(doc, onepagers, live):
         A("")
     A("## Next six (ranks 16–21)")
     A("")
-    A("| # | Ticker | Score /6 | Article | Source | Below full credit |")
+    A("| # | Ticker | Score | Article | Source | Below full credit |")
     A("|---|---|---|---|---|---|")
     for i, r in enumerate(near, 16):
-        A(f"| {i} | {r['sym']} | {r['score']:g} | [{r['title']}]({r['url']}) | {r['source']} | {miss(r['sc'])} |")
+        A(f"| {i} | {r['sym']} | {score_cell(r)} | [{r['title']}]({r['url']}) | {r['source']} | {miss(r['sc'])} |")
     A("")
     for line in top_record_lines(doc, top_record_authors()):
         A(line)
@@ -455,7 +509,7 @@ def render(doc, onepagers, live):
         o = onepagers.get(r["sym"]) if onepagers else None
         A('<div class="pb"></div>')
         A("")
-        A(f"### {n}. {r['sym']}" + (f" ({o['company']})" if o else "") + f": {r['score']:g} / 6")
+        A(f"### {n}. {r['sym']}" + (f" ({o['company']})" if o else "") + f": {score_cell(r)}")
         A("")
         tail = f". {o['words']} words. {o['read']}. Long disclosure: {o['long']}." if o else "."
         A(f"[{r['title'].rstrip('.')}]({r['url']}). {r['source']}, {r['date']}{tail}")
@@ -469,15 +523,12 @@ def render(doc, onepagers, live):
                 A(f"**Author batting average:** {fmt_bat(bat)}")
                 A("")
         notes = r.get("notes") or {}
-        if not o and not any(notes.get("c%d" % k) for k in range(1, 7)):
-            A("_One-pager not yet written for this name; add it to onepagers.json or notes.c1–c6 in scored.json._")
+        if not o and not any(notes.get("c%d" % k) for k in range(1, 8)):
+            A("_One-pager not yet written for this name; add it to onepagers.json or notes.c1–c7 in scored.json._")
             A("")
             continue
         for k, (lab, v) in enumerate(zip(CN, r["sc"]), 1):
-            evidence = notes.get("c%d" % k) or (o or {}).get("c%d" % k) or "not recorded"
-            if k == 3 and evidence == "not recorded":
-                evidence = "not stated"
-            A(f"{k}. **{lab}: {v:g}.** {evidence}")
+            A(f"{k}. **{lab}: {v:g}.** {criterion_evidence(k, r, o)}")
         if notes.get("return_formula"):
             A("")
             A(f"Return formula: {notes['return_formula']}")
@@ -516,7 +567,7 @@ def render(doc, onepagers, live):
         for k, v in (st.get("drops") or {}).items():
             A(f"  - {k}: {v:,}")
         A(f"- **Read in full:** {st.get('read', 0)}")
-        A(f"- **Scored /6:** {st.get('scored', len(rows))}")
+        A(f"- **Scored:** {st.get('scored', len(rows))}")
         if skipped is not None:
             A(f"- **Seeking Alpha skipped (full text unavailable, not scored):** {skipped}")
         sa = st.get("sa")
@@ -550,9 +601,9 @@ def write_outputs(md, rows, ranked, out_path):
     rk = {id(r) for r in ranked}
     with open(csv_path, "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
-        w.writerow(["ticker", "score", "T", "R", "C", "M", "D", "K", "title", "url", "source", "date", "ranked"])
+        w.writerow(["ticker", "score", "score_out_of", "T", "R", "C", "Moat", "Edge", "View", "Catalyst", "title", "url", "source", "date", "ranked"])
         for r in sorted(rows, key=lambda r: (-r["score"], r["sym"])):
-            w.writerow([r["sym"], r["score"], *r["sc"], r["title"], r["url"], r["source"], r["date"], id(r) in rk])
+            w.writerow([r["sym"], r["score"], r.get("score_out_of") or "", *r["sc"], r["title"], r["url"], r["source"], r["date"], id(r) in rk])
     print(out_path)
     print(csv_path)
 
