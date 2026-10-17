@@ -1,6 +1,6 @@
 # Screeny
 
-On-demand stock-article scout. It sweeps Substack and a short list of blogs, forums, Value Investors Club, and Seeking Alpha, reads pitches in full, scores them out of 6, and writes a ranked Markdown report.
+On-demand stock-article scout. It sweeps Substack and a short list of blogs, forums, Value Investors Club, and Seeking Alpha, reads pitches in full, scores them out of 7, and writes a ranked Markdown report. A total still stored on the old six-point rubric is marked /6.
 
 The user runs it from the Cursor agent window. A run starts when someone asks. Nothing runs on a timer. The Seeking Alpha Long Ideas pull is the only step that uses a signed-in browser. No password or cookie is stored in the repo.
 
@@ -134,7 +134,7 @@ flowchart TD
 
   auto["Automatic add search in the same --plan"]
   stats --> auto
-  high["Recommendation of an author who scored at least 4.5/6"]
+  high["Recommendation of an author who scored at least 5.25/7"]
   auto --> high
   stock{"Publication reads as stock research?"}
   high --> stock
@@ -189,7 +189,7 @@ The cap trim runs only when the list, after those drops and after counting propo
 
 ### When a source is proposed for addition
 
-An add is a Substack recommendation of an author who scored at least 4.5/6, and only when the candidate's `p` is greater than 0.23 and `median_excess_2y` is greater than 0. A missing `p` or a missing median excess does not pass. A candidate who fails either test is recorded as not added.
+An add is a Substack recommendation of an author who scored at least 5.25/7, and only when the candidate's `p` is greater than 0.23 and `median_excess_2y` is greater than 0. 5.25/7 is the old 4.5/6 bar scaled to seven points (both are 75%). A stored total still marked out of 6 clears that same bar at 4.5, so it is not compared with 5.25. A missing `p` or a missing median excess does not pass. A candidate who fails either test is recorded as not added.
 
 `p` is `ba2y_p_lt_hits`. `bat/calc.py` `p_lt_hits` computes the binomial probability `P(X <= hits - 1)` with `n` equal to the number of 2-year pitches and a success probability of 0.5, then rounds to 4 decimals. It is the chance of fewer hits than this author got if each pitch were a coin flip. It is 0 when hits is 0, and blank when `n` is missing. The same formula is described under **p_lt_hits_by_chance**. For 1 hit out of 2, `p` is 0.25. For 2 hits out of 2, it is 0.75.
 
@@ -240,7 +240,7 @@ Seeking Alpha is excluded. Every other active source records:
 
 ## Batting average
 
-The 2-year average used for upkeep is separate from the /6 score. The /6 score still requires an explicit long disclosure. The batting average answers a different question: of the author's past pitches, how many beat the benchmark.
+The 2-year average used for upkeep is separate from the /7 score. The /7 score still requires an explicit long disclosure. The batting average answers a different question: of the author's past pitches, how many beat the benchmark.
 
 ### Window and sample
 
@@ -258,7 +258,7 @@ One pitch per ticker. Inside a window, the earliest pitch on that ticker is the 
 - A title that names exactly one US or Canada ticker is method `title`. A dual listing such as `(TSXV: SUM or OTC: SUMMF)` is one company. The batting-average title parser maps both TSX and TSXV to `.TO`. `(TYO: 7974)` and other non-US/Canada tags are dropped.
 - No ticker, or more than one company: fetch `https://<host>/api/v1/posts/<slug>`, cached under `cache/` (gitignored). Method `body`. The ticker comes from the opening text and from repeated mentions (`$TICKER`, `(NYSE: X)`, `(TSX: X)`, `ticker: X`). If none appear, the company name is looked up on Yahoo (US/Canada equity only). A holding-company title is not replaced by a subsidiary ticker.
 - The 2-year pass fetches the body even when the title already names the ticker, so a hold or short in the body is visible. Bodies for the 1–3 year window are fetched in parallel. Each HTTP call has a hard wall-clock cap. One author has about a 300 second budget. A partial result past that budget is not saved.
-- For the /6 score, the author must disclose a long: an explicit "I own / I am long / my position" line, or buy/thesis language. "May hold" does not count.
+- For the /7 score, the author must disclose a long: an explicit "I own / I am long / my position" line, or buy/thesis language. "May hold" does not count.
 - Each kept pitch stores `method` (`title` or `body`) and `confidence`. A preview body is not mined for a ticker. Seeking Alpha past pitches use the public author API only.
 
 ### What is excluded
@@ -292,7 +292,7 @@ A stored batting average has no expiry. `--plan` keeps the stored numbers and re
 
 `python3 scripts/make_report.py` writes `reports/<today>/REPORT.md`. `python3 scripts/make_report.py --pdf` writes `REPORT.pdf` from that Markdown. After the ranked list, the batting tables, and the next six, both files have **Articles from top-record authors**.
 
-That section lists every article published inside the report window by an author whose stored 2-year record has at least 2 pitches and `ba2y_p_lt_hits` of 0.5 or higher. The author list is read from `state/source_stats.csv` at report time and limited to URLs still in `config/sources.csv`. An article is matched to that author by URL. Authors who are only in the stats file, or only on the dormant or never-readd lists, are not included. Next to each author: hits/pitches, the batting average, and `p_lt_hits_by_chance`. Each article shows the date, title, link, and the /6 score when that article was scored. Authors are ordered by that chance, highest first. An approved add is included on the next report because `--apply` stores the recomputed batting average.
+That section lists every article published inside the report window by an author whose stored 2-year record has at least 2 pitches and `ba2y_p_lt_hits` of 0.5 or higher. The author list is read from `state/source_stats.csv` at report time and limited to URLs still in `config/sources.csv`. An article is matched to that author by URL. Authors who are only in the stats file, or only on the dormant or never-readd lists, are not included. Next to each author: hits/pitches, the batting average, and `p_lt_hits_by_chance`. Each article shows the date, title, link, and the /7 score when that article was scored. A total still stored out of 6 is shown as /6. Authors are ordered by that chance, highest first. An approved add is included on the next report because `--apply` stores the recomputed batting average.
 
 ## Coming
 

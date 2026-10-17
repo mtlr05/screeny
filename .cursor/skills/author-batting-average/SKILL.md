@@ -9,7 +9,7 @@ description: >-
 
 # Author batting average
 
-Measures how often an author's past long pitches beat the market. The result is reported. It is not part of the /6 score unless the caller says otherwise.
+Measures how often an author's past long pitches beat the market. The result is reported. It is not part of the /7 score unless the caller says otherwise.
 
 ## 1. Collect the author's past pitches
 
@@ -25,7 +25,7 @@ python3 bat/pitches.py sylencecapital p14capital --limit 20
 - **Title.** If the title (and subtitle) name exactly one ticker, the method is `title`. A dual listing such as `(TSXV: SUM or OTC: SUMMF)` is one company; the listed line is the ticker.
 - **Body.** If the title has no ticker, or names more than one company, fetch the public post at `https://<host>/api/v1/posts/<slug>`. Responses are cached under `cache/` (gitignored). Uncached calls wait `--sleep` seconds (default 1). The method is `body`. The 2-year batting-average pass fetches the body even when the title already names the ticker, so a hold or short in the body is visible. Each network call has a hard wall-clock cap. Body fetches overlap. One author has about a 300 second budget; a partial result past that budget is not saved.
 - The primary ticker is the one in the opening text, or the one repeated most often: `$TICKER`, `(NYSE: X)`, `(NASDAQ: X)`, `(TSX: X)`, `(TSXV: X)`, `ticker: X`. If the body never names a ticker, look the company name up on Yahoo and keep a US or Canada equity. ETFs and other listings are dropped.
-- **Long stance for the /6 score.** Explicit disclosure ("I own", "I am long", "my position", "I bought") or buy/thesis language ("investment thesis", "LONG $TICKER", "why I own", "quick pitch"). "May hold" does not count. Drop bearish, hold, recap, macro, watchlist, screen, and closed-position notes.
+- **Long stance for the /7 score.** Explicit disclosure ("I own", "I am long", "my position", "I bought") or buy/thesis language ("investment thesis", "LONG $TICKER", "why I own", "quick pitch"). "May hold" does not count. Drop bearish, hold, recap, macro, watchlist, screen, and closed-position notes.
 - **2-year batting average.** `bat/longcheck.py` decides exclusions. `exclude_reason` drops a short, a sell rating, or a hold rating unless `is_long` on the post body is `long`. A hold with that ownership stays in. Ownership in the title alone does not keep a hold. A title that names one ticker and has no such signal still counts, including an unclear stance. A body-only pitch also needs one dominant US or Canada ticker and long or bullish language before that check. Exclusions are counted by reason in `ba2y_excl`. The price lookup retries `SYM.TO` then `SYM.V`, uses a hard wall-clock cap, and does not cache a timeout. A timeout stops the suffix retry. The stored method tag is `ba_method=v2-excl-TO`.
 - Each kept pitch stores `method` (`title` or `body`) and `confidence` from 0 to 1. A paywalled preview is not mined for a ticker. Do not bypass a paywall.
 
@@ -66,7 +66,7 @@ Blogs: use the public archive or sitemap and the same long-pitch rules. Include 
 - No pitches in a window: `n/a`. Flag a sample under 5 as small. Those authors do not rank in the top-5 tables.
 - Source upkeep drops an author when this 2-year average is 33% or less on at least 5 pitches (a fraction under 0.334, so one third is included). A source also drops for no post in 6 months, or for 4 failed loads in a row. A source with no scored articles stays. There is no probation. An automatic add needs `ba2y_p_lt_hits` greater than 0.23 and `ba2y_median_excess` greater than 0. Every drop and add waits for the user's approval, with the name, the numbers, and `ba_updated`.
 
-The report column **BA 2y (1y)** prefers the 2-year average (`hits/n = %`, with `p_lt`). If there is no 2-year sample, use the 1-year average tagged `(1y)`. If neither exists, `n/a`. The column does not change the /6 score.
+The report column **BA 2y (1y)** prefers the 2-year average (`hits/n = %`, with `p_lt`). If there is no 2-year sample, use the 1-year average tagged `(1y)`. If neither exists, `n/a`. The column does not change the /7 score.
 
 The report section **Articles from top-record authors** lists every article in the report window from an author whose stored `ba2y_p_lt_hits` is at least 0.5 on at least 2 pitches. The generator reads `state/source_stats.csv` when it writes the report. Show hits/pitches, the percent, and `p_lt_hits_by_chance` next to the author, and the title, date, link, and score (when scored) for each article. An approved source add stores that recomputed row, so the section updates without a separate author list.
 

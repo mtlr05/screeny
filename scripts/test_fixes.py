@@ -201,22 +201,25 @@ def test_report_drop_counts_come_from_the_screen_file():
     print("report counts come from the screen file")
 
 
-def test_old_criterion_4_is_moat_and_new_scores_use_the_higher():
+def test_old_six_point_scores_stay_marked_out_of_6():
     import make_report
+    import source_upkeep
 
-    old = {"sc": [1, 1, 1, 0.75, 1, 1]}
-    kept = make_report.with_c4(old)
-    assert kept["c4a"] == 0.75
-    assert kept["c4b"] is None
-    assert kept["sc"][3] == 0.75
-    assert make_report.tot(kept["sc"]) == 5.75
-    fresh = {"sc": [1, 0, 0, 0.5, 0.5, 0.5], "c4a": 0, "c4b": 0}
-    scored = make_report.with_c4(fresh)
-    assert scored["sc"][3] == 0
-    assert make_report.tot(scored["sc"]) == 2
-    higher = {"sc": [1, 1, 0, 0, 1, 1], "c4a": 0.5, "c4b": 0.75}
-    assert make_report.with_c4(higher)["sc"][3] == 0.75
-    print("criterion 4 is the higher of 4a and 4b")
+    old = {"sc": [1, 1, 1, 0.75, 0.5, 1]}
+    got = make_report.normalize(old)
+    assert got["sc"] == [1, 1, 1, 0.75, 0, 0.5, 1]
+    assert got["score_out_of"] == 6
+    assert got["score"] == 5.25
+    new = {"sc": [1, 1, 0, 0.5, 0.75, 1, 1]}
+    got = make_report.normalize(new)
+    assert got["score_out_of"] == 7
+    assert got["score"] == 5.25
+    assert got["sc"][3] == 0.5 and got["sc"][4] == 0.75
+    assert source_upkeep.clears_recommend_bar(4.5, 6)
+    assert not source_upkeep.clears_recommend_bar(4.5, 7)
+    assert source_upkeep.clears_recommend_bar(5.25, 7)
+    assert source_upkeep.on_seven_point_scale(4.5, 6) == 5.25
+    print("old totals stay out of 6; the add bar is 5.25/7")
 
 
 if __name__ == "__main__":
@@ -225,4 +228,4 @@ if __name__ == "__main__":
     test_macro_phrase_and_single_listing()
     test_content_screen_drops_only_clear_cases()
     test_report_drop_counts_come_from_the_screen_file()
-    test_old_criterion_4_is_moat_and_new_scores_use_the_higher()
+    test_old_six_point_scores_stay_marked_out_of_6()
