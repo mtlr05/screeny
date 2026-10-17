@@ -74,7 +74,7 @@ That writes `reports/sa_candidates_<date>.csv` and `reports/sa_read_order_<date>
 python3 scripts/sa_ingest.py check fulltext/sa_<id>.txt
 ```
 
-`full` means the body is at least 600 words, there is no paywall marker, and the disclosure says a beneficial long position in the shares of that ticker. A short body, a paywall marker (`Subscribe to continue`, `To continue reading`, `only available to Premium`, `Sign up to continue`), or a missing disclosure is `preview` and is not scored. A disclosure that does not name the ticker is `not_long`.
+`full` means the body is at least 600 words, there is no paywall marker, and the disclosure says a beneficial long position in the shares of that company. Another listing of the same company counts: the check compares the base symbol and, when a Yahoo quote is available, the company name. `ESVIF` matches an article on `ESI.TO` when both quotes are Ensign Energy. A short body, a paywall marker (`Subscribe to continue`, `To continue reading`, `only available to Premium`, `Sign up to continue`), or a missing disclosure is `preview` and is not scored. A disclosure that names only unrelated tickers, such as `NIO` and `LI` on an `XPEV` article, is `not_long`. A bond, preferred, or note of the same issuer, such as `MFICL` against `MFIC`, is `long_other_security`. It is not scored. The report appendix lists those so the user can judge them.
 5. If the page is a Press & Hold bot check, a captcha, or HTTP 403 or 429, pause and try that article once more. If it fails again, stop. `check` exits 3 on a bot-check page. The unread remainder stays in `reports/sa_read_order_<date>.csv`. Next time the user is signed in, continue with:
 
 ```bash
