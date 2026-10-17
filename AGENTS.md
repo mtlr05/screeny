@@ -5,7 +5,7 @@ On-demand scout for single-stock investment write-ups. David runs it from the Cu
 ## Hard rules
 
 - Cite every source (title and URL). Never invent numbers, tickers, dates, or URLs. Mark anything unverified.
-- Score only articles read in full. A paywalled or preview-only post is dropped. Never score from a title, summary, or preview. Do not bypass a paywall.
+- Score only articles read in full. A paywalled or preview-only post is dropped. Never score from a title, summary, or preview. Do not bypass a paywall. Criterion scores and the one-sentence evidence live in `state/scored.json` (`sc` and `notes.c1`–`notes.c6`). The report reprints those fields. Do not pass `--prices` when the stored `since_publish` should stay as written.
 - Never use Seeking Alpha investing groups.
 - If Seeking Alpha shows a bot check, pause and try that article once more. If it fails again, stop gathering and score what was already read in full. The new-article pull is the signed-in browser plus `scripts/sa_ingest.py`. Do not store a login or a cookie. If the session has expired, ask the user to sign in.
 - The author must disclose a long position (a Seeking Alpha "beneficial long position" disclosure, or an explicit "I own / I am long / I hold a position" statement). A Buy/LONG rating alone, or "may hold" boilerplate, does not count. Drop reason: `author not long`.
@@ -36,7 +36,7 @@ On-demand scout for single-stock investment write-ups. David runs it from the Cu
 - `.cursor/skills/author-batting-average/` — batting average on its own.
 - `scripts/` — sweep, fetch, prices, earnings drops, report. `rerun/` — full-window helpers. `bat/` — batting-average helpers.
 
-X links are optional. The user pastes them. Do not call the X MCP and do not keep an X account list.
+X links are optional. The user pastes them. Do not call the X MCP and do not keep an X account list. The sweep does not pull X-linked blogs, so the original run's two `x_network_blog` posts are not in the sourced count unless those links are pasted.
 
 ## Source upkeep
 

@@ -278,6 +278,8 @@ def screen(list_path, out_path, results_path, since, today, quotes, price_at=Non
                     "words": "",
                 }
     write_csv(out_path, CAND_FIELDS, kept)
+    order_path = os.path.join(os.path.dirname(out_path) or ".", f"sa_read_order_{today}.csv")
+    write_read_order(kept, doc, order_path)
     save_json(results_path, doc)
     summary = {
         "li": len(raw_rows),
@@ -297,6 +299,64 @@ def screen(list_path, out_path, results_path, since, today, quotes, price_at=Non
 def _section(text, name):
     match = re.search(rf"===\s*{re.escape(name)}\s*===\s*(.*?)(?=\n===|\Z)", text or "", re.S | re.I)
     return match.group(1).strip() if match else ""
+
+
+def write_read_order(candidates, results, path):
+    """Unread tickers first, then anything already read, each group by date."""
+
+    def rank(row):
+        aid = article_id(row.get("url") or "")
+        record = results.get(aid) or {}
+        done = 1 if record.get("status") == "scored" or record.get("words") else 0
+        return (done, row.get("date") or "", row.get("ticker") or "")
+
+    ordered = sorted(candidates, key=rank)
+    write_csv(path, ["url", "article_id", "ticker", "date", "title"], [
+        {
+            "url": row.get("url") or "",
+            "article_id": article_id(row.get("url") or ""),
+            "ticker": row.get("ticker") or "",
+            "date": row.get("date") or "",
+            "title": row.get("title") or "",
+        }
+        for row in ordered
+    ])
+    return ordered
+
+
+def resume(order_path, results_path):
+    """Ids still unread after a bot check, in the saved read order."""
+    rows = read_csv(order_path)
+    doc = load_json(results_path, {})
+    pending = []
+    for row in rows:
+        aid = article_id(row.get("url") or "") or (row.get("article_id") or "")
+        record = doc.get(aid) or {}
+        if record.get("status") == "scored" or record.get("words"):
+            continue
+        if record.get("status") == "drop" and record.get("reason") != "bot check":
+            continue
+        pending.append({"id": aid, "ticker": row.get("ticker") or "", "url": row.get("url") or ""})
+    print(f"Unread Seeking Alpha articles: {len(pending)}")
+    for item in pending:
+        print(f"  {item['id']} {item['ticker']} {item['url']}")
+    return pending
+
+
+def unwrap_lines(text):
+    """Join wrapped PDF lines. Blank lines stay as paragraph breaks."""
+    parts = []
+    buf = ""
+    for line in (text or "").splitlines():
+        if not line.strip():
+            if buf:
+                parts.append(buf)
+                buf = ""
+            continue
+        buf = (buf + " " + line.strip()).strip()
+    if buf:
+        parts.append(buf)
+    return "\n".join(parts)
 
 
 def parse_fulltext(text):
@@ -331,7 +391,7 @@ def classify_text(text, ticker=""):
     if BOT.search(text or ""):
         return "blocked", "bot check"
     parsed = parse_fulltext(text or "")
-    words = len((parsed["body"] or "").split())
+    words = len(unwrap_lines(parsed["body"]).split())
     if words < MIN_WORDS or PAYWALL.search(text or "") or not parsed["disclosure"]:
         return "preview", "preview or missing analyst disclosure"
     if not LONG.search(parsed["disclosure"]) or not ticker_named(parsed["disclosure"], ticker, parsed["tickers"]):
@@ -380,6 +440,22 @@ def check(path, results_path, candidates_path=""):
     return 0
 
 
+def merge_counts(candidates):
+    """Count from sa_status. drop_reason does not change the counts."""
+    previews = not_long = unread = read = 0
+    for row in candidates:
+        status = (row.get("sa_status") or "").strip()
+        if status == "preview":
+            previews += 1
+        elif status == "not_long":
+            not_long += 1
+        elif status == "full":
+            read += 1
+        elif status in ("screened", "blocked"):
+            unread += 1
+    return {"read": read, "previews": previews, "skipped_unread": unread, "not_long": not_long}
+
+
 def merge(candidates_path, triage_path, results_path, breakdown_path):
     candidates = read_csv(candidates_path)
     doc = load_json(results_path, {})
@@ -388,55 +464,54 @@ def merge(candidates_path, triage_path, results_path, breakdown_path):
     if not isinstance(triage, list):
         triage = []
     triage_urls = {(row.get("url") or "").rstrip("/") for row in triage}
+    counts = merge_counts(candidates)
     added = 0
-    previews = 0
-    not_long = 0
-    unread = 0
     for row in candidates:
-        if row.get("drop_reason") and row.get("sa_status") != "full":
+        status = (row.get("sa_status") or "").strip()
+        if row.get("drop_reason") and status != "full":
+            continue
+        if status != "full":
             continue
         aid = article_id(row.get("url") or "")
-        record = doc.get(aid) or {}
-        if record.get("status") == "drop" and record.get("reason") == "author not long":
-            not_long += 1
-            continue
-        if record.get("status") == "drop" and "preview" in (record.get("reason") or ""):
-            previews += 1
-            continue
-        if record.get("status") != "needs_score" or not record.get("words"):
-            unread += 1
-            continue
-        url = (row.get("url") or record.get("url") or "").rstrip("/")
-        if not url or url in triage_urls or record.get("in_triage"):
+        record = doc.get(aid) if isinstance(doc.get(aid), dict) else {}
+        url = (row.get("url") or (record or {}).get("url") or "").rstrip("/")
+        if not url or url in triage_urls or (record or {}).get("in_triage"):
             continue
         triage.append(
             {
                 "sub": "seekingalpha",
                 "url": url,
-                "title": row.get("title") or record.get("title") or "",
+                "title": row.get("title") or (record or {}).get("title") or "",
                 "subtitle": "",
-                "date": (row.get("date") or record.get("date") or "")[:10],
+                "date": (row.get("date") or (record or {}).get("date") or "")[:10],
                 "audience": "everyone",
-                "wc": record.get("words") or "",
+                "wc": row.get("wordcount") or (record or {}).get("words") or "",
                 "source": "Seeking Alpha",
-                "ticker": row.get("ticker") or record.get("ticker") or "",
-                "author": scrub(row.get("author") or record.get("author") or ""),
+                "ticker": row.get("ticker") or (record or {}).get("ticker") or "",
+                "author": scrub(row.get("author") or (record or {}).get("author") or ""),
             }
         )
         triage_urls.add(url)
-        record["in_triage"] = True
-        doc[aid] = record
+        if aid:
+            record = dict(record or {})
+            record["in_triage"] = True
+            doc[aid] = record
         added += 1
     prior = load_json(breakdown_path, {})
-    full = sum(1 for item in doc.values() if isinstance(item, dict) and item.get("status") == "needs_score" and item.get("words"))
     breakdown = {
-        "li": screen_summary.get("li", 0),
+        "li": screen_summary.get("li", len(candidates)),
         "li_from": screen_summary.get("li_from", ""),
         "li_to": screen_summary.get("li_to", ""),
-        "kept": screen_summary.get("kept", 0),
-        "read": full,
-        "previews": previews,
-        "skipped_unread": unread,
+        "kept": screen_summary.get("kept", counts["read"]),
+        "read": counts["read"],
+        "previews": counts["previews"],
+        "skipped_unread": counts["skipped_unread"],
+        "not_long": counts["not_long"],
+        "unread": [
+            {"id": article_id(row.get("url") or ""), "ticker": row.get("ticker") or ""}
+            for row in candidates
+            if (row.get("sa_status") or "") in ("screened", "blocked")
+        ],
         "passed": sum(1 for item in doc.values() if isinstance(item, dict) and item.get("in_triage")),
         "scored": prior.get("scored", 0),
     }
@@ -444,46 +519,160 @@ def merge(candidates_path, triage_path, results_path, breakdown_path):
     save_json(results_path, doc)
     save_json(breakdown_path, breakdown)
     print(f"Merged {added} Seeking Alpha articles into {triage_path}.")
-    print(f"Previews: {previews}. Author not long: {not_long}. Not yet read: {unread}.")
+    print(
+        f"Previews: {counts['previews']}. Author not long: {counts['not_long']}. "
+        f"Not yet read: {counts['skipped_unread']}."
+    )
     return added
 
 
-def fetch_quotes(symbols):
-    """Public Yahoo quote for exchange, type, and market cap. No Seeking Alpha login."""
+class QuoteFetchError(RuntimeError):
+    """Yahoo did not return enough quotes to screen the list."""
+
+
+def _quote_fields(item, symbol):
+    return {
+        "quoteType": item.get("quoteType"),
+        "exchange": item.get("exchange") or item.get("exchangeName"),
+        "marketCap": item.get("marketCap"),
+        "regularMarketPrice": item.get("regularMarketPrice"),
+        "currency": item.get("currency"),
+        "longName": item.get("longName") or item.get("shortName"),
+        "shortName": item.get("shortName"),
+        "sym": item.get("symbol") or symbol,
+    }
+
+
+def _chart_quote(session, symbol):
+    response = session.get(
+        f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}",
+        params={"range": "1d"},
+        timeout=30,
+    )
+    if getattr(response, "status_code", 0) != 200:
+        return None
+    try:
+        result = ((response.json().get("chart") or {}).get("result")) or []
+    except Exception:
+        return None
+    if not result:
+        return None
+    meta = result[0].get("meta") or {}
+    return _quote_fields(meta, symbol)
+
+
+def fetch_quotes(symbols, session=None, cache_path=None):
+    """Yahoo v7 quote with a crumb, then v8 chart, then .V/.CN for a missing .TO.
+
+    A fetch that leaves more than 30% of symbols missing raises QuoteFetchError
+    instead of marking the whole list ticker-not-found. No Seeking Alpha login.
+    """
+    import time
+
     import requests
 
-    from _paths import user_agent
+    from _paths import CACHE, user_agent
 
-    out = {}
     symbols = [symbol for symbol in symbols if symbol]
+    cache_path = cache_path or os.path.join(CACHE, "yq_cache.json")
+    out = {}
+    if os.path.exists(cache_path):
+        try:
+            out.update(json.load(open(cache_path, encoding="utf-8")))
+        except (OSError, json.JSONDecodeError):
+            out = {}
     if not symbols:
         return out
-    try:
-        response = requests.get(
-            "https://query1.finance.yahoo.com/v7/finance/quote",
-            params={"symbols": ",".join(symbols)},
-            headers={"User-Agent": user_agent()},
-            timeout=30,
-        )
-        result = ((response.json().get("quoteResponse") or {}).get("result")) or []
-    except Exception:
-        result = []
-    got = {item.get("symbol"): item for item in result}
-    for symbol in symbols:
-        quote = got.get(symbol)
-        if not quote:
-            out[symbol] = {"missing": 1}
+    own_session = session is None
+    if own_session:
+        session = requests.Session()
+        session.headers["User-Agent"] = user_agent()
+    need = [symbol for symbol in symbols if symbol not in out or out[symbol].get("missing")]
+    if need and own_session:
+        try:
+            session.get("https://fc.yahoo.com", timeout=20)
+            crumb = session.get("https://query2.finance.yahoo.com/v1/test/getcrumb", timeout=20).text
+        except Exception as exc:
+            print(f"WARNING: Yahoo crumb request failed: {exc}")
+            crumb = ""
+    else:
+        crumb = ""
+    for start in range(0, len(need), 50):
+        batch = need[start : start + 50]
+        if not batch:
             continue
-        out[symbol] = {
-            "quoteType": quote.get("quoteType"),
-            "exchange": quote.get("exchange"),
-            "marketCap": quote.get("marketCap"),
-            "regularMarketPrice": quote.get("regularMarketPrice"),
-            "currency": quote.get("currency"),
-            "longName": quote.get("longName"),
-            "shortName": quote.get("shortName"),
-            "sym": quote.get("symbol"),
-        }
+        result = []
+        try:
+            response = session.get(
+                "https://query2.finance.yahoo.com/v7/finance/quote",
+                params={"symbols": ",".join(batch), "crumb": crumb},
+                timeout=30,
+            )
+            if getattr(response, "status_code", 0) == 401:
+                print("WARNING: Yahoo v7 quote returned HTTP 401. Falling back to the chart API.")
+            elif getattr(response, "status_code", 0) != 200:
+                print(f"WARNING: Yahoo v7 quote returned HTTP {getattr(response, 'status_code', 'error')}.")
+            else:
+                result = ((response.json().get("quoteResponse") or {}).get("result")) or []
+        except Exception as exc:
+            print(f"WARNING: Yahoo v7 quote failed: {exc}")
+        got = {item.get("symbol"): item for item in result}
+        for symbol in batch:
+            quote = got.get(symbol)
+            if quote:
+                out[symbol] = _quote_fields(quote, symbol)
+                continue
+            chart = None
+            try:
+                chart = _chart_quote(session, symbol)
+            except Exception as exc:
+                print(f"WARNING: Yahoo chart failed for {symbol}: {exc}")
+            if chart:
+                chart["marketCap"] = None
+                out[symbol] = chart
+            else:
+                out[symbol] = {"missing": 1}
+        if start + 50 < len(need):
+            time.sleep(0.3)
+    for symbol in list(need):
+        if not str(symbol).endswith(".TO") or not out.get(symbol, {}).get("missing"):
+            continue
+        base = symbol[:-3]
+        for suffix in (".V", ".CN"):
+            alt = base + suffix
+            if alt not in out or out[alt].get("missing"):
+                try:
+                    response = session.get(
+                        "https://query2.finance.yahoo.com/v7/finance/quote",
+                        params={"symbols": alt, "crumb": crumb},
+                        timeout=30,
+                    )
+                    result = ((response.json().get("quoteResponse") or {}).get("result")) or [] if response.status_code == 200 else []
+                except Exception:
+                    result = []
+                if result:
+                    out[alt] = _quote_fields(result[0], alt)
+                else:
+                    chart = _chart_quote(session, alt)
+                    out[alt] = chart if chart else {"missing": 1}
+                    if chart:
+                        out[alt]["marketCap"] = None
+            if out.get(alt) and not out[alt].get("missing"):
+                resolved = dict(out[alt])
+                resolved["sym"] = out[alt].get("sym") or alt
+                out[symbol] = resolved
+                break
+    missing = [symbol for symbol in symbols if out.get(symbol, {}).get("missing")]
+    if symbols and len(missing) / len(symbols) > 0.30:
+        raise QuoteFetchError(
+            f"Yahoo quotes missing for {len(missing)} of {len(symbols)} symbols. "
+            "Stopping. These rows were not marked ticker-not-found."
+        )
+    try:
+        ensure(os.path.dirname(cache_path) or ".")
+        json.dump(out, open(cache_path, "w", encoding="utf-8"))
+    except OSError as exc:
+        print(f"WARNING: could not write quote cache: {exc}")
     return out
 
 
@@ -576,13 +765,72 @@ def self_test():
         assert len(load_json(triage_path, [])) == 1
         assert load_json(breakdown_path, {})["kept"] == 1
         assert not os.path.exists(os.path.join(folder, "seen_posts.csv"))
+        mix = os.path.join(folder, "mix.csv")
+        mix_triage = os.path.join(folder, "mix_triage.json")
+        mix_break = os.path.join(folder, "mix_break.json")
+        mix_results = os.path.join(folder, "mix_results.json")
+        write_csv(
+            mix,
+            CAND_FIELDS,
+            [
+                {"url": "https://seekingalpha.com/article/21", "source": "Seeking Alpha", "date": "2026-10-10", "title": "Full", "audience": "everyone", "wordcount": "800", "first_seen_run": "2026-10-16", "author": "A", "ticker": "FULL", "mcap_usd": "1", "exchange": "NMS", "sa_status": "full", "drop_reason": ""},
+                {"url": "https://seekingalpha.com/article/22", "source": "Seeking Alpha", "date": "2026-10-11", "title": "Preview", "audience": "preview", "wordcount": "100", "first_seen_run": "2026-10-16", "author": "A", "ticker": "PREV", "mcap_usd": "", "exchange": "", "sa_status": "preview", "drop_reason": "preview"},
+                {"url": "https://seekingalpha.com/article/23", "source": "Seeking Alpha", "date": "2026-10-12", "title": "Not long", "audience": "everyone", "wordcount": "800", "first_seen_run": "2026-10-16", "author": "A", "ticker": "NOLONG", "mcap_usd": "", "exchange": "", "sa_status": "not_long", "drop_reason": "author not long"},
+                {"url": "https://seekingalpha.com/article/24", "source": "Seeking Alpha", "date": "2026-10-09", "title": "Still screened", "audience": "everyone", "wordcount": "", "first_seen_run": "2026-10-16", "author": "A", "ticker": "WAIT", "mcap_usd": "", "exchange": "", "sa_status": "screened", "drop_reason": ""},
+                {"url": "https://seekingalpha.com/article/25", "source": "Seeking Alpha", "date": "2026-10-13", "title": "Blocked", "audience": "everyone", "wordcount": "", "first_seen_run": "2026-10-16", "author": "A", "ticker": "STOP", "mcap_usd": "", "exchange": "", "sa_status": "blocked", "drop_reason": "bot check"},
+            ],
+        )
+        merge(mix, mix_triage, mix_results, mix_break)
+        counted = load_json(mix_break, {})
+        assert counted["read"] == 1, counted
+        assert counted["previews"] == 1, counted
+        assert counted["not_long"] == 1, counted
+        assert counted["skipped_unread"] == 2, counted
+        assert counted["passed"] == 1, counted
+        assert [row["ticker"] for row in load_json(mix_triage, [])] == ["FULL"]
+        order = write_read_order(read_csv(mix), {}, os.path.join(folder, "order.csv"))
+        assert [row["ticker"] for row in order[:4]] == ["WAIT", "FULL", "PREV", "NOLONG"]
+        assert order[-1]["ticker"] == "STOP"
+
+        class _Resp:
+            def __init__(self, status, payload=None, text=""):
+                self.status_code = status
+                self._payload = payload or {}
+                self.text = text
+
+            def json(self):
+                return self._payload
+
+        class _Session:
+            def get(self, url, **_kwargs):
+                if "fc.yahoo.com" in url or "getcrumb" in url:
+                    return _Resp(200, text="crumb")
+                if "/v7/finance/quote" in url:
+                    return _Resp(401, {"quoteResponse": {"result": []}})
+                if url.rstrip("/").endswith("/ACME"):
+                    return _Resp(200, {"chart": {"result": [{"meta": {"symbol": "ACME", "exchangeName": "NMS", "currency": "USD", "regularMarketPrice": 10}}]}})
+                if url.rstrip("/").endswith("/ZZ.V"):
+                    return _Resp(200, {"chart": {"result": [{"meta": {"symbol": "ZZ.V", "exchangeName": "VAN", "currency": "CAD", "regularMarketPrice": 2}}]}})
+                return _Resp(404, {"chart": {"result": None}})
+
+        cache_path = os.path.join(folder, "yq_cache.json")
+        quoted = fetch_quotes(["ACME", "ZZ.TO"], session=_Session(), cache_path=cache_path)
+        assert quoted["ACME"]["exchange"] == "NMS" and quoted["ACME"]["marketCap"] is None
+        assert quoted["ACME"].get("missing") != 1
+        assert quoted["ZZ.TO"]["sym"] == "ZZ.V"
+        try:
+            fetch_quotes(["NO1", "NO2", "NO3", "NO4"], session=_Session(), cache_path=os.path.join(folder, "empty.json"))
+        except QuoteFetchError:
+            pass
+        else:
+            raise AssertionError("a 401 with no chart data should stop instead of marking every ticker missing")
     print("sa_ingest self-test ok")
     return 0
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Screen, check, and merge one Seeking Alpha Long Ideas pull")
-    parser.add_argument("command", choices=["screen", "check", "merge", "self-test"])
+    parser.add_argument("command", choices=["screen", "check", "merge", "resume", "self-test"])
     parser.add_argument("path", nargs="?")
     parser.add_argument("triage", nargs="?")
     parser.add_argument("--out", default="")
@@ -603,12 +851,26 @@ def main(argv=None):
         supplied = load_json(args.quotes, None) if args.quotes else None
         rows = read_csv(args.path)
         quotes = _quotes_for(rows, supplied)
-        screen(args.path, out, args.results, args.since, today, quotes)
+
+        def price_at(symbol, day):
+            try:
+                import px
+                return px.ret(symbol, day)
+            except Exception as exc:
+                print(f"WARNING: publish-day price failed for {symbol}: {exc}")
+                return None
+
+        screen(args.path, out, args.results, args.since, today, quotes, price_at)
         return 0
     if args.command == "check":
         if not args.path:
             parser.error("check requires a fulltext file")
         return check(args.path, args.results, args.candidates)
+    if args.command == "resume":
+        if not args.path:
+            parser.error("resume requires the read-order CSV")
+        resume(args.path, args.results)
+        return 0
     if not args.path or not args.triage:
         parser.error("merge requires the candidates CSV and the triage JSON")
     merge(args.path, args.triage, args.results, args.breakdown)

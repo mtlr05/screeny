@@ -27,7 +27,7 @@ state/backlog.json
 state/articles_scored.csv
 state/articles.csv
 bat/arch.json
-bat/sa_auth.json
+bat/sa_author_cache.json
 bat/pitches.json
 crawl.json
 swept_posts.json

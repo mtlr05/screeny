@@ -342,7 +342,9 @@ def render(doc, onepagers, live):
     A("")
     A("## Stats")
     A("")
-    A(f"- **Articles sourced:** {st.get('sourced', 0):,}")
+    A(f"- **Articles sourced (posts in window):** {st.get('sourced', 0):,}")
+    if st.get("new_since_last_run") is not None:
+        A(f"- **New since last run:** {st.get('new_since_last_run'):,}")
     A(f"- **Articles read in full:** {st.get('read', 0)}")
     A(f"- **Articles scored:** {st.get('scored', len(rows))}")
     A("")
@@ -423,12 +425,21 @@ def render(doc, onepagers, live):
         A(line)
     A("## Caveats")
     A("")
-    A('- Prices are Yahoo daily closes; "since publish" uses the first close on or after the publish date.')
+    run_notes = {}
+    notes_path = os.path.join(STATE, "run_notes.json")
+    if os.path.exists(notes_path):
+        try:
+            run_notes = json.load(open(notes_path, encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            run_notes = {}
+    price_source = run_notes.get("price_source") or "not recorded"
+    ceo_source = run_notes.get("ceo_stake_source") or "from the article only"
+    A(f'- Prices: {price_source}. "Since publish" uses the first close on or after the publish date when a price source was recorded.')
     amb_text = doc.get("ambiguous_text")
     amb = doc.get("ambiguous") or []
     shown = amb_text if amb_text else ("; ".join(amb) if amb else "none recorded")
     A("- Long-disclosure ambiguous (dropped): " + shown + ".")
-    A("- CEO stakes come from the article, checked against Yahoo insider holdings where available.")
+    A(f"- CEO stakes: {ceo_source}. If the article and any cited filing do not state the stake, criterion 3 is 0 and the note says not stated.")
     A("- Author batting averages use adjusted closes (Yahoo); SPY for US names, XIC.TO for Canadian. Delisted/acquired names use the buyout or last trade when available; otherwise they are excluded and noted in batting.json. SA author histories used the public author API (title, date, ticker, sentiment); full bodies were not required.")
     skipped = st.get("sa_skipped_unread")
     if skipped is not None:
@@ -456,17 +467,24 @@ def render(doc, onepagers, live):
             if bat:
                 A(f"**Author batting average:** {fmt_bat(bat)}")
                 A("")
-        if not o:
-            A("_One-pager not yet written for this name; add it to onepagers.json._")
+        notes = r.get("notes") or {}
+        if not o and not any(notes.get("c%d" % k) for k in range(1, 7)):
+            A("_One-pager not yet written for this name; add it to onepagers.json or notes.c1–c6 in scored.json._")
             A("")
             continue
         for k, (lab, v) in enumerate(zip(CN, r["sc"]), 1):
-            A(f"{k}. **{lab}: {v:g}.** {o.get('c%d' % k, 'not recorded')}")
+            evidence = notes.get("c%d" % k) or (o or {}).get("c%d" % k) or "not recorded"
+            if k == 3 and evidence == "not recorded":
+                evidence = "not stated"
+            A(f"{k}. **{lab}: {v:g}.** {evidence}")
+        if notes.get("return_formula"):
+            A("")
+            A(f"Return formula: {notes['return_formula']}")
         A("")
         A("**Red flags (reported, not scored):**")
-        for flag in o.get("flags") or []:
+        for flag in (o or {}).get("flags") or []:
             A(f"- {flag}")
-        if o.get("thin"):
+        if (o or {}).get("thin"):
             A("")
             A("_Stored notes were thin for this name, so the justifications were reconstructed from the saved full text._")
         A("")
@@ -479,7 +497,9 @@ def render(doc, onepagers, live):
         A("")
     else:
         sourced = st.get("sourced", 0)
-        A(f"- **Articles sourced:** {sourced:,} posts in window")
+        A(f"- **Articles sourced (posts in window):** {sourced:,}")
+        if st.get("new_since_last_run") is not None:
+            A(f"- **New since last run:** {st.get('new_since_last_run'):,}")
         for k, v in sorted((st.get("by_type") or {}).items(), key=lambda kv: -kv[1]):
             A(f"  - {k}: {v:,}")
         unr = st.get("unreachable") or []
@@ -501,6 +521,12 @@ def render(doc, onepagers, live):
             A(f"  - Read in full: {sa.get('read', 0)} ({sa.get('previews', 0)} were previews and were not scored)")
             A(f"  - Skipped because the full text could not be read: {sa.get('skipped_unread', skipped or 0)}")
             A(f"  - Scored: {sa.get('scored', 0)}")
+            unread = sa.get("unread") or []
+            if unread:
+                tickers = ", ".join(item.get("ticker") or item.get("id") or "" for item in unread)
+                A(f"- **Not read (SA):** {len(unread)} ({tickers})")
+            elif run_notes.get("sa_pull_complete") is False:
+                A("- **Not read (SA):** the pull stopped before every candidate was read. See state/sa_breakdown.json.")
         A("")
     return "\n".join(L) + "\n", rows, ranked
 

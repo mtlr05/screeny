@@ -66,8 +66,8 @@ New articles this run, after the Substack sweep and before the full-text triage:
 python3 scripts/sa_ingest.py screen reports/sa_list_<date>.csv
 ```
 
-That writes `reports/sa_candidates_<date>.csv`. Columns extend `seen_posts` with `author,ticker,mcap_usd,exchange,sa_status,drop_reason`. `source` is `Seeking Alpha`. A kept row has `sa_status` `screened`.
-3. Full read, candidates only, 20–30 seconds apart. Open the article, scroll to the disclosure, and save `fulltext/sa_<id>.txt` with `URL`, `TITLE`, `AUTHOR`, `DATE`, `TICKERS`, a `=== SUMMARY ===` section, `=== ARTICLE BODY ===`, and `=== ANALYST'S DISCLOSURE ===`.
+That writes `reports/sa_candidates_<date>.csv` and `reports/sa_read_order_<date>.csv`. Columns extend `seen_posts` with `author,ticker,mcap_usd,exchange,sa_status,drop_reason`. `source` is `Seeking Alpha`. A kept row has `sa_status` `screened`. Read in the order file: tickers not yet scored first, then the rest by date, so a rate limit cuts off the least useful reads.
+3. Full read, in that order, 20–30 seconds apart. Prefer the rendered page text. Do not use a PDF unless the page will not copy; the checker unwraps wrapped lines before it counts words. Open the article, scroll to the disclosure, and save `fulltext/sa_<id>.txt` with `URL`, `TITLE`, `AUTHOR`, `DATE`, `TICKERS`, a `=== SUMMARY ===` section, `=== ARTICLE BODY ===`, and `=== ANALYST'S DISCLOSURE ===`. If the first save is under 600 words, reload once, scroll to "Analyst's Disclosure", and save again before treating it as a preview.
 4. Classify each saved file:
 
 ```bash
@@ -75,7 +75,13 @@ python3 scripts/sa_ingest.py check fulltext/sa_<id>.txt
 ```
 
 `full` means the body is at least 600 words, there is no paywall marker, and the disclosure says a beneficial long position in the shares of that ticker. A short body, a paywall marker (`Subscribe to continue`, `To continue reading`, `only available to Premium`, `Sign up to continue`), or a missing disclosure is `preview` and is not scored. A disclosure that does not name the ticker is `not_long`.
-5. If the page is a Press & Hold bot check, a captcha, or HTTP 403 or 429, pause and try that article once more. If it fails again, stop. Score only what was already read in full. `check` exits 3 on a bot-check page.
+5. If the page is a Press & Hold bot check, a captcha, or HTTP 403 or 429, pause and try that article once more. If it fails again, stop. `check` exits 3 on a bot-check page. The unread remainder stays in `reports/sa_read_order_<date>.csv`. Next time the user is signed in, continue with:
+
+```bash
+python3 scripts/sa_ingest.py resume reports/sa_read_order_<date>.csv
+```
+
+Score only what was already read in full.
 6. Merge the articles that passed into the triage list. Dedupe is `state/sa_results.json` (skip ids already recorded). Do not add these URLs to `state/seen_posts.csv`.
 
 ```bash
@@ -92,7 +98,7 @@ That runs the screen, the preview and long-disclosure checks, the bot-check stop
 
 ## 5. X
 
-Do not use the X MCP. Do not read or rebuild an account list. X links are optional. If the user pastes write-up links, add those URLs to the triage list and read them under the same rules.
+Do not use the X MCP. Do not read or rebuild an account list. X links are optional. The sweep does not pull X-linked blogs. If the user pastes write-up links, add those URLs to the triage list and read them under the same rules. The original run's two `x_network_blog` posts are not part of this repo's sourced count unless those links are pasted.
 
 ## 6. Triage, then read in full
 
@@ -128,11 +134,11 @@ Record an ambiguous disclosure (the "may hold" kind of line) and drop it. Priori
 One point each. Partial credit is as stated. Small/mid cap and US/Canada listing are filters, not scored.
 
 1. Thesis with a secular runway or growth driver. Cheap but no growth (asset value, cash pile, wind-down, low multiple only) = 0.5.
-2. Return ~40%/yr from the publish-day close using the author's target and timeframe (default 2 years). 25–40%/yr = 0.5. Below 25%/yr = 0.
-3. CEO is a large shareholder. Roughly 5%+ = 1; 1–5% = 0.5.
+2. Return ~40%/yr from the publish-day close using the author's target and timeframe (default 2 years). Compute it with `scripts/px.py` and print the formula (target, publish close, horizon) in the one-pager `notes.return_formula`. 25–40%/yr = 0.5. Below 25%/yr = 0.
+3. CEO is a large shareholder. Judge this only from the article or a cited filing. Roughly 5%+ = 1; 1–5% = 0.5. If neither source states the stake, score 0 and write "not stated". Do not use unstated knowledge.
 4. Moat or edge (best of the two). Moat is judged on the business model against the five types (intangibles, switching costs, network effects, cost advantage, efficient scale), with mechanism, trend, and main threat: Strong 1 / Moderate 0.75 / Narrow 0.5. Edge = a proven operator, capital allocator, or dealmaker with evidence, or an obsessive founder-builder (built from scratch, product-led, evidence-backed). A good guidance record supports an edge.
-5. Differential view, written by you: the specific reason the market is wrong (stigma or category label, a temporary or mundane issue, neglect) and why it should correct, compared with what the price implies and with other coverage. Both named with evidence = 1; one missing or vague = 0.5; matches consensus = 0. An overreaction to temporary news supports it.
-6. Dated catalyst within ~24 months that could force a re-rating = 1; named but undated = 0.5; none = 0.
+5. Differential view, written by you: the specific reason the market is wrong (stigma or category label, a temporary or mundane issue, neglect) and why it should correct, compared with what the price implies and with other coverage. Score 1 only when the article states both the cause of the mispricing and why it corrects. Otherwise 0.5. Matches consensus = 0. An overreaction to temporary news supports it.
+6. Dated catalyst: 1 only for a named event with a date inside 24 months. Named but undated = 0.5. None = 0.
 
 Check the publish-day close:
 
