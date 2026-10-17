@@ -25,7 +25,7 @@ python3 scripts/weekly_sweep.py --since YYYY-MM-DD
 
 The script pulls every active Substack archive in `config/sources.csv`, skips URLs already in `state/seen_posts.csv`, appends new URLs, and writes `reports/triage_<date>.json`, `reports/stats_<date>.json`, and `reports/substack_screen_<date>.csv`.
 
-A free post is dropped on the title only when the title or subtitle is a recap, a macro note, or a list. Those words match as whole words, so a company name is not dropped for a fragment such as "chart" inside "charter". A missing pitch keyword in the title is not a drop.
+A free post is dropped on the title only when the title or subtitle is a recap, a macro phrase, or a list. Macro matches as a phrase (`macro outlook`, `macro update`, `macro note`, and the same kind of phrase), not as the bare word, so a single-stock pitch can still say "macro idea". Other words match as whole words, so a company name is not dropped for a fragment such as "chart" inside "charter". A title that names one ticker or one exchange (`$TICKER`, `AXL.V`, `TSX`, `NYSE`, and the same kind of tag) is not dropped on the title; the body screen decides. A missing pitch keyword in the title is not a drop.
 
 Every other free post is fetched (the first 1,500 words). Drop it only when that text is clearly not a single-stock pitch (a macro piece, a book review, a general essay, a multi-stock list, or no identifiable listed company) or the author is short, selling, or on hold. An unclear post stays a candidate. A post already in `state/seen_posts.csv` is not fetched again.
 

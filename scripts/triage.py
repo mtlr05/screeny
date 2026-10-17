@@ -1,16 +1,17 @@
 """Cheap title triage of a swept-posts JSON file. The body screen lives in weekly_sweep.py.
 
-A free post is dropped on the title only when it is a recap, macro note, or list (whole words).
-A missing pitch keyword is not a drop. Screening rules are applied later, after the full read.
+A free post is dropped on the title only when it is a recap, a macro phrase, or a list
+(whole words). One ticker or exchange tag skips that drop. A missing pitch keyword
+is not a drop. Screening rules are applied later, after the full read.
 """
 import collections
 import csv
 import json
 import os
-import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import weekly_sweep
 from _paths import CACHE, STATE
 
 posts_path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(CACHE, "swept_posts.json")
@@ -21,10 +22,6 @@ if os.path.exists(scored):
     old = {r["url"] for r in csv.DictReader(open(scored, newline="", encoding="utf-8")) if r.get("url")}
 c = collections.Counter()
 out = []
-NEG = re.compile(
-    r"\b(?:portfolio update|monthly|weekly|roundup|recap|letter|macro|podcast|links|reading list|week in|digest|market update|watchlist|thread|interview|chart)\b",
-    re.I,
-)
 for p in P:
     if p["url"] in old:
         c["already_scored"] += 1
@@ -34,7 +31,11 @@ for p in P:
         continue
     # no word-count cutoff
     t = p["title"] + " " + p.get("subtitle", "")
-    if NEG.search(t):
+    if weekly_sweep.single_listing_title(t):
+        c["candidate"] += 1
+        out.append(p)
+        continue
+    if weekly_sweep.NEG.search(t):
         c["recap/macro"] += 1
         continue
     c["candidate"] += 1

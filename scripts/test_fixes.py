@@ -97,6 +97,37 @@ def test_pitch_titles_stay_and_recap_drops():
     print("pitch titles stay; recap still drops")
 
 
+def test_macro_phrase_and_single_listing():
+    arrow = "A 10%+ Portfolio Position. Multiple Catalysts. Our Best Macro Idea for the Next 6 Months?"
+    assert weekly_sweep.title_drop_reason(_post("https://ex.substack.com/p/arrow", arrow)) == ""
+    body = "Arrow Exploration is our third largest position. We are long the shares."
+    assert weekly_sweep.content_drop_reason(arrow, body) == ""
+    rows, cand = weekly_sweep.screen_posts(
+        [_post("https://ex.substack.com/p/arrow", arrow)],
+        set(),
+        fetch=lambda post: body,
+    )
+    assert rows[0]["decision"] == "keep", rows[0]
+    assert [post["title"] for post in cand] == [arrow]
+    for title in (
+        "Weekly Macro Roundup",
+        "Q4 2026 Macro Outlook: growth, rates, and positioning",
+    ):
+        assert weekly_sweep.title_drop_reason(_post("https://ex.substack.com/p/macro", title)) == (
+            "not a single-stock pitch (recap/macro/list)"
+        ), title
+    assert weekly_sweep.title_drop_reason(_post("https://ex.substack.com/p/one", "Weekly roundup", subtitle="AXL.V")) == ""
+    assert weekly_sweep.title_drop_reason(_post("https://ex.substack.com/p/one", "Macro update $AXL")) == ""
+    assert weekly_sweep.title_drop_reason(_post("https://ex.substack.com/p/one", "Weekly roundup (TSX: AXL)")) == ""
+    assert weekly_sweep.title_drop_reason(_post("https://ex.substack.com/p/one", "Weekly roundup NYSE")) == ""
+    assert weekly_sweep.title_drop_reason(_post("https://ex.substack.com/p/two", "Weekly roundup $AAA $MSFT")) == (
+        "not a single-stock pitch (recap/macro/list)"
+    )
+    paid = _post("https://ex.substack.com/p/paid", "Weekly roundup AXL.V", audience="only_paid")
+    assert weekly_sweep.title_drop_reason(paid) == "paywalled"
+    print("macro phrase and single listing ok")
+
+
 def test_content_screen_drops_only_clear_cases():
     assert weekly_sweep.content_drop_reason("Acme Corp", "I am short the stock.") == "author short"
     assert weekly_sweep.content_drop_reason("Acme Corp", "Recommendation: Hold. I do not own it.") == "author hold"
@@ -173,5 +204,6 @@ def test_report_drop_counts_come_from_the_screen_file():
 if __name__ == "__main__":
     test_in_window_sourced_count()
     test_pitch_titles_stay_and_recap_drops()
+    test_macro_phrase_and_single_listing()
     test_content_screen_drops_only_clear_cases()
     test_report_drop_counts_come_from_the_screen_file()
