@@ -28,6 +28,7 @@ import concurrent.futures as cf
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "bat"))
 from _paths import CACHE, FULLTEXT, REPORTS, ROOT, SEEN, SOURCES, ensure, user_agent
+import text_store
 from longcheck import exclude_reason
 
 # Whole words only, so "chart" does not match Charter and "letter" does not match newsletter.
@@ -82,7 +83,6 @@ COMPANY_WORD = re.compile(
 POSSESSIVE_NAME = re.compile(r"\b[A-Z][\w.-]*(?:'s|’s)\b")
 SCREEN_FIELDS = ("url", "title", "decision", "reason")
 BODY_WORDS = 1500
-BOT_PAGE = re.compile(r"press\s*&\s*hold|bot check|captcha", re.I)
 
 
 def posts_in_window(res):
@@ -205,9 +205,14 @@ def first_words(text, n=BODY_WORDS):
 
 def text_usable(text):
     """A stored body can be reused. Empty text and a bot-check page cannot."""
-    if BOT_PAGE.search(text or ""):
-        return False
-    return len((text or "").split()) >= 20
+    return text_store.text_usable(text)
+
+
+def fulltext_name(post):
+    slug = post_slug(post)
+    if not slug:
+        return ""
+    return slug[:60] + ".txt"
 
 
 def post_slug(post):
@@ -247,6 +252,12 @@ def load_stored_body(post, store_dir=None):
             continue
         if text_usable(text):
             return first_words(text)
+    if store_dir is not None:
+        return ""
+    name = fulltext_name(post)
+    copied = text_store.materialize(name, FULLTEXT) if name else ""
+    if text_usable(copied):
+        return first_words(copied)
     return ""
 
 
@@ -258,6 +269,15 @@ def save_stored_body(post, text, store_dir=None):
     ensure(os.path.dirname(path))
     with open(path, "w", encoding="utf-8") as handle:
         handle.write(text)
+    if store_dir is not None:
+        return
+    name = fulltext_name(post)
+    if not name:
+        return
+    ensure(FULLTEXT)
+    with open(os.path.join(FULLTEXT, name), "w", encoding="utf-8") as handle:
+        handle.write(text)
+    text_store.publish(name, text)
 
 
 def post_api(post):

@@ -257,6 +257,35 @@ def test_fetch_body_reuses_stored_text():
     print("stored body is reused; a bot-check page is fetched again")
 
 
+def test_shared_store_copies_into_fulltext():
+    import text_store
+
+    post = _post("https://ex.substack.com/p/shared-slug", "Acme Corp")
+    previous = os.environ.get("SCREENY_TEXT_STORE")
+    old_fulltext = weekly_sweep.FULLTEXT
+    with tempfile.TemporaryDirectory() as tmp:
+        os.environ["SCREENY_TEXT_STORE"] = os.path.join(tmp, "store")
+        local = os.path.join(tmp, "fulltext")
+        os.makedirs(local)
+        weekly_sweep.FULLTEXT = local
+        try:
+            text_store.publish("shared-slug.txt", " ".join(["gamma"] * 30))
+
+            def boom(*_args, **_kwargs):
+                raise AssertionError("shared store should fill fulltext")
+
+            text = weekly_sweep.fetch_body(post, {}, getter=boom)
+            assert text.split()[0] == "gamma"
+            assert os.path.isfile(os.path.join(local, "shared-slug.txt"))
+        finally:
+            weekly_sweep.FULLTEXT = old_fulltext
+            if previous is None:
+                os.environ.pop("SCREENY_TEXT_STORE", None)
+            else:
+                os.environ["SCREENY_TEXT_STORE"] = previous
+    print("shared store copies into fulltext")
+
+
 if __name__ == "__main__":
     test_in_window_sourced_count()
     test_pitch_titles_stay_and_recap_drops()
@@ -265,3 +294,4 @@ if __name__ == "__main__":
     test_report_drop_counts_come_from_the_screen_file()
     test_old_six_point_scores_stay_marked_out_of_6()
     test_fetch_body_reuses_stored_text()
+    test_shared_store_copies_into_fulltext()

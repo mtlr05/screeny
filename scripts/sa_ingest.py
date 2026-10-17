@@ -23,6 +23,7 @@ import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _paths import FULLTEXT, REPORTS, STATE, ensure
+import text_store
 
 LIST_FIELDS = ["url", "article_id", "source", "author", "date", "title", "ticker", "date_text"]
 CAND_FIELDS = [
@@ -326,9 +327,7 @@ def write_read_order(candidates, results, path):
 
 def text_is_usable(text):
     """Stored article text can be reused. Empty text and a bot-check page cannot."""
-    if BOT.search(text or ""):
-        return False
-    return len((text or "").split()) >= 20
+    return text_store.text_usable(text)
 
 
 def stored_sa_text(aid, directory):
@@ -362,6 +361,8 @@ def resume(order_path, results_path, fulltext_dir=None):
         if record.get("status") == "drop" and record.get("reason") != "bot check":
             continue
         item = {"id": aid, "ticker": row.get("ticker") or "", "url": row.get("url") or ""}
+        if not text_is_usable(stored_sa_text(aid, fulltext_dir)):
+            text_store.materialize(f"sa_{aid}.txt", fulltext_dir)
         if text_is_usable(stored_sa_text(aid, fulltext_dir)):
             reused.append(item)
             continue
@@ -510,6 +511,8 @@ def classify_text(text, ticker="", quotes=None):
 
 def check(path, results_path, candidates_path="", quotes=None):
     text = open(path, encoding="utf-8").read()
+    if text_is_usable(text):
+        text_store.publish_file(path)
     parsed = parse_fulltext(text)
     aid = article_id(parsed["url"] or os.path.basename(path))
     doc = load_json(results_path, {})
@@ -833,6 +836,7 @@ def _fulltext(url, title, author, ticker, body, disclosure):
 
 def self_test():
     """Offline fake rows. No network and no login."""
+    previous_store = os.environ.get("SCREENY_TEXT_STORE")
     quotes = {
         "ACME": {"quoteType": "EQUITY", "exchange": "NMS", "marketCap": 2e9, "regularMarketPrice": 10, "currency": "USD", "longName": "Acme", "sym": "ACME"},
         "BOND": {"quoteType": "ETF", "exchange": "PCX", "marketCap": 1e9, "regularMarketPrice": 20, "currency": "USD", "longName": "Bond ETF", "sym": "BOND"},
@@ -841,6 +845,7 @@ def self_test():
         "AAA": {"quoteType": "EQUITY", "exchange": "NMS", "marketCap": 1e9, "regularMarketPrice": 8, "currency": "USD", "longName": "Aaa", "sym": "AAA"},
     }
     with tempfile.TemporaryDirectory() as folder:
+        os.environ["SCREENY_TEXT_STORE"] = os.path.join(folder, "text_store")
         list_path = os.path.join(folder, "list.csv")
         cand_path = os.path.join(folder, "candidates.csv")
         results_path = os.path.join(folder, "sa_results.json")
@@ -971,6 +976,10 @@ def self_test():
         open(os.path.join(texts, "sa_32.txt"), "w", encoding="utf-8").write("Press & Hold to confirm you are human")
         pending = resume(reuse_order, os.path.join(folder, "no_results.json"), texts)
         assert [item["ticker"] for item in pending] == ["BOT", "MISS"], pending
+        text_store.publish("sa_33.txt", " ".join(["fromstore"] * 30))
+        pending = resume(reuse_order, os.path.join(folder, "no_results.json"), texts)
+        assert [item["ticker"] for item in pending] == ["BOT"], pending
+        assert "fromstore" in open(os.path.join(texts, "sa_33.txt"), encoding="utf-8").read()
 
         class _Resp:
             def __init__(self, status, payload=None, text=""):
@@ -1004,6 +1013,10 @@ def self_test():
             pass
         else:
             raise AssertionError("a 401 with no chart data should stop instead of marking every ticker missing")
+    if previous_store is None:
+        os.environ.pop("SCREENY_TEXT_STORE", None)
+    else:
+        os.environ["SCREENY_TEXT_STORE"] = previous_store
     print("sa_ingest self-test ok")
     return 0
 
