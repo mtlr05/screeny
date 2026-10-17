@@ -34,6 +34,7 @@ On-demand scout for single-stock investment write-ups. David runs it from the Cu
 - `reports/` — dated outputs. Sample: `reports/2026-10-14/`.
 - `fulltext/` and `cache/` — local only, not committed.
 - `.cursor/skills/stock-screen/` — sweep, triage, read, score, report.
+- `.cursor/skills/stock-screen-scoring/` — the six criteria and the evidence rules. This skill takes precedence over the scoring summary in the stock-screen skill.
 - `.cursor/skills/author-batting-average/` — batting average on its own.
 - `scripts/` — sweep, fetch, prices, earnings drops, report. `rerun/` — full-window helpers. `bat/` — batting-average helpers.
 
