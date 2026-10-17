@@ -54,6 +54,7 @@ The agent follows `AGENTS.md` and `.cursor/skills/`. A full run covers the last 
 | `rerun/` | Full 4-month rebuild helpers |
 | `bat/` | Author batting average: detection, exclusion, prices, and the chance calculation |
 | `.cursor/skills/stock-screen/` | Sweep, triage, read, score, report, then upkeep |
+| `.cursor/skills/stock-screen-scoring/` | The six scoring criteria and the evidence rules |
 | `.cursor/skills/author-batting-average/` | Batting average on its own |
 
 `bat/` files:

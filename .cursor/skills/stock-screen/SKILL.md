@@ -139,6 +139,8 @@ Record an ambiguous disclosure (the "may hold" kind of line) and drop it. Priori
 
 ## 8. Score out of 6
 
+The scoring criteria and evidence rules are defined in the stock-screen-scoring skill, and that skill takes precedence.
+
 One point each. Partial credit is as stated. Small/mid cap and US/Canada listing are filters, not scored.
 
 1. Thesis with a secular runway or growth driver. Cheap but no growth (asset value, cash pile, wind-down, low multiple only) = 0.5.
