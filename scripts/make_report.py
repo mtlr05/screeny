@@ -24,12 +24,12 @@ from _paths import CACHE, EXAMPLES, REPORTS, RERUN, ROOT, SEEN, SOURCES, STATE, 
 import calc as batcalc
 import weekly_sweep
 
-LBL = ["Thesis/runway", "Return ~40%/yr", "CEO large holder", "Moat", "Edge", "Differential view", "Dated catalyst"]
+LBL = ["Thesis/runway", "Return ~40%/yr", "CEO ownership", "Moat", "Edge", "Differential view", "Dated catalyst"]
 FULL = [1, 1, 1, 1, 1, 1, 1]
 CN = [
     "Thesis with secular runway",
     "Return ~40%/yr",
-    "CEO is a large shareholder",
+    "CEO ownership or incentive",
     "Moat",
     "Edge",
     "Differential view",
@@ -416,7 +416,7 @@ def render(doc, onepagers, live):
     A("")
     A("1. **Thesis with secular runway**: cheap with no growth = 0.5.")
     A("2. **Return ~40%/yr**: from the publish-day close to the author's target over the author's timeframe (2 years if none given). 25-40%/yr = 0.5; under 25%/yr = 0.")
-    A("3. **CEO is a large shareholder** (roughly 5%+ = 1; 1-5% = 0.5).")
+    A("3. **CEO ownership or incentive** (highest tier: CEO or founder-CEO at least 5% = 1; CEO or executive-chair open-market purchase = 0.75; 1–5%, a stated holding not shown to be under 1%, skin in the game, or a non-CEO founder or chair at least 5% = 0.5; aggregate insiders at least 10%, a director or unnamed insider purchase, or pay tied to performance = 0.25; otherwise 0, and 'not stated' when nothing is in the article or a cited filing).")
     A("4. **Moat**: five moat types, Strong 1 / Moderate 0.75 / Narrow 0.5; none described = 0.")
     A("5. **Edge**: checkable evidence about the people, Strong 1 / Moderate 0.75 / Narrow 0.5; assertion only = 0.")
     A("6. **Differential view**: names why the market is wrong (stigma or label, temporary or mundane issue, neglect) and why it corrects; an overreaction to temporary news supports it.")

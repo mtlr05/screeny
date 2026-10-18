@@ -20,7 +20,7 @@ Fact-check of key claims, author batting average (share of past long pitches tha
 
 1. **Thesis with secular runway**: cheap with no growth = 0.5.
 2. **Return ~40%/yr**: from the publish-day close to the author's target over the author's timeframe (2 years if none given). 25-40%/yr = 0.5; under 25%/yr = 0.
-3. **CEO is a large shareholder** (roughly 5%+ = 1; 1-5% = 0.5).
+3. **CEO ownership or incentive** (highest tier in the stock-screen-scoring skill; article or a cited filing only; otherwise 0 and "not stated").
 4. **Moat or edge**: moat graded on the five moat types (Strong 1 / Moderate 0.75 / Narrow 0.5), or an edge: proven operator, allocator or dealmaker, or an obsessive founder-builder (a good guidance record supports it).
 5. **Differential view**: names why the market is wrong (stigma or label, temporary or mundane issue, neglect) and why it corrects; an overreaction to temporary news supports it.
 6. **Dated catalyst within ~24 months**: undated = 0.5.
