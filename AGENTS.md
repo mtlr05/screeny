@@ -9,6 +9,8 @@ On-demand scout for single-stock investment write-ups. David runs it from the Cu
 - Never use Seeking Alpha investing groups.
 - If Seeking Alpha shows a bot check, pause and try that article once more. If it fails again, stop gathering and score what was already read in full. The new-article pull is the signed-in browser plus `scripts/sa_ingest.py`. Do not store a login or a cookie. If the session has expired, ask the user to sign in.
 - The author must disclose a long position (a Seeking Alpha "beneficial long position" disclosure, or an explicit "I own / I am long / I hold a position" statement). A Buy/LONG rating alone, or "may hold" boilerplate, does not count. Drop reason: `author not long`.
+- During a long step (a sweep or article reads), check its progress log every 1 to 2 minutes. The check takes a second or two. Restart the step immediately if it has stalled or died. On a Content Error, back off and resume.
+- Do not re-download article text. Keep fetched text in `fulltext/`, in `state/`, and in the shared store (`SCREENY_TEXT_STORE`, or `~/.screeny/fulltext_store` if unset). On any run, including after a failed run or in a fresh clone, check `fulltext/` first, then the shared store, then seen or result records. Copy a usable store file into `fulltext/` instead of fetching. Fetch only a missing article, or one whose stored file is unusable (a bot-check page or an empty file). `python3 scripts/text_store.py import DIR` copies an existing `fulltext/` folder into the store.
 
 ## Preferences
 
@@ -32,7 +34,7 @@ On-demand scout for single-stock investment write-ups. David runs it from the Cu
 - `state/source_stats.csv` — per tracked source: last post, consecutive failed loads, articles scored in the last 6 months, 6-month average score, 2-year batting average and pitch count, `ba2y_p_lt_hits` (`p_lt_hits_by_chance`), `ba2y_median_excess`, `ba2y_med_ret` (2-year median stock return), `ba_updated`, `ba_method`, exclusion and price-loss counts, plus title versus body pitch counts. Seeking Alpha is not in this file. A stored batting average has no expiry. Recalculate it only for an add candidate or a removal proposal, and only when `ba_updated` is not today, unless someone asks for `--full-ba`.
 - `state/scored.json`, `state/batting.json` — this run's scores and batting averages.
 - `reports/` — dated outputs. Sample: `reports/2026-10-14/`.
-- `fulltext/` and `cache/` — local only, not committed.
+- `fulltext/` and `cache/` — local only, not committed. A copy of each usable `fulltext/` file also goes to the shared store outside the clone (`SCREENY_TEXT_STORE`, default `~/.screeny/fulltext_store`).
 - `.cursor/skills/stock-screen/` — sweep, triage, read, score, report.
 - `.cursor/skills/stock-screen-scoring/` — the six criteria and the evidence rules. This skill takes precedence over the scoring summary in the stock-screen skill.
 - `.cursor/skills/author-batting-average/` — batting average on its own.
