@@ -9,6 +9,7 @@ On-demand scout for single-stock investment write-ups. David runs it from the Cu
 - Never use Seeking Alpha investing groups.
 - If Seeking Alpha shows a bot check, pause and try that article once more. If it fails again, stop gathering and score what was already read in full. The new-article pull is the signed-in browser plus `scripts/sa_ingest.py`. Do not store a login or a cookie. If the session has expired, ask the user to sign in.
 - The author must disclose a long position (a Seeking Alpha "beneficial long position" disclosure, or an explicit "I own / I am long / I hold a position" statement). A Buy/LONG rating alone, or "may hold" boilerplate, does not count. Drop reason: `author not long`.
+- Criterion 3 is CEO ownership or incentive, from the article or a cited filing only. Score the highest tier in the stock-screen-scoring skill. If nothing is stated, score 0 and print "not stated". The evidence sentence quotes or cites the matched sentence. Do not use a holding figure from outside the text. `scripts/ceo_stake_grep.py` only lists candidate sentences.
 
 ## Preferences
 

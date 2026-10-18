@@ -80,6 +80,8 @@ python3 scripts/sa_ingest.py screen reports/sa_list_YYYY-MM-DD.csv
 python3 scripts/sa_ingest.py check fulltext/sa_ID.txt
 python3 scripts/sa_ingest.py merge reports/sa_candidates_YYYY-MM-DD.csv reports/triage_YYYY-MM-DD.json
 python3 scripts/sa_ingest.py self-test
+python3 scripts/ceo_stake_grep.py self-test
+python3 scripts/ceo_stake_grep.py FILE
 python3 scripts/sa_public.py article https://seekingalpha.com/article/123
 python3 bat/sa_one.py "Author Name" author-slug
 python3 bat/pitches.py subdomain --limit 20
@@ -94,6 +96,8 @@ python3 scripts/source_upkeep.py --apply reports/source_upkeep_YYYY-MM-DD.json
 ```
 
 `make_report.py --example` re-renders the 2026-10-14 sample from `examples/scored.json` into `cache/example-REPORT.md`. It does not call the network.
+
+Criterion 3 (CEO ownership or incentive) is scored only from the article or a cited filing. `ceo_stake_grep.py` prints candidate sentences and a suggested tier; the scorer confirms them. Nothing stated is 0 and the note says "not stated". The evidence sentence cites the matched sentence.
 
 Triage files are JSON. `grab_fulltext.py` reads that file directly.
 
