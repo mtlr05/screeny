@@ -16,6 +16,11 @@ Standing rules in `AGENTS.md` win if this file and the chat disagree. Do not cha
 
 Run commands from the repo root.
 
+## Run checks
+
+- **Progress.** During a long step, such as a sweep or a run of article reads, check its progress log every 1 to 2 minutes. The check itself takes a second or two. If the step has stalled or the process has died, restart it immediately. On a Content Error, back off and resume.
+- **No re-download.** Fetched article text stays in `fulltext/`, in `state/`, and in the shared text store. On every run, including one after a failed run or in a fresh clone, look in `fulltext/` first, then the shared store, then seen or result records. If the store has a usable copy, copy it into `fulltext/` and do not fetch. Fetch only an article that is missing in both places, or whose stored file is unusable (a bot-check page or an empty file). The store is `SCREENY_TEXT_STORE`, or `~/.screeny/fulltext_store` when that variable is unset. `weekly_sweep.py`, `grab_fulltext.py`, and `sa_ingest.py resume` follow this. To load an existing `fulltext/` folder into the store once: `python3 scripts/text_store.py import fulltext`.
+
 ## 1. Sweep sources
 
 ```bash
@@ -118,7 +123,7 @@ Fetch Substack text (no jq):
 python3 scripts/grab_fulltext.py reports/triage_YYYY-MM-DD.json
 ```
 
-A paywall, a truncated body, or a preview means drop. Saved files land in `fulltext/` (gitignored).
+A paywall, a truncated body, or a preview means drop. Saved files land in `fulltext/` (gitignored) and in the shared text store. Do not fetch a URL that already has a usable file in either place.
 
 `python3 scripts/triage2.py` can order the reading queue from saved text. Its number is not the /7 score.
 

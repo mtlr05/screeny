@@ -22,7 +22,8 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from _paths import REPORTS, STATE, ensure
+from _paths import FULLTEXT, REPORTS, STATE, ensure
+import text_store
 
 LIST_FIELDS = ["url", "article_id", "source", "author", "date", "title", "ticker", "date_text"]
 CAND_FIELDS = [
@@ -324,11 +325,34 @@ def write_read_order(candidates, results, path):
     return ordered
 
 
-def resume(order_path, results_path):
-    """Ids still unread after a bot check, in the saved read order."""
+def text_is_usable(text):
+    """Stored article text can be reused. Empty text and a bot-check page cannot."""
+    return text_store.text_usable(text)
+
+
+def stored_sa_text(aid, directory):
+    if not aid or not directory:
+        return ""
+    path = os.path.join(directory, f"sa_{aid}.txt")
+    if not os.path.isfile(path):
+        return ""
+    try:
+        return open(path, encoding="utf-8").read()
+    except OSError:
+        return ""
+
+
+def resume(order_path, results_path, fulltext_dir=None):
+    """Ids that still need a browser fetch, in the saved read order.
+
+    A usable file in fulltext/ is reused and is not fetched again.
+    """
+    if fulltext_dir is None:
+        fulltext_dir = FULLTEXT
     rows = read_csv(order_path)
     doc = load_json(results_path, {})
     pending = []
+    reused = []
     for row in rows:
         aid = article_id(row.get("url") or "") or (row.get("article_id") or "")
         record = doc.get(aid) or {}
@@ -336,7 +360,16 @@ def resume(order_path, results_path):
             continue
         if record.get("status") == "drop" and record.get("reason") != "bot check":
             continue
-        pending.append({"id": aid, "ticker": row.get("ticker") or "", "url": row.get("url") or ""})
+        item = {"id": aid, "ticker": row.get("ticker") or "", "url": row.get("url") or ""}
+        if not text_is_usable(stored_sa_text(aid, fulltext_dir)):
+            text_store.materialize(f"sa_{aid}.txt", fulltext_dir)
+        if text_is_usable(stored_sa_text(aid, fulltext_dir)):
+            reused.append(item)
+            continue
+        pending.append(item)
+    print(f"Reuse stored Seeking Alpha text: {len(reused)}")
+    for item in reused:
+        print(f"  stored {item['id']} {item['ticker']} {item['url']}")
     print(f"Unread Seeking Alpha articles: {len(pending)}")
     for item in pending:
         print(f"  {item['id']} {item['ticker']} {item['url']}")
@@ -478,6 +511,8 @@ def classify_text(text, ticker="", quotes=None):
 
 def check(path, results_path, candidates_path="", quotes=None):
     text = open(path, encoding="utf-8").read()
+    if text_is_usable(text):
+        text_store.publish_file(path)
     parsed = parse_fulltext(text)
     aid = article_id(parsed["url"] or os.path.basename(path))
     doc = load_json(results_path, {})
@@ -801,6 +836,7 @@ def _fulltext(url, title, author, ticker, body, disclosure):
 
 def self_test():
     """Offline fake rows. No network and no login."""
+    previous_store = os.environ.get("SCREENY_TEXT_STORE")
     quotes = {
         "ACME": {"quoteType": "EQUITY", "exchange": "NMS", "marketCap": 2e9, "regularMarketPrice": 10, "currency": "USD", "longName": "Acme", "sym": "ACME"},
         "BOND": {"quoteType": "ETF", "exchange": "PCX", "marketCap": 1e9, "regularMarketPrice": 20, "currency": "USD", "longName": "Bond ETF", "sym": "BOND"},
@@ -809,6 +845,7 @@ def self_test():
         "AAA": {"quoteType": "EQUITY", "exchange": "NMS", "marketCap": 1e9, "regularMarketPrice": 8, "currency": "USD", "longName": "Aaa", "sym": "AAA"},
     }
     with tempfile.TemporaryDirectory() as folder:
+        os.environ["SCREENY_TEXT_STORE"] = os.path.join(folder, "text_store")
         list_path = os.path.join(folder, "list.csv")
         cand_path = os.path.join(folder, "candidates.csv")
         results_path = os.path.join(folder, "sa_results.json")
@@ -923,6 +960,26 @@ def self_test():
         order = write_read_order(read_csv(mix), {}, os.path.join(folder, "order.csv"))
         assert [row["ticker"] for row in order[:4]] == ["WAIT", "FULL", "PREV", "NOLONG"]
         assert order[-1]["ticker"] == "STOP"
+        reuse_order = os.path.join(folder, "reuse_order.csv")
+        write_csv(
+            reuse_order,
+            ["url", "article_id", "ticker", "date", "title"],
+            [
+                {"url": "https://seekingalpha.com/article/31", "article_id": "31", "ticker": "KEEP", "date": "2026-10-01", "title": "Stored"},
+                {"url": "https://seekingalpha.com/article/32", "article_id": "32", "ticker": "BOT", "date": "2026-10-02", "title": "Bot"},
+                {"url": "https://seekingalpha.com/article/33", "article_id": "33", "ticker": "MISS", "date": "2026-10-03", "title": "Missing"},
+            ],
+        )
+        texts = os.path.join(folder, "fulltext")
+        os.makedirs(texts)
+        open(os.path.join(texts, "sa_31.txt"), "w", encoding="utf-8").write(" ".join(["stored"] * 40))
+        open(os.path.join(texts, "sa_32.txt"), "w", encoding="utf-8").write("Press & Hold to confirm you are human")
+        pending = resume(reuse_order, os.path.join(folder, "no_results.json"), texts)
+        assert [item["ticker"] for item in pending] == ["BOT", "MISS"], pending
+        text_store.publish("sa_33.txt", " ".join(["fromstore"] * 30))
+        pending = resume(reuse_order, os.path.join(folder, "no_results.json"), texts)
+        assert [item["ticker"] for item in pending] == ["BOT"], pending
+        assert "fromstore" in open(os.path.join(texts, "sa_33.txt"), encoding="utf-8").read()
 
         class _Resp:
             def __init__(self, status, payload=None, text=""):
@@ -956,6 +1013,10 @@ def self_test():
             pass
         else:
             raise AssertionError("a 401 with no chart data should stop instead of marking every ticker missing")
+    if previous_store is None:
+        os.environ.pop("SCREENY_TEXT_STORE", None)
+    else:
+        os.environ["SCREENY_TEXT_STORE"] = previous_store
     print("sa_ingest self-test ok")
     return 0
 

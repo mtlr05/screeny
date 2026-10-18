@@ -16,6 +16,13 @@ Commands assume the repo root. Scripts find `config/`, `state/`, and `reports/` 
 
 Optional: set `SCREENY_USER_AGENT` if you want a specific User-Agent. The default is a plain browser string. Do not put an email address in the repo.
 
+Fetched article text is copied to a shared folder outside the clone so a fresh checkout can reuse it. Set `SCREENY_TEXT_STORE` to choose the folder. The default is `~/.screeny/fulltext_store`. Before a fetch, scripts look in `fulltext/` and then that store. A usable store file is copied into `fulltext/` and not downloaded again. A bot-check page or an empty file is not usable.
+
+```bash
+python3 scripts/text_store.py import fulltext
+python3 scripts/text_store.py self-test
+```
+
 Markdown is the report. The PDF is that same file, including **Articles from top-record authors**. Install the optional packages, then pass `--pdf`:
 
 ```bash
@@ -49,7 +56,7 @@ The agent follows `AGENTS.md` and `.cursor/skills/`. A full run covers the last 
 | `state/sa_results.json` | Seeking Alpha article ids already checked or merged. Gitignored |
 | `reports/` | Dated reports and upkeep proposals. Sample: `reports/2026-10-14/` |
 | `examples/` | Same sample, plus `scored.json` so the report script can re-render it |
-| `fulltext/`, `cache/` | Local fetches, including pitch bodies and `cache/crawl.json`. Gitignored |
+| `fulltext/`, `cache/` | Local fetches, including pitch bodies and `cache/crawl.json`. Gitignored. Usable texts are also copied to `SCREENY_TEXT_STORE` (default `~/.screeny/fulltext_store`) |
 | `scripts/` | Sweep, fetch, prices, earnings drops, report, source upkeep |
 | `rerun/` | Full 4-month rebuild helpers |
 | `bat/` | Author batting average: detection, exclusion, prices, and the chance calculation |

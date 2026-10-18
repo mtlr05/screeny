@@ -161,10 +161,12 @@ def test_content_screen_drops_only_clear_cases():
     def _boom(url, headers, timeout):
         raise OSError("offline")
 
-    post = _post("https://ex.substack.com/p/slug", "Acme Corp")
-    text = weekly_sweep.fetch_body(post, {}, getter=_ok)
-    assert len(text.split()) == 1500, len(text.split())
-    assert weekly_sweep.fetch_body(post, {}, getter=_boom) == ""
+    with tempfile.TemporaryDirectory() as tmp:
+        post = _post("https://ex.substack.com/p/slug", "Acme Corp")
+        text = weekly_sweep.fetch_body(post, {}, getter=_ok, store_dir=tmp)
+        assert len(text.split()) == 1500, len(text.split())
+        missing = _post("https://ex.substack.com/p/other", "Other Corp")
+        assert weekly_sweep.fetch_body(missing, {}, getter=_boom, store_dir=tmp) == ""
     print("content screen ok")
 
 
@@ -222,6 +224,68 @@ def test_old_six_point_scores_stay_marked_out_of_6():
     print("old totals stay out of 6; the add bar is 5.25/7")
 
 
+def test_fetch_body_reuses_stored_text():
+    post = _post("https://ex.substack.com/p/slug", "Acme Corp")
+
+    class _Resp:
+        def json(self):
+            return {"body_html": "<p>" + " ".join(["beta"] * 30) + "</p>"}
+
+    with tempfile.TemporaryDirectory() as tmp:
+        path = os.path.join(tmp, "slug.txt")
+        open(path, "w", encoding="utf-8").write(" ".join(["alpha"] * 40))
+
+        def boom(*_args, **_kwargs):
+            raise AssertionError("stored text should be reused")
+
+        text = weekly_sweep.fetch_body(post, {}, getter=boom, store_dir=tmp)
+        assert text.split()[0] == "alpha"
+        open(path, "w", encoding="utf-8").write("Press & Hold to confirm you are human")
+        calls = []
+
+        def fetch(*_args, **_kwargs):
+            calls.append(1)
+            return _Resp()
+
+        text = weekly_sweep.fetch_body(post, {}, getter=fetch, store_dir=tmp)
+        assert calls == [1]
+        assert "beta" in text.split()
+        calls.clear()
+        text = weekly_sweep.fetch_body(post, {}, getter=boom, store_dir=tmp)
+        assert "beta" in text.split()
+        assert calls == []
+    print("stored body is reused; a bot-check page is fetched again")
+
+
+def test_shared_store_copies_into_fulltext():
+    import text_store
+
+    post = _post("https://ex.substack.com/p/shared-slug", "Acme Corp")
+    previous = os.environ.get("SCREENY_TEXT_STORE")
+    old_fulltext = weekly_sweep.FULLTEXT
+    with tempfile.TemporaryDirectory() as tmp:
+        os.environ["SCREENY_TEXT_STORE"] = os.path.join(tmp, "store")
+        local = os.path.join(tmp, "fulltext")
+        os.makedirs(local)
+        weekly_sweep.FULLTEXT = local
+        try:
+            text_store.publish("shared-slug.txt", " ".join(["gamma"] * 30))
+
+            def boom(*_args, **_kwargs):
+                raise AssertionError("shared store should fill fulltext")
+
+            text = weekly_sweep.fetch_body(post, {}, getter=boom)
+            assert text.split()[0] == "gamma"
+            assert os.path.isfile(os.path.join(local, "shared-slug.txt"))
+        finally:
+            weekly_sweep.FULLTEXT = old_fulltext
+            if previous is None:
+                os.environ.pop("SCREENY_TEXT_STORE", None)
+            else:
+                os.environ["SCREENY_TEXT_STORE"] = previous
+    print("shared store copies into fulltext")
+
+
 if __name__ == "__main__":
     test_in_window_sourced_count()
     test_pitch_titles_stay_and_recap_drops()
@@ -229,3 +293,5 @@ if __name__ == "__main__":
     test_content_screen_drops_only_clear_cases()
     test_report_drop_counts_come_from_the_screen_file()
     test_old_six_point_scores_stay_marked_out_of_6()
+    test_fetch_body_reuses_stored_text()
+    test_shared_store_copies_into_fulltext()
