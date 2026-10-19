@@ -2,8 +2,8 @@
 
 Every call has a hard wall-clock cap. A timeout is never cached.
 Only a real Not Found is cached, for 7 days. A symbol with no dot and no
-price data is retried as SYM.TO, then SYM.V. The benchmark is XIC.TO for
-.TO and .V listings and SPY otherwise.
+price data is retried as SYM.TO, then SYM.V. The benchmark is XCS.TO for
+.TO and .V listings and IWM otherwise.
 """
 import datetime as dt
 import json
@@ -54,8 +54,8 @@ def hard_get(url, params=None, headers=None, wall=20, timeout=(5, 8)):
 def benchmark(symbol):
     sym = str(symbol or "")
     if sym.endswith(".TO") or sym.endswith(".V"):
-        return "XIC.TO"
-    return "SPY"
+        return "XCS.TO"
+    return "IWM"
 
 
 def _path(symbol):
@@ -190,7 +190,7 @@ def resolve_series(symbol, period1, period2, fallback=True):
     """Price series, retrying SYM.TO then SYM.V when the bare symbol has no data.
 
     A timeout is not treated as missing data and is not followed by a suffix retry.
-    fallback=False is for benchmarks (SPY, XIC.TO), which are not retried as .TO/.V.
+    fallback=False is for benchmarks (IWM, XCS.TO), which are not retried as .TO/.V.
     """
     status, rows = fetch_chart(symbol, period1, period2)
     if status == "ok":
@@ -270,10 +270,10 @@ def _self_test():
         raise SystemExit("hard_get did not time out")
     finally:
         server.close()
-    assert benchmark("ABC.TO") == "XIC.TO"
-    assert benchmark("ABC.V") == "XIC.TO"
-    assert benchmark("ABC") == "SPY"
-    assert benchmark("ABC.CN") == "SPY"
+    assert benchmark("ABC.TO") == "XCS.TO"
+    assert benchmark("ABC.V") == "XCS.TO"
+    assert benchmark("ABC") == "IWM"
+    assert benchmark("ABC.CN") == "IWM"
     print("prices self-test ok")
     return 0
 

@@ -2,7 +2,7 @@
 
 On-demand stock-article scout. It sweeps Substack and a short list of blogs, forums, Value Investors Club, and Seeking Alpha, reads pitches in full, scores them out of 7, and writes a ranked Markdown report. A total still stored on the old six-point rubric is marked /6.
 
-The user runs it from the Cursor agent window. A run starts when someone asks. Nothing runs on a timer. The Seeking Alpha Long Ideas pull is the only step that uses a signed-in browser. No password or cookie is stored in the repo.
+David runs it from the Cursor agent window. A run starts when someone asks. Nothing runs on a timer. Seeking Alpha is the only step that uses a signed-in browser. No password or cookie is stored in the repo.
 
 ## Setup
 
@@ -12,7 +12,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Commands assume the repo root. Scripts find `config/`, `state/`, and `reports/` from their own location.
+Commands assume the repo root. Scripts find `config/`, `state/`, and `reports/` from their own location. `requirements.txt` includes matplotlib, which the report uses for the score chart.
 
 Optional: set `SCREENY_USER_AGENT` if you want a specific User-Agent. The default is a plain browser string. Do not put an email address in the repo.
 
@@ -23,16 +23,16 @@ python3 scripts/text_store.py import fulltext
 python3 scripts/text_store.py self-test
 ```
 
-Markdown is the report. The PDF is that same file, including **Articles from top-record authors**. Install the optional packages, then pass `--pdf`:
+Markdown is the report. The PDF is that same file, including the chart and **Articles from top-record authors**. Install the optional packages, then pass `--pdf`:
 
 ```bash
 pip install markdown weasyprint
 python3 scripts/make_report.py --pdf
 ```
 
-That writes `REPORT.pdf` next to `REPORT.md`. If those packages are missing, the script keeps the Markdown and prints that the PDF was skipped.
+That writes `REPORT.pdf` next to `REPORT.md`. If those packages are missing, the script keeps the Markdown and prints that the PDF was skipped. If matplotlib is missing, the script keeps the report and prints that the chart was skipped.
 
-## Ask Cursor
+## Run it
 
 - `Run the stock screen`
 - `Screen this week's articles`
@@ -41,80 +41,81 @@ That writes `REPORT.pdf` next to `REPORT.md`. If those packages are missing, the
 
 The agent follows `AGENTS.md` and `.cursor/skills/`. A full run covers the last 4 months. "This week" means the last 7 days.
 
-## Layout
+## What the report contains
 
-| Path | Role |
-|---|---|
-| `config/sources.csv` | Active sources (Substack plus a few manual feeds) |
-| `config/sources_dormant_or_dead.csv` | Parked feeds, including sources that were already dormant or dead. Automatic adds skip them. A dormant recheck may put a parked author back unless they are also on the never-readd list |
-| `config/sources_dropped_never_readd.csv` | Authors removed by an approved drop (`name`, `url`, `dropped_on`, `reason`). Currently the 17 drops from 2026-10-16. Discovery skips them. `--apply` refuses the add. A dormant recheck must not put them back |
-| `config/universe.csv` | Optional ticker list for earnings-drop search |
-| `state/seen_posts.csv` | URLs already swept. Dedupe key is `url`. Append-only |
-| `state/source_stats.csv` | Per-source upkeep stats. Seeking Alpha is excluded |
-| `state/scored.json`, `state/batting.json` | This run's scores and batting averages |
-| `state/sa_breakdown.json` | Seeking Alpha counts actually observed this run |
-| `state/sa_results.json` | Seeking Alpha article ids already checked or merged. Gitignored |
-| `reports/` | Dated reports and upkeep proposals. Sample: `reports/2026-10-14/` |
-| `examples/` | Same sample, plus `scored.json` so the report script can re-render it |
-| `fulltext/`, `cache/` | Local fetches, including pitch bodies and `cache/crawl.json`. Gitignored. Usable texts are also copied to `SCREENY_TEXT_STORE` (default `~/.screeny/fulltext_store`) |
-| `scripts/` | Sweep, fetch, prices, earnings drops, report, source upkeep |
-| `rerun/` | Full 4-month rebuild helpers |
-| `bat/` | Author batting average: detection, exclusion, prices, and the chance calculation |
-| `.cursor/skills/stock-screen/` | Sweep, triage, read, score, report, then upkeep |
-| `.cursor/skills/stock-screen-scoring/` | The six scoring criteria and the evidence rules |
-| `.cursor/skills/author-batting-average/` | Batting average on its own |
+`python3 scripts/make_report.py` writes `reports/<today>/REPORT.md`. `--pdf` writes `REPORT.pdf` from that Markdown.
 
-`bat/` files:
+1. **Stats.** Articles sourced, articles read in full, articles scored.
+2. **Screening and scoring rules.**
+3. **Ranked list.** Best article per ticker. Top 15 plus every tie at the 15th score. The **BA 2y (1y)** column is the author's 2-year batting average as hits/n = %, else the 1-year figure tagged `(1y)`, else `n/a`. It does not change the /7 score.
+4. **Score vs P(fewer hits).** One point per scored article. The vertical axis is `P(X < hits)`, defined in the batting-average section below. Blue is the 2-year sample. Red is the 1-year sample, used only when the 2-year sample is missing. A black `x` at 0 means neither sample exists. The image is `score_vs_ba.png` next to the report.
+5. **Author batting top-5**, then the next six, then **Articles from top-record authors**, then caveats. The top-5 tables use the ranked list and the next six, and they need at least 5 pitches. The batting average itself is still calculated for every scored author, so the chart can plot names below that cut.
+6. **Appendix: one-pagers.**
+7. **Appendix: batting average and P(X < hits).** The short explanation, then every chart point: ticker, score, author, linked article, date, sample (`2y`, `1y`, or `x`), hits/n, and the probability.
+8. **Appendix: detailed stats.** Drop reasons, the Seeking Alpha breakdown, and counts by source type.
 
-| File | Role |
-|---|---|
-| `bat/pitches.py` | Detect one author's pitches, or write `bat/pitches.json` from the hand list |
-| `bat/lib.py` | Archive, title and body detection, parallel fetch, `.TO`/`.V` price retry, 2-year score |
-| `bat/longcheck.py` | Drop a short, a sell, or a hold whose body does not show ownership |
-| `bat/calc.py` | Windows, `p_lt_hits`, and `state/batting.json` for the report |
-| `bat/sa_one.py`, `bat/sa.py` | Seeking Alpha public author history (title, date, ticker, sentiment) |
-| `bat/prices.py`, `bat/arch.py` | Price and archive helpers |
+**Articles from top-record authors** lists every article in the report window from an author whose stored 2-year `ba2y_p_lt_hits` is at least 0.5 on at least 2 pitches. The list is read from `state/source_stats.csv` at report time and limited to URLs still in `config/sources.csv`. Next to the author: hits/pitches, the batting average, and `p_lt_hits_by_chance`. Each article shows the date, title, link, and the score when the article was scored.
 
-## Commands
+## Score
+
+One point each, out of 7. Small or mid cap (under about US$10B) and a US or Canada listing are filters, not points. The evidence rules are in `.cursor/skills/stock-screen-scoring/`.
+
+1. Thesis with a secular runway. Cheap with no growth is 0.5.
+2. Return of about 40% a year from the publish-day close to the author's target. 25–40% a year is 0.5. Under 25% is 0.
+3. CEO ownership or incentive, from the article or a cited filing only. Nothing stated is 0 and the note says "not stated". `scripts/ceo_stake_grep.py` only lists candidate sentences.
+4. Moat. None described is 0, and that is not a drop.
+5. Edge. An assertion with no checkable evidence is 0, and that is not a drop.
+6. Differential view: why the market is wrong, and why that corrects.
+7. A named catalyst dated inside 24 months. Named but undated is 0.5.
+
+The author must disclose a long position. A Buy rating alone, or "may hold" boilerplate, does not count.
+
+## Batting average
+
+The batting average is not part of the /7 score. It answers a different question: of this author's past long pitches, how many beat a small-cap index?
+
+A weekly screen calculates it for every author of an article that was read in full and scored. Pitch collection and the calculation are separate:
 
 ```bash
-python3 scripts/weekly_sweep.py --since 2026-10-08
-python3 scripts/earnings_drops.py
-python3 scripts/rss.py FEED_URL --since 2026-10-08
-python3 scripts/grab_fulltext.py reports/triage_YYYY-MM-DD.json
-python3 scripts/px.py 2026-10-01 AAPL
-python3 scripts/sa_ingest.py screen reports/sa_list_YYYY-MM-DD.csv
-python3 scripts/sa_ingest.py check fulltext/sa_ID.txt
-python3 scripts/sa_ingest.py merge reports/sa_candidates_YYYY-MM-DD.csv reports/triage_YYYY-MM-DD.json
-python3 scripts/sa_ingest.py self-test
-python3 scripts/ceo_stake_grep.py self-test
-python3 scripts/ceo_stake_grep.py FILE
-python3 scripts/sa_public.py article https://seekingalpha.com/article/123
-python3 bat/sa_one.py "Author Name" author-slug
-python3 bat/pitches.py subdomain --limit 20
-python3 bat/calc.py
-python3 scripts/make_report.py --prices --pdf
-python3 scripts/make_report.py --example --pdf
-python3 scripts/crawl_sources.py
-python3 scripts/source_upkeep.py --plan
-python3 scripts/source_upkeep.py --plan --crawl
-python3 scripts/source_upkeep.py --plan --full-ba
-python3 scripts/source_upkeep.py --apply reports/source_upkeep_YYYY-MM-DD.json
+python3 bat/pitches.py subdomain
+python3 bat/calc.py --today YYYY-MM-DD --benchmark auto
 ```
 
-`make_report.py --example` re-renders the 2026-10-14 sample from `examples/scored.json` into `cache/example-REPORT.md`. It does not call the network.
+The second command calls `batting_average(pitches, today, window_months=12, duration_months=24, benchmark="auto")` twice: once with a 12-month hold and once with a 24-month hold. Both summaries go to `state/batting.json`. To score one window only, pass `--window-months` and `--duration-months`.
 
-Criterion 3 (CEO ownership or incentive) is scored only from the article or a cited filing. `ceo_stake_grep.py` prints candidate sentences and a suggested tier; the scorer confirms them. Nothing stated is 0 and the note says "not stated". The evidence sentence cites the matched sentence.
+- **window_months** (default 12) is how wide the publication cohort is.
+- **duration_months** (default 24) is the hold. The cohort ends on `today - duration`, so the return is finished. That default is pitches from 3 years ago up to 2 years ago, held 24 months.
+- Duration 12 with the same 12-month width is the 1-year average: pitches from 2 years ago up to 1 year ago, held 12 months.
 
-Triage files are JSON. `grab_fulltext.py` reads that file directly.
+One pitch per ticker. Inside a window, the earliest pitch on that ticker is the one that counts. The return is the adjusted close, dividends included. A pitch is a hit when that return is above the benchmark over the same dates. The batting average is `h / n`.
 
-`weekly_sweep.py` drops a free post on the title only when it is a recap, a macro phrase, or a list. Macro matches as a phrase (`macro outlook`, `macro update`, `macro note`, and the same kind of phrase), not as the bare word. Other words match as whole words. A title that names one ticker or one exchange (`$TICKER`, `AXL.V`, `TSX`, `NYSE`, and the same kind of tag) is not dropped on the title; the body screen decides. It does not drop a post because the title lacks a pitch keyword. Each remaining free post is fetched (the first 1,500 words) and dropped only when the body is clearly not a single-stock pitch (macro, book review, general essay, multi-stock list, or no identifiable listed company), or the author is short, selling, or on hold. Anything unclear stays a candidate. Paywalled posts are dropped. Every post in the window, including those drops, is written to `reports/substack_screen_<date>.csv` with `url`, `title`, `decision`, and `reason`. Drop counts in `reports/stats_<date>.json` are counted from that file. `make_report.py` uses the same file when the scored stats include `substack_screen`. Posts already in `state/seen_posts.csv` are not fetched again.
+`benchmark` `auto` is **IWM** (Russell 2000) for a US listing, and **XCS.TO** (S&P/TSX SmallCap) for `.TO` and `.V`. `.CN` and `.NE` use IWM. Any other symbol, such as `SPY`, is used for every pitch. The report's since-publish column is a different comparison and stays IWM for US listings and XIC.TO for Canada.
 
-A full 4-month rebuild, when asked, is `python3 scripts/rerun_sweep.py`, then `rerun/fetch.py`, `rerun/screen1.py`, `rerun/resolve.py`, a full read recorded in `rerun/dispo.py`, then `python3 scripts/make_report.py --legacy`.
+`P(X < hits)` treats each evaluated pitch as a fair coin. `X` is the number of hits in `n` pitches if each pitch beats the benchmark with probability 1/2:
 
-## Source list
+`P(X < h) = sum_{k=0}^{h-1} C(n, k) / 2^n`
 
-The active list is `config/sources.csv`. The sweep and the report read that file. They do not run `--plan`. There is no timer. When the agent follows the stock-screen skill, it writes the report and then runs `python3 scripts/source_upkeep.py --plan`. That refreshes `state/source_stats.csv` and writes a proposal. It does not change the source lists. `--apply` changes them only for proposals the user marks `"approved": true`.
+`bat/calc.py` `p_lt_hits` computes that and rounds to 4 decimals. It is stored as `p_lt` in `state/batting.json` and as `ba2y_p_lt_hits` in `state/source_stats.csv`. It is 0 when there are no hits, and blank when `n` is missing. It is the chance of fewer hits than this author, not the batting average. A 2-for-2 record is 0.75. A 15-for-31 record is 0.3601, because 15 is close to half of 31. Higher means more coin-flip outcomes had fewer hits than this record. The chart plots this number. The top-5 tables and the source proposals sort by it, highest first.
+
+A sample under 5 pitches is flagged as small and does not rank in the top-5 tables. No pitches in a window is `n/a`.
+
+A short, a sell, or a hold is left out unless the body shows the author owns the shares. A title that names one ticker and has no such signal still counts. Counts by reason are stored in `ba2y_excl`. A symbol with no dot and no price is retried as `SYM.TO`, then `SYM.V`. A timeout is not a delisting and is not cached (`ba2y_lost_px`). Only a real Not Found is cached, for 7 days (`ba2y_lost_notfound`). Known buyouts live in the `BUY` map in `bat/calc.py`.
+
+New calculations are tagged `ba_method=v3-iwm-xcs`. A stored row keeps its older tag, including `v2-excl-TO`, until that author is recalculated. A stored average has no expiry. `--plan` recalculates it only for a removal proposal or an add candidate, and only when `ba_updated` is not today. `--full-ba` is the resumable pass over every Substack author (saves every 10; `--force` redoes the current method; `--ba-limit N` stops early). A partial result past the author budget of about 300 seconds is not saved.
+
+The 2-year median excess return is stored as `ba2y_median_excess` (stock return minus benchmark return). The 2-year median stock return is stored as `ba2y_med_ret`. The 1-year median return and the 1-year median excess are not stored yet. The report still prints median excess for authors calculated in the run.
+
+### How a pitch is detected
+
+`python3 bat/pitches.py subdomain` reads the public archive.
+
+- A title that names exactly one US or Canada ticker is method `title`. A dual listing such as `(TSXV: SUM or OTC: SUMMF)` is one company.
+- No ticker, or more than one company: fetch `https://<host>/api/v1/posts/<slug>`, cached under `cache/`. Method `body`. The 2-year pass fetches the body even when the title already names the ticker, so a hold or short in the body is visible.
+- Seeking Alpha past pitches use the public author API only (`python3 bat/sa_one.py "Author Name" author-slug`). Title, date, ticker, and sentiment are enough. If that API returns a bot check, stop.
+
+## Sources
+
+The active list is `config/sources.csv`. The sweep and the report read that file. They do not change it. After the report, the stock-screen skill runs `python3 scripts/source_upkeep.py --plan`. That refreshes `state/source_stats.csv` and writes `reports/source_upkeep_<date>.json`. It does not change the source lists, and it does not recompute every batting average. `--apply` changes the lists only for proposals marked `"approved": true`.
 
 ```mermaid
 flowchart TD
@@ -170,59 +171,31 @@ flowchart TD
   handCheck -->|no| handYes["On the active list. The p and median-excess bar does not apply"]
 ```
 
-A blank last-post date is not a stale drop, and there is no probation. The `p > 0.23` and median-excess test is only for an automatic add proposal. `p` is `ba2y_p_lt_hits`: binomial `P(X <= hits - 1)` with `n` equal to the 2-year pitch count and success probability 0.5, rounded to 4 decimals. `median_excess_2y` is `ba2y_median_excess`, the median of stock return minus benchmark return in that window. Median stock return for that same window is stored as `ba2y_med_ret`. The three publications added on 2026-10-16 were hand-adds: that bar does not apply to them, and none is on the never-readd list. Automatic adds also skip authors who are only on the dormant list. A dormant recheck may put those authors back. It must not put a never-readd author back.
-
-## Source upkeep
-
-`python3 scripts/source_upkeep.py --plan` rewrites `state/source_stats.csv` and writes `reports/source_upkeep_<date>.json`. It leaves `config/sources.csv`, `config/sources_dormant_or_dead.csv`, and `config/sources_dropped_never_readd.csv` unchanged. It does not recompute every batting average.
-
-Every drop and every add is a proposal. Show the user each line with the source name, whether it is a drop or an add, the reason, the numbers behind it, `p_lt_hits_by_chance`, and `ba_updated` (the date that batting average was calculated). Set `"approved": true` only on the entries the user approves, then:
+Show every proposal before changing the list: source name, drop or add, reason, the numbers, `p_lt_hits_by_chance`, and `ba_updated`. `p_lt_hits_by_chance` is the probability in the batting-average section.
 
 ```bash
 python3 scripts/source_upkeep.py --apply reports/source_upkeep_YYYY-MM-DD.json
 ```
 
-`--apply` changes the lists only for those approved entries. Unapproved entries stay proposals. An approved drop moves the row to `config/sources_dormant_or_dead.csv` and appends `name`, `url`, `dropped_on`, and `reason` to `config/sources_dropped_never_readd.csv`. An approved add appends a Substack row to `config/sources.csv` and writes the batting average computed for that candidate into `state/source_stats.csv`. The next report picks the new author up from that file.
+An approved drop moves the row to `config/sources_dormant_or_dead.csv` and appends `name`, `url`, `dropped_on`, and `reason` to `config/sources_dropped_never_readd.csv`. An approved add appends a Substack row and writes that candidate's batting average into `state/source_stats.csv`. `--apply` prints `REFUSED` and does not add anyone already on the never-readd list.
 
-### When a source is proposed for removal
+### Drops
 
-Tracked active sources have a soft cap of 600. Seeking Alpha rows are not in that count.
+Tracked active sources have a soft cap of 600. Seeking Alpha is not in that count. Propose a drop only when:
 
-Propose a drop only in these cases:
+- The stored 2-year batting average is 33% or less on at least 5 pitches. The cutoff is a fraction under 0.334, so one third is included.
+- The last known post is older than 6 months. A blank date stays.
+- The feed failed to load on 4 consecutive runs. The fourth failure is enough. There is no probation.
 
-- The 2-year batting average is 33% or less on at least 5 pitches. The cutoff is a fraction under 0.334, so a one-third record is included.
-- The last known post is older than 6 months. A blank last-post date is unknown and stays.
-- The feed failed to load on 4 consecutive runs. A run counts only when `weekly_sweep.py` recorded that source in its stats file (`attempted` and `failed`). The fourth failure is enough. There is no probation period.
+A source with no scored articles stays. The cap trim runs only when the list would still exceed 600 after those drops and after counting proposed adds. It proposes the lowest 6-month average score among sources with at least 3 scored articles in that window.
 
-A source with no scored articles stays. Empty output is not a removal reason.
+### Adds
 
-The cap trim runs only when the list, after those drops and after counting proposed adds, would still exceed 600. It proposes the lowest 6-month average score, and only among sources with at least 3 scored articles in that window, until the list fits.
+An automatic add is a Substack recommendation of an author who scored at least 5.25/7 (4.5/6 when the stored total is still out of 6), the publication reads as stock research, `ba2y_p_lt_hits` is greater than 0.23, and `ba2y_median_excess` is greater than 0. A missing chance or a missing median excess does not pass. Crypto, bitcoin, forex, options trading, day trading, real estate, macro-only, and politics are skipped. Anyone on the dormant list or the never-readd list is skipped. `--crawl` fetches recommendations. Without it, `--plan` uses `cache/crawl.json` when that file exists.
 
-### When a source is proposed for addition
+`config/sources_dropped_never_readd.csv` holds authors removed by an approved drop, including the 17 drops from 2026-10-16. Discovery skips them. A dormant recheck must not put them back. The only override is a hand edit of that file. An author who is only on the dormant list can come back through a dormant recheck.
 
-An add is a Substack recommendation of an author who scored at least 5.25/7, and only when the candidate's `p` is greater than 0.23 and `median_excess_2y` is greater than 0. 5.25/7 is the old 4.5/6 bar scaled to seven points (both are 75%). A stored total still marked out of 6 clears that same bar at 4.5, so it is not compared with 5.25. A missing `p` or a missing median excess does not pass. A candidate who fails either test is recorded as not added.
-
-`p` is `ba2y_p_lt_hits`. `bat/calc.py` `p_lt_hits` computes the binomial probability `P(X <= hits - 1)` with `n` equal to the number of 2-year pitches and a success probability of 0.5, then rounds to 4 decimals. It is the chance of fewer hits than this author got if each pitch were a coin flip. It is 0 when hits is 0, and blank when `n` is missing. The same formula is described under **p_lt_hits_by_chance**. For 1 hit out of 2, `p` is 0.25. For 2 hits out of 2, it is 0.75.
-
-`median_excess_2y` is stored as `ba2y_median_excess`. It is the median of each 2-year pitch's stock total return minus its benchmark total return. The window is pitches published 2–3 years ago. The benchmark is XIC.TO for `.TO` and `.V`, and SPY otherwise. The stored number is a fraction, so 0.05 is 5 percentage points. Greater than 0 means the median pitch beat its benchmark.
-
-Median stock return for that same window is stored as `ba2y_med_ret`. `bat/lib.py` `score()` returns it as `median_return`: the median of the stock total returns, before subtracting the benchmark. It is a fraction, blank when there are no priced pitches.
-
-`--crawl` fetches those recommendations (the same walk as `scripts/crawl_sources.py`). Without it, `--plan` uses `cache/crawl.json` when that file exists.
-
-While evaluating new authors, a recommendation is kept only when the publication name or description reads as stock research (small-cap, value, equity, thesis, and similar wording). Publications about crypto, bitcoin, forex, options trading, day trading, real estate, macro-only, or politics are skipped and are not add candidates.
-
-Seeking Alpha is one pull for the run, not a tracked source, and those articles are not added to `state/seen_posts.csv`. It is left out of `state/source_stats.csv`. The pull uses the machine's signed-in browser: save the Long Ideas list, run `scripts/sa_ingest.py screen`, read each candidate into `fulltext/sa_<id>.txt`, then `check` and `merge`. The cheap screen uses the reference recap, multi-stock, and fund patterns, then Yahoo for listing and market cap. If the session has expired, ask the user to sign in. Do not request or store a password or a cookie. A preview or a missing long disclosure is not scored. A disclosed long in another listing of the same company, confirmed by the base symbol or the Yahoo company name, still counts. A bond, preferred, or note of that issuer is `long_other_security` and is listed in the report appendix for the user to judge. A disclosure that names only unrelated tickers stays `author not long`. A bot check is tried once more, then the pull stops. The unread remainder is `reports/sa_read_order_<date>.csv`; `sa_ingest.py resume` continues it. Yahoo quotes use a public crumb and fall back to the chart API. A quote fetch that misses more than 30% of symbols stops instead of marking every name not found. Market cap for names between US$3B and US$40B is scaled to the publish-day price. `--apply` skips a Seeking Alpha row. The sweep's `sourced` count is every post in the window. `new_since_last_run` is the subset not already in `state/seen_posts.csv`. X-linked blogs are included only when the user pastes the links, so the original run's two `x_network_blog` posts are not in the repo count. Caveat lines for prices and CEO stakes come from `state/run_notes.json` (`price_source`, `ceo_stake_source`, `sa_pull_complete`). The default CEO source is the article only.
-
-### Never re-add
-
-`config/sources_dropped_never_readd.csv` holds authors removed by an approved drop. It currently has the 17 drops from 2026-10-16. Discovery treats those URLs and Substack subdomains as already known and skips them. `--apply` prints `REFUSED` and does not add anyone on the list. A dormant recheck must not move that author back to `config/sources.csv`. The only override is a hand edit of the never-readd file.
-
-Authors who are only parked in `config/sources_dormant_or_dead.csv` are not on that list. Automatic adds skip them because the dormant list is already known. A dormant recheck may put them back.
-
-### Manual-add exception
-
-The automatic add bar is `p > 0.23` and `median_excess_2y > 0`. The user can still approve a source by hand. On 2026-10-16 three publications were added that way. Each row's `how_discovered` records the exception. None of the three is on the never-readd list. Each is `type=substack`, `status=active`, with `feed_url` set to `<url>/feed`. The batting averages below are seeded with `ba_updated=2026-10-16` and `ba_method=v2-excl-TO`.
+David approved three hand-adds on 2026-10-16 that miss the automatic bar. Later removal proposals still use the drop rules. Their seeded averages were stored with `ba_method=v2-excl-TO` and are not recomputed until that author is recalculated.
 
 | Source | URL | 2y BA | p_lt_hits_by_chance |
 |---|---|---|---|
@@ -230,85 +203,75 @@ The automatic add bar is `p > 0.23` and `median_excess_2y > 0`. The user can sti
 | Welfare Capital Research | https://welfarecapital.substack.com | 2/2 | 0.75 |
 | The Lead-Lag Report | https://leadlagreport.substack.com | 2/2 | 0.75 |
 
-For the two 2/2 sources, 0.75 is `P(X <= 1)`. This exception covers how they were added. Later removal proposals still use the drop rules above.
-
 ### What each tracked source stores
 
-Seeking Alpha is excluded. Every other active source records:
+Seeking Alpha is excluded. Every other active source records last post date, consecutive failed loads, articles scored in the last 6 months and the average of those scores, the 2-year batting average (`ba2y_hits`, `ba2y_n`, `ba2y_pct`, and `ba_2y` as a percent), `ba2y_p_lt_hits`, `ba2y_median_excess`, `ba2y_med_ret`, `ba_updated`, `ba_method`, title versus body pitch counts, `ba2y_excl`, and `ba2y_lost_px` versus `ba2y_lost_notfound`. A blank percentage is neither a drop nor an add.
 
-- last post date
-- consecutive failed loads
-- articles scored in the last 6 months, and the average score over those articles
-- 2-year batting average (`ba2y_hits`, `ba2y_n`, `ba2y_pct`, and `ba_2y` as a percent)
-- `ba2y_p_lt_hits`, which is `p_lt_hits_by_chance`
-- `ba2y_median_excess`, which is `median_excess_2y`
-- `ba2y_med_ret`, which is the median stock return over the same 2-year pitches
-- `ba_updated` and `ba_method` (the current method is `v2-excl-TO`)
-- title versus body pitch counts (`ba2y_n_title`, `ba2y_n_body`, also mirrored on `pitches_title` and `pitches_body`)
-- `ba2y_excl` (short, sell, and hold counts) and `ba2y_lost_px` versus `ba2y_lost_notfound`
+Seeking Alpha is one pull for the run. Those articles are not added to `state/seen_posts.csv`. The pull uses the machine's signed-in browser: save the Long Ideas list, run `scripts/sa_ingest.py screen`, read each candidate into `fulltext/sa_<id>.txt`, then `check` and `merge`. If the session has expired, ask the user to sign in. A preview or a missing long disclosure is not scored. A bot check is tried once more, then the pull stops. The unread remainder stays in `reports/sa_read_order_<date>.csv`. `sa_ingest.py resume` continues it.
 
-`pitches_title` and `pitches_body` stay blank until that author has been detected. A blank percentage is neither a drop nor an add.
+## Commands and files
 
-## Batting average
+```bash
+python3 scripts/weekly_sweep.py --since 2026-10-08
+python3 scripts/earnings_drops.py
+python3 scripts/rss.py FEED_URL --since 2026-10-08
+python3 scripts/grab_fulltext.py reports/triage_YYYY-MM-DD.json
+python3 scripts/px.py 2026-10-01 AAPL
+python3 scripts/sa_ingest.py screen reports/sa_list_YYYY-MM-DD.csv
+python3 scripts/sa_ingest.py check fulltext/sa_ID.txt
+python3 scripts/sa_ingest.py merge reports/sa_candidates_YYYY-MM-DD.csv reports/triage_YYYY-MM-DD.json
+python3 scripts/sa_ingest.py self-test
+python3 scripts/ceo_stake_grep.py self-test
+python3 scripts/ceo_stake_grep.py FILE
+python3 scripts/sa_public.py article https://seekingalpha.com/article/123
+python3 bat/sa_one.py "Author Name" author-slug
+python3 bat/pitches.py subdomain --limit 20
+python3 bat/calc.py --today YYYY-MM-DD --window-months 12 --duration-months 24 --benchmark auto
+python3 scripts/make_report.py --prices --pdf
+python3 scripts/make_report.py --example --pdf
+python3 scripts/crawl_sources.py
+python3 scripts/source_upkeep.py --plan
+python3 scripts/source_upkeep.py --plan --crawl
+python3 scripts/source_upkeep.py --plan --full-ba
+python3 scripts/source_upkeep.py --apply reports/source_upkeep_YYYY-MM-DD.json
+```
 
-The 2-year average used for upkeep is separate from the /7 score. The /7 score still requires an explicit long disclosure. The batting average answers a different question: of the author's past pitches, how many beat the benchmark.
+`make_report.py --example` re-renders the 2026-10-14 sample from `examples/scored.json` into `cache/example-REPORT.md`. It does not call the network.
 
-### Window and sample
+`weekly_sweep.py` drops a free post on the title only when it is a recap, a macro phrase, or a list. Macro matches as a phrase, not as the bare word. A title that names one ticker or one exchange is not dropped on the title. The body screen then reads about the first 1,500 words and drops the post only when that text is clearly not a single-stock pitch, or the author is short, selling, or on hold. Unclear posts stay. Paywalled posts are dropped. Every post in the window is a row in `reports/substack_screen_<date>.csv`.
 
-One pitch per ticker. Inside a window, the earliest pitch on that ticker is the one that counts.
+A full 4-month rebuild, when asked, is `python3 scripts/rerun_sweep.py`, then `rerun/fetch.py`, `rerun/screen1.py`, `rerun/resolve.py`, a full read recorded in `rerun/dispo.py`, then `python3 scripts/make_report.py --legacy`.
 
-- **2-year (stored for upkeep and used for drops and adds):** published 2–3 years before today. Measure the 24-month total return from the publish-date close.
-- **1-year (report only):** published 1–2 years before today. Measure the 12-month total return.
+| Path | Role |
+|---|---|
+| `config/sources.csv` | Active sources |
+| `config/sources_dormant_or_dead.csv` | Parked feeds. Automatic adds skip them. A dormant recheck may put a parked author back unless they are on the never-readd list |
+| `config/sources_dropped_never_readd.csv` | Authors removed by an approved drop. Discovery skips them. `--apply` refuses the add |
+| `config/universe.csv` | Optional ticker list for the earnings-drop search |
+| `state/seen_posts.csv` | URLs already swept. Dedupe key is `url`. Append-only |
+| `state/source_stats.csv` | Per-source upkeep stats. Seeking Alpha is excluded |
+| `state/scored.json`, `state/batting.json` | This run's scores and batting averages |
+| `state/sa_breakdown.json` | Seeking Alpha counts observed this run |
+| `state/sa_results.json` | Seeking Alpha article ids already checked. Gitignored |
+| `reports/` | Dated reports and upkeep proposals |
+| `examples/` | The 2026-10-14 sample, plus `scored.json` so the report script can re-render it |
+| `fulltext/`, `cache/` | Local fetches. Gitignored. Usable texts are also copied to the text store |
+| `scripts/` | Sweep, fetch, prices, earnings drops, report, source upkeep |
+| `rerun/` | Full 4-month rebuild helpers |
+| `bat/` | Author batting average: detection, exclusion, prices, and the chance calculation |
+| `.cursor/skills/stock-screen/` | Sweep, triage, read, score, report, then upkeep |
+| `.cursor/skills/stock-screen-scoring/` | The seven criteria and the evidence rules |
+| `.cursor/skills/author-batting-average/` | Batting average on its own |
 
-`bat/calc.py` sets both windows from today's date. A sample under 5 pitches is flagged as small and does not rank in the report's top-5 tables. No pitches in a window is `n/a`.
-
-### How a pitch is detected
-
-`python3 bat/pitches.py subdomain` reads the public archive.
-
-- A title that names exactly one US or Canada ticker is method `title`. A dual listing such as `(TSXV: SUM or OTC: SUMMF)` is one company. The batting-average title parser maps both TSX and TSXV to `.TO`. `(TYO: 7974)` and other non-US/Canada tags are dropped.
-- No ticker, or more than one company: fetch `https://<host>/api/v1/posts/<slug>`, cached under `cache/` (gitignored). Method `body`. The ticker comes from the opening text and from repeated mentions (`$TICKER`, `(NYSE: X)`, `(TSX: X)`, `ticker: X`). If none appear, the company name is looked up on Yahoo (US/Canada equity only). A holding-company title is not replaced by a subsidiary ticker.
-- The 2-year pass fetches the body even when the title already names the ticker, so a hold or short in the body is visible. Bodies for the 1–3 year window are fetched in parallel. Each HTTP call has a hard wall-clock cap. One author has about a 300 second budget. A partial result past that budget is not saved.
-- For the /7 score, the author must disclose a long: an explicit "I own / I am long / my position" line, or buy/thesis language. "May hold" does not count.
-- Each kept pitch stores `method` (`title` or `body`) and `confidence`. A preview body is not mined for a ticker. Seeking Alpha past pitches use the public author API only.
-
-### What is excluded
-
-`bat/longcheck.py` `exclude_reason` drops a short, a sell rating, or a hold rating. A hold stays in when `is_long` on the post body is `long` (the author clearly owns the shares). Ownership in the title alone does not override a hold. A pitch with no short, sell, or hold signal still counts, including an unclear stance. Counts by reason are stored in `ba2y_excl`.
-
-### Prices and benchmarks
-
-Prices use Yahoo's chart API (adjusted close, dividends included). A timeout is retried and is never cached, and it is not a delisting (`ba2y_lost_px`). Only a real Not Found is cached, for 7 days (`ba2y_lost_notfound`). A symbol with no dot and no listing is retried as `SYM.TO`, then `SYM.V`. A timeout stops that suffix retry.
-
-The batting-average benchmark is XIC.TO for `.TO` and `.V`, and SPY otherwise. `.CN` and `.NE` use SPY on this path. The report's "since publish" column is a different comparison: IWM for US listings and XIC.TO for Canada (`.TO`, `.V`, `.CN`).
-
-A hit is a pitch whose total return beat its benchmark. The batting average is hits / pitches evaluated. Always show hits/total and the percent. Delisted or acquired stocks use the buyout price or the last trade. If the outcome cannot be found, the pitch is excluded and the reason is noted. Known buyouts live in the `BUY` map in `bat/calc.py`.
-
-### p_lt_hits_by_chance
-
-`p_lt_hits_by_chance` is the binomial probability `P(X <= hits - 1)` with `n` pitches and `p = 0.5`: the chance of fewer hits than this author got if each pitch were a coin flip. `bat/calc.py` `p_lt_hits` computes it and rounds to 4 decimals. It is 0 when hits is 0, and blank when `n` is missing.
-
-It is always stored, in `state/source_stats.csv` as `ba2y_p_lt_hits` and in `state/batting.json` as `p_lt`. Every upkeep proposal prints it next to `ba_updated`. The plan's stored-average list and the report's top-5 batting tables sort by it, highest first. For 2 hits out of 2 the value is 0.75. For 15 hits out of 31 it is 0.3601.
-
-### When a stored average is recalculated
-
-A stored batting average has no expiry. `--plan` keeps the stored numbers and recalculates only in two cases, and only when `ba_updated` is not today:
-
-- the author is proposed for removal
-- the author is an add candidate
-
-`python3 scripts/source_upkeep.py --plan --full-ba` is the one-off pass over every Substack author. It skips authors already stored with `ba_method=v2-excl-TO`, saves every 10 authors, and resumes. `--force` redoes authors already stored with the current method. `--ba-limit N` stops early. If an author's time budget runs out, that partial average is not saved. Recomputing an author can change a number if the archive or prices have moved.
-
-## Report
-
-`python3 scripts/make_report.py` writes `reports/<today>/REPORT.md`. `python3 scripts/make_report.py --pdf` writes `REPORT.pdf` from that Markdown. After the ranked list, the batting tables, and the next six, both files have **Articles from top-record authors**.
-
-That section lists every article published inside the report window by an author whose stored 2-year record has at least 2 pitches and `ba2y_p_lt_hits` of 0.5 or higher. The author list is read from `state/source_stats.csv` at report time and limited to URLs still in `config/sources.csv`. An article is matched to that author by URL. Authors who are only in the stats file, or only on the dormant or never-readd lists, are not included. Next to each author: hits/pitches, the batting average, and `p_lt_hits_by_chance`. Each article shows the date, title, link, and the /7 score when that article was scored. A total still stored out of 6 is shown as /6. Authors are ordered by that chance, highest first. An approved add is included on the next report because `--apply` stores the recomputed batting average.
-
-## Coming
-
-The 1-year median stock return and the 1-year median excess return are not stored yet. The 2-year median stock return is stored as `ba2y_med_ret`. The 2-year median excess is stored as `ba2y_median_excess` and is part of the automatic add bar. The screen report already prints median excess return for authors computed during a run.
+| File | Role |
+|---|---|
+| `bat/pitches.py` | Detect one author's pitches, or write `bat/pitches.json` |
+| `bat/lib.py` | Archive, title and body detection, `.TO`/`.V` retry, and the priced score |
+| `bat/longcheck.py` | Drop a short, a sell, or a hold whose body does not show ownership |
+| `bat/calc.py` | `batting_average(today, window_months, duration_months, benchmark)` and `state/batting.json` |
+| `bat/sa_one.py`, `bat/sa.py` | Seeking Alpha public author history |
+| `bat/prices.py`, `bat/arch.py` | Price and archive helpers |
 
 ## Rules that do not change
 
-Cite every source. Never invent a number or a URL. Score only articles read in full. Do not bypass paywalls or bot checks. Never use Seeking Alpha investing groups. If Seeking Alpha shows a bot check, stop and score what was already read. The author has to disclose a long position. X links are optional and are pasted by hand. This repo does not call the X MCP.
+Cite every source. Never invent a number, a ticker, a date, or a URL. Score only articles read in full. Do not bypass a paywall or a bot check. Never use Seeking Alpha investing groups. If Seeking Alpha shows a bot check, pause and try that article once more. If it fails again, stop gathering and score what was already read. The author has to disclose a long position. X links are optional and are pasted by hand. This repo does not call the X MCP.

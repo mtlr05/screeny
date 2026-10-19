@@ -45,7 +45,7 @@ MIN_SCORED_FOR_TRIM = 3
 SCORE_FLOOR_6 = 4.5
 SCORE_FLOOR_7 = 5.25
 FAILS_TO_DROP = 4
-BA_METHOD = "v2-excl-TO"
+BA_METHOD = "v3-iwm-xcs"
 BA_BUDGET = 300
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 STATS_FIELDS = [
@@ -994,6 +994,10 @@ def recalc_removals(stats_rows, cutoff, as_of, stats_path):
 
 def print_ba_summary(stats_rows):
     """Every plan lists stored BAs by P(fewer hits by chance), highest first."""
+    try:
+        sys.stdout.reconfigure(errors="replace")
+    except Exception:
+        pass
     ranked = []
     for row in stats_rows:
         if all(blank(row.get(key)) for key in ("ba2y_n", "ba_2y_n", "ba2y_pct", "ba_2y", "ba_updated")):

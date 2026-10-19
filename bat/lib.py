@@ -912,70 +912,137 @@ def ret(symbol, day, months, when=None):
     return _ret_h(hist(symbol), day, months, when)
 
 
-def bench(symbol):
-    return "XIC.TO" if str(symbol).endswith((".TO", ".V")) else "SPY"
+def bench(symbol, choice="auto"):
+    return batcalc.choose_benchmark(symbol, choice)
 
 
-def prefetch_px(tickers, workers=6):
+def prefetch_px(tickers, workers=6, benchmark="auto"):
     """Warm resolve() for tickers and their benchmarks. Same results as calling resolve one by one."""
     import concurrent.futures as cf
 
     with cf.ThreadPoolExecutor(workers) as pool:
         resolved = list(pool.map(lambda symbol: resolve(symbol)[1], tickers))
-        list(pool.map(resolve, {bench(symbol) for symbol in resolved}))
+        list(pool.map(resolve, {bench(symbol, benchmark) for symbol in resolved}))
 
 
 def window(name, today=None):
-    """(start, end, months). 1y is published 1–2 years ago. 2y is published 2–3 years ago. End is exclusive."""
+    """(start, end, months). 1y is a 12-month cohort held 12 months. 2y is a 12-month cohort held 24 months."""
+    if name == "1y":
+        return batcalc.cohort(today, 12, 12)
+    return batcalc.cohort(today, 12, 24)
+
+
+def _pitch_row(row):
+    """ticker, date, method, url, title. method defaults to title."""
+    if isinstance(row, dict):
+        return (
+            row.get("ticker") or "",
+            (row.get("date") or "")[:10],
+            row.get("method") or "title",
+            row.get("url") or "",
+            row.get("title") or "",
+        )
+    symbol = row[0]
+    day = (row[1] or "")[:10]
+    method = row[2] if len(row) > 2 else "title"
+    # (ticker, date, method, confidence) is the author_pitches shape.
+    # (ticker, date, method, url, title) is the report shape.
+    url = ""
+    title = ""
+    if len(row) >= 5:
+        url = row[3] or ""
+        title = row[4] or ""
+    return symbol, day, method, url, title
+
+
+def _buyout_return(symbol, series, day, months):
+    """Buyout price over the start close, when the deal date falls inside the hold."""
     import pandas as pd
 
-    years = 1 if name == "1y" else 2
-    months = 12 * years
-    anchor = _clock(today)
-    start = (anchor - pd.DateOffset(years=years + 1)).strftime("%Y-%m-%d")
-    end = (anchor - pd.DateOffset(years=years)).strftime("%Y-%m-%d")
-    return start, end, months
+    deal = batcalc.BUY.get(str(symbol).split(".")[0])
+    if not deal or series is None or len(getattr(series, "index", [])) == 0:
+        return None
+    d0 = pd.Timestamp(day)
+    d1 = d0 + pd.DateOffset(months=months)
+    if pd.Timestamp(deal[0]) >= d1:
+        return None
+    after = series[series.index >= d0]
+    if after.empty or not after.iloc[0]:
+        return None
+    return deal[1] / float(after.iloc[0]) - 1
 
 
-def score(pitches, window_name="2y", today=None):
-    """Price kept pitches. Timeouts are lost_fail. A real Not Found is lost_notfound. Neither is in n."""
+def score(pitches, window_name="2y", today=None, window_months=None, duration_months=None, benchmark="auto"):
+    """Price kept pitches. Timeouts are lost_fail. A real Not Found is lost_notfound. Neither is in n.
+
+    window_name selects the 12-month cohort held 12 months (1y) or 24 months (2y).
+    window_months and duration_months override that when both are set.
+    """
     import statistics
 
-    start, end, months = window(window_name, today)
-    symbols = sorted({row[0] for row in pitches or [] if start <= row[1] < end})
+    if window_months is None or duration_months is None:
+        start, end, months = window(window_name, today)
+    else:
+        start, end, months = batcalc.cohort(today, window_months, duration_months)
+    keyed = []
+    for row in pitches or []:
+        symbol, day, method, url, title = _pitch_row(row)
+        keyed.append((day, symbol, method, url, title))
+    symbols = sorted({symbol for day, symbol, _method, _url, _title in keyed if start <= day < end and symbol})
     if symbols:
-        prefetch_px(symbols)
+        prefetch_px(symbols, benchmark=benchmark)
     seen = set()
     excess = []
     stock_rets = []
+    detail = []
+    excluded = []
     hits = n_title = n_body = lost_fail = lost_notfound = lost_nodata = 0
-    for row in sorted(pitches or [], key=lambda item: item[1]):
-        symbol, day = row[0], row[1]
-        method = row[2] if len(row) > 2 else "title"
-        if not (start <= day < end) or symbol in seen:
+    for day, symbol, method, url, title in sorted(keyed, key=lambda item: item[0]):
+        if not (start <= day < end) or not symbol or symbol in seen:
             continue
         seen.add(symbol)
         status, resolved, series = resolve(symbol)
         if status == "fail":
             lost_fail += 1
+            excluded.append(dict(ticker=symbol, date=day, why="timeout"))
             continue
         if status == "notfound":
             lost_notfound += 1
+            excluded.append(dict(ticker=symbol, date=day, why="not found"))
             continue
-        bench_status, _bench_symbol, bench_series = resolve(bench(resolved))
+        bm_symbol = bench(resolved, benchmark)
+        bench_status, _bench_symbol, bench_series = resolve(bm_symbol)
         if bench_status != "ok":
             lost_fail += 1
+            excluded.append(dict(ticker=symbol, date=day, why="benchmark " + bm_symbol))
             continue
         stock_ret = _ret_h(series, day, months, today)
+        if stock_ret is None:
+            stock_ret = _buyout_return(resolved, series, day, months)
         bench_ret = _ret_h(bench_series, day, months, today)
         if stock_ret is None or bench_ret is None:
             lost_nodata += 1
+            excluded.append(dict(ticker=resolved, date=day, why="no completed price"))
             continue
         stock_rets.append(stock_ret)
         excess.append(stock_ret - bench_ret)
-        hits += stock_ret > bench_ret
+        hit = int(stock_ret > bench_ret)
+        hits += hit
         n_title += method == "title"
         n_body += method == "body"
+        detail.append(
+            dict(
+                ticker=resolved,
+                date=day,
+                url=url,
+                title=title,
+                method=method,
+                stock_ret=round(float(stock_ret), 4),
+                bench=bm_symbol,
+                bench_ret=round(float(bench_ret), 4),
+                hit=hit,
+            )
+        )
     return {
         "hits": int(hits),
         "n": len(excess),
@@ -987,6 +1054,11 @@ def score(pitches, window_name="2y", today=None):
         "lost_fail": lost_fail,
         "lost_notfound": lost_notfound,
         "lost_nodata": lost_nodata,
+        "rows": detail,
+        "excluded": excluded,
+        "start": start,
+        "end": end,
+        "months": months,
     }
 
 

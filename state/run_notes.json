@@ -1,0 +1,8 @@
+{
+ "price_source": "px.py Yahoo chart, publish-day close",
+ "ceo_stake_source": "from the article only",
+ "sa_pull_complete": false,
+ "extra_caveats": [
+  "Value Investors Club's public page now shows ideas only after 90 days (the page's end date was 2026-07-21). The 30 ideas published 2026-07-13 through 2026-07-20 are the ones that became public in this window. Thirteen US or Canada small- and mid-cap long ideas were read in full. Each ends with the club's form line, \"I and/or others I advise hold a material investment in the issuer's securities,\" or with the line that they do not hold one. That form line is not an explicit \"I own / I am long / I hold\" statement, so those thirteen were dropped as author not long. Mistras (MG) returned an empty body and was not read."
+ ]
+}

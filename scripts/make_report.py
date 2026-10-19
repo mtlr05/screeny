@@ -122,6 +122,140 @@ def bat_for(source, batting):
     return batting.get(source) or batting.get(source.replace(" (SA)", ""))
 
 
+def chart_points(articles, batting):
+    """One row per scored article. 2-year p_lt, else 1-year, else no sample."""
+    points = []
+    for article in articles:
+        bat = bat_for(article.get("source") or "", batting)
+        summary = (bat or {}).get("summary") or {}
+        y2, y1 = summary.get("2y"), summary.get("1y")
+        if y2 and y2.get("n"):
+            sample, block = "2y", y2
+        elif y1 and y1.get("n"):
+            sample, block = "1y", y1
+        else:
+            sample, block = "none", None
+        p = None
+        hits = n = ""
+        if block:
+            raw = block.get("p_lt")
+            if raw in (None, ""):
+                raw = batcalc.p_lt_hits(block.get("hits") or 0, block.get("n") or 0)
+            if raw not in (None, ""):
+                p = float(raw)
+            hits = block.get("hits")
+            n = block.get("n")
+        points.append(
+            {
+                "sym": article.get("sym") or "",
+                "score": article.get("score"),
+                "score_label": score_cell(article),
+                "source": article.get("source") or "",
+                "title": article.get("title") or "",
+                "url": article.get("url") or "",
+                "date": article.get("date") or "",
+                "sample": sample,
+                "p": p,
+                "hits": hits,
+                "n": n,
+            }
+        )
+    points.sort(key=lambda row: (-(row["score"] or 0), row["sym"]))
+    return points
+
+
+def write_score_chart(points, path):
+    """Matplotlib scatter. Blue is 2-year, red is 1-year, black x at 0 is no sample."""
+    try:
+        import matplotlib
+
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+    except Exception as exc:
+        print("Chart skipped (matplotlib not installed):", exc)
+        return False
+    fig, ax = plt.subplots(figsize=(8.2, 5.2))
+    for sample, color, label in (("2y", "#1f77b4", "2-year"), ("1y", "#d62728", "1-year")):
+        chosen = [p for p in points if p["sample"] == sample and p["p"] is not None]
+        if not chosen:
+            continue
+        ax.scatter(
+            [p["score"] for p in chosen],
+            [p["p"] for p in chosen],
+            c=color,
+            marker="o",
+            s=36,
+            label=label,
+            zorder=3,
+        )
+    missing = [p for p in points if p["sample"] == "none" or p["p"] is None]
+    if missing:
+        ax.scatter(
+            [p["score"] for p in missing],
+            [0 for _ in missing],
+            c="black",
+            marker="x",
+            s=36,
+            label="no sample",
+            zorder=3,
+        )
+    labeled = [p for p in points if p["p"] is not None]
+    if labeled and len(points) <= 25:
+        for p in labeled:
+            ax.annotate(p["sym"], (p["score"], p["p"]), textcoords="offset points", xytext=(4, 4), fontsize=7)
+    ax.set_xlabel("article score")
+    ax.set_ylabel("P(X < hits)")
+    ax.set_xlim(0, 7.2)
+    ax.set_ylim(-0.05, 1.05)
+    ax.grid(True, linestyle=":", alpha=0.7)
+    ax.legend(frameon=False, loc="center left", bbox_to_anchor=(1.02, 0.5))
+    ax.set_title("Score vs P(fewer hits)")
+    fig.tight_layout()
+    ensure(os.path.dirname(path) or ".")
+    fig.savefig(path, dpi=120, bbox_inches="tight")
+    plt.close(fig)
+    print(path)
+    return True
+
+
+def batting_appendix(points):
+    """One-page explanation, then the rows the chart plotted."""
+    lines = [
+        "## Appendix: batting average and P(X < hits)",
+        "",
+        "A pitch counts once per ticker. For the 2-year average, the pitch was published in the 12 months ending 24 months before the report date, and the stock is held 24 months from the publish-date close. For the 1-year average, the same width of publication dates ends 12 months before the report date, and the hold is 12 months. The return is the adjusted close, dividends included. A pitch is a hit when that return is above the benchmark over the same dates: IWM for a US listing, XCS.TO for a `.TO` or `.V` listing. A short, a sell, or a hold is left out unless the author states that they own the shares. A pitch with no completed price is left out of `n`.",
+        "",
+        "The batting average is hits divided by pitches evaluated, `h / n`.",
+        "",
+        "`P(X < hits)` treats each evaluated pitch as a coin flip. `X` is the number of hits in `n` pitches if each pitch beats the benchmark with probability 1/2, independently:",
+        "",
+        "`P(X < h) = sum_{k=0}^{h-1} C(n, k) / 2^n`",
+        "",
+        "That is the binomial cumulative probability already stored as `p_lt`. It is the chance of fewer hits than this author, not the batting average. It is 0 when `h` is 0, and it is blank when `n` is missing. A perfect 2-for-2 record is 0.75. A 15-for-31 record is about 0.36, because 15 is close to half of 31. On the chart, higher means more of the coin-flip outcomes had fewer hits than this record. Blue is the 2-year figure. Red is the 1-year figure, used only when the 2-year sample is missing. An `x` on 0 means neither sample exists. The table under this note lists every point: ticker, score, author, linked article, date, sample used, hits/n, and this probability.",
+        "",
+        "| Ticker | Score | Author | Article | Published | Sample | Hits / N | P(X < hits) |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
+    if not points:
+        lines.append("| — | | | no scored articles | | | | |")
+        lines.append("")
+        return lines
+    for p in points:
+        title = _md_cell(p["title"])
+        link = f"[{title}]({p['url']})" if p["url"] else title
+        if p["sample"] == "none" or p["p"] is None:
+            sample, hits, chance = "x", "", ""
+        else:
+            sample = p["sample"]
+            hits = f"{p['hits']}/{p['n']}"
+            chance = f"{p['p']:.4f}".rstrip("0").rstrip(".")
+        lines.append(
+            f"| {p['sym']} | {p['score_label']} | {_md_cell(p['source'])} | {link} | {p['date']} | {sample} | {hits} | {chance} |"
+        )
+    lines.append("")
+    return lines
+
+
 def cell_bat(article, batting):
     if article.get("ba"):
         return article["ba"]
@@ -377,7 +511,7 @@ def rank(articles):
     return rows, ranked, near, cut
 
 
-def render(doc, onepagers, live):
+def render(doc, onepagers, live, chart_dir=None):
     st = weekly_sweep.apply_screen_counts(doc.get("stats") or {})
     batting = doc.get("batting") or {}
     if os.path.exists(os.path.join(STATE, "batting.json")):
@@ -409,7 +543,7 @@ def render(doc, onepagers, live):
     A("## 2. Reported, not scored")
     A("")
     A(
-        "Fact-check of key claims, author batting average (share of past long pitches that beat SPY, or XIC.TO for Canadian listings, over 1-year and 2-year windows; see the Author batting average skill), management guidance record, balance-sheet flags, and soft notes. Shown per name; they do not change the score."
+        "Fact-check of key claims, author batting average (share of past long pitches that beat IWM, or XCS.TO for .TO and .V listings, over 1-year and 2-year windows; see the Author batting average skill), management guidance record, balance-sheet flags, and soft notes. Shown per name; they do not change the score."
     )
     A("")
     A("## 3. Scoring (out of 7, 1 point each)")
@@ -451,10 +585,25 @@ def render(doc, onepagers, live):
             if bat:
                 A(f"- Author batting average: {fmt_bat(bat)}")
         A("")
+    points = chart_points(rows, batting)
+    chart_name = "score_vs_ba.png"
+    chart_ok = False
+    if chart_dir:
+        chart_ok = write_score_chart(points, os.path.join(chart_dir, chart_name))
+    A("## Score vs P(fewer hits)")
+    A("")
+    A("Each point is one scored article. The vertical axis is `P(X < hits)` from the author's past pitches, not the batting average itself. Blue is the 2-year sample. Red is the 1-year sample, used only when the 2-year sample is missing. A black x at 0 means neither sample exists.")
+    A("")
+    if chart_ok:
+        A(f"![Score vs P(fewer hits)]({chart_name})")
+        A("")
+    else:
+        A("_Chart not written. Install matplotlib and re-run the report._")
+        A("")
     authors = [r["source"] for r in ranked] + [r["source"] for r in near]
     A("## Author batting averages (top 5 of the 21)")
     A("")
-    A("Measured on past single-stock long pitches only. 1-year window: pitches published 1–2 years ago, 12-month total return vs SPY (XIC.TO for Canadian listings). 2-year window: pitches published 2–3 years ago, 24-month total return. Min 5 pitches to rank; ties alphabetical. Authors with thinner archives show n/a on the one-pagers.")
+    A("Measured on past single-stock long pitches only. 1-year window: pitches published 1–2 years ago, 12-month total return vs IWM (XCS.TO for .TO and .V). 2-year window: pitches published 2–3 years ago, 24-month total return. Min 5 pitches to rank; ties alphabetical. Authors with thinner archives show n/a on the one-pagers. Every scored author is calculated; this table is still the top of the ranked list and the next six.")
     A("")
     for window_name, title in (("1y", "### By 1-year batting average"), ("2y", "### By 2-year batting average")):
         A(title)
@@ -495,10 +644,12 @@ def render(doc, onepagers, live):
     shown = amb_text if amb_text else ("; ".join(amb) if amb else "none recorded")
     A("- Long-disclosure ambiguous (dropped): " + shown + ".")
     A(f"- CEO stakes: {ceo_source}. If the article and any cited filing do not state the stake, criterion 3 is 0 and the note says not stated.")
-    A("- Author batting averages use adjusted closes (Yahoo); SPY for US names, XIC.TO for Canadian. Delisted/acquired names use the buyout or last trade when available; otherwise they are excluded and noted in batting.json. SA author histories used the public author API (title, date, ticker, sentiment); full bodies were not required.")
+    A("- Author batting averages use adjusted closes (Yahoo); IWM for US names, XCS.TO for .TO and .V. The since-publish column is a different comparison: IWM for US listings and XIC.TO for Canada. Delisted/acquired names use the buyout or last trade when available; otherwise they are excluded and noted in batting.json. SA author histories used the public author API (title, date, ticker, sentiment); full bodies were not required.")
     skipped = st.get("sa_skipped_unread")
     if skipped is not None:
         A(f"- Seeking Alpha articles skipped because the full text could not be read: {skipped}. Previews were not scored.")
+    for line in run_notes.get("extra_caveats") or []:
+        A(f"- {line}")
     A("")
     A("## Appendix: one-pagers")
     A("")
@@ -540,6 +691,10 @@ def render(doc, onepagers, live):
             A("")
             A("_Stored notes were thin for this name, so the justifications were reconstructed from the saved full text._")
         A("")
+    A('<div class="pb"></div>')
+    A("")
+    for line in batting_appendix(points):
+        A(line)
     A('<div class="pb"></div>')
     A("")
     A("## Appendix: detailed stats")
@@ -624,7 +779,10 @@ def try_pdf(md_path):
         sys.exit(1)
     css = "@page{size:Letter landscape;margin:1.4cm} body{font-family:sans-serif;font-size:9.5pt} table{border-collapse:collapse;font-size:8pt} td,th{border:1px solid #bbb;padding:3px} .pb{page-break-before:always} h2,h3{break-after:avoid} h3{margin-top:0} tr{break-inside:avoid} a{color:#1a4fa0}"
     pdf_path = os.path.splitext(md_path)[0] + ".pdf"
-    weasyprint.HTML(string=f"<html><head><meta charset='utf-8'><style>{css}</style></head><body>{h}</body></html>").write_pdf(pdf_path)
+    weasyprint.HTML(
+        string=f"<html><head><meta charset='utf-8'><style>{css}</style></head><body>{h}</body></html>",
+        base_url=os.path.dirname(os.path.abspath(md_path)),
+    ).write_pdf(pdf_path)
     print(pdf_path)
 
 
@@ -707,7 +865,7 @@ def legacy(out_path, want_pdf):
         op_path = os.path.join(EXAMPLES, "onepagers.json")
     op = load_json(op_path) if os.path.exists(op_path) else {}
     op.pop("_about", None)
-    md, rows, ranked = render(doc, op, live=False)
+    md, rows, ranked = render(doc, op, live=False, chart_dir=os.path.dirname(out_path))
     write_outputs(md, rows, ranked, out_path)
     if want_pdf:
         try_pdf(out_path)
@@ -742,7 +900,7 @@ def main():
     doc = load_json(scored_path)
     op = load_json(op_path) if os.path.exists(op_path) else {}
     op.pop("_about", None)
-    md, rows, ranked = render(doc, op, live=a.prices)
+    md, rows, ranked = render(doc, op, live=a.prices, chart_dir=os.path.dirname(out) or ".")
     write_outputs(md, rows, ranked, out)
     print(f"ranked={len(ranked)} scored_rows={len(rows)}")
     if a.pdf:

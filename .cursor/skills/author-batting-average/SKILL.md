@@ -26,7 +26,7 @@ python3 bat/pitches.py sylencecapital p14capital --limit 20
 - **Body.** If the title has no ticker, or names more than one company, fetch the public post at `https://<host>/api/v1/posts/<slug>`. Responses are cached under `cache/` (gitignored). Uncached calls wait `--sleep` seconds (default 1). The method is `body`. The 2-year batting-average pass fetches the body even when the title already names the ticker, so a hold or short in the body is visible. Each network call has a hard wall-clock cap. Body fetches overlap. One author has about a 300 second budget; a partial result past that budget is not saved.
 - The primary ticker is the one in the opening text, or the one repeated most often: `$TICKER`, `(NYSE: X)`, `(NASDAQ: X)`, `(TSX: X)`, `(TSXV: X)`, `ticker: X`. If the body never names a ticker, look the company name up on Yahoo and keep a US or Canada equity. ETFs and other listings are dropped.
 - **Long stance for the /7 score.** Explicit disclosure ("I own", "I am long", "my position", "I bought") or buy/thesis language ("investment thesis", "LONG $TICKER", "why I own", "quick pitch"). "May hold" does not count. Drop bearish, hold, recap, macro, watchlist, screen, and closed-position notes.
-- **2-year batting average.** `bat/longcheck.py` decides exclusions. `exclude_reason` drops a short, a sell rating, or a hold rating unless `is_long` on the post body is `long`. A hold with that ownership stays in. Ownership in the title alone does not keep a hold. A title that names one ticker and has no such signal still counts, including an unclear stance. A body-only pitch also needs one dominant US or Canada ticker and long or bullish language before that check. Exclusions are counted by reason in `ba2y_excl`. The price lookup retries `SYM.TO` then `SYM.V`, uses a hard wall-clock cap, and does not cache a timeout. A timeout stops the suffix retry. The stored method tag is `ba_method=v2-excl-TO`.
+- **2-year batting average.** `bat/longcheck.py` decides exclusions. `exclude_reason` drops a short, a sell rating, or a hold rating unless `is_long` on the post body is `long`. A hold with that ownership stays in. Ownership in the title alone does not keep a hold. A title that names one ticker and has no such signal still counts, including an unclear stance. A body-only pitch also needs one dominant US or Canada ticker and long or bullish language before that check. Exclusions are counted by reason in `ba2y_excl`. The price lookup retries `SYM.TO` then `SYM.V`, uses a hard wall-clock cap, and does not cache a timeout. A timeout stops the suffix retry. The stored method tag for a new calculation is `ba_method=v3-iwm-xcs`. A row already stored as `v2-excl-TO` keeps that tag until the author is recalculated.
 - Each kept pitch stores `method` (`title` or `body`) and `confidence` from 0 to 1. A paywalled preview is not mined for a ticker. Do not bypass a paywall.
 
 `pitches_title` and `pitches_body` in `state/source_stats.csv` count those 2-year-window pitches by method. Until detection, both stay blank. `python3 scripts/source_upkeep.py --plan` rewrites the stats file and does not change the source list. A stored batting average has no expiry. It is recalculated only when that author is proposed for removal or is an add candidate, and only when `ba_updated` is not today. `--full-ba` is the resumable pass (saves every 10 authors; `--force` redoes the current method; `--ba-limit N` stops early). A partial result past the author budget is not saved.
@@ -45,15 +45,17 @@ Blogs: use the public archive or sitemap and the same long-pitch rules. Include 
 
 ## 2. Windows (relative to today)
 
-- **1-year:** published 1–2 years ago. Measure the 12-month total return from the publish-date close.
-- **2-year:** published 2–3 years ago. Measure the 24-month total return from the publish-date close.
+The calculation is `batting_average(pitches, today, window_months=12, duration_months=24, benchmark="auto")` in `bat/calc.py`.
 
-`bat/calc.py` sets both windows from today's date.
+- **window_months** (default 12) is how wide the publication cohort is.
+- **duration_months** (default 24) is how long each pitch is held. The cohort ends on `today - duration`, so the return is finished.
+- Duration 24 with a 12-month window: pitches published 2–3 years ago, 24-month total return. This is the 2-year average.
+- Duration 12 with a 12-month window: pitches published 1–2 years ago, 12-month total return. This is the 1-year average.
 
 ## 3. Returns and benchmark
 
 - Total return (adjusted close, dividends included) from the publish date to the publish date plus 12 or 24 months.
-- Benchmark over those same dates: SPY for US-listed stocks, XIC.TO for `.TO` and `.V` only, unless the caller sets another benchmark. `.CN` and `.NE` use SPY on this path.
+- Benchmark over those same dates: IWM for US-listed stocks, XCS.TO for `.TO` and `.V` only, unless the caller sets another benchmark. `.CN` and `.NE` use IWM on this path. The report's since-publish column is separate and stays IWM for US listings and XIC.TO for Canada.
 - If a ticker has no price data, retry `SYM.TO`, then `SYM.V`. Retry a Yahoo timeout. Never cache a timeout as no data, and do not count a timeout as delisted (`ba2y_lost_px`). Only a real Not Found is cached, for 7 days (`ba2y_lost_notfound`). Those lost pitches are not part of n.
 - Delisted or acquired stocks: use the buyout price or the last trade. If the outcome cannot be found, exclude the pitch and note why. Known buyouts live in the `BUY` map in `bat/calc.py`; add a real deal, never a guessed price.
 
@@ -78,7 +80,13 @@ David approved three manual additions on 2026-10-16 that miss the automatic add 
 
 ```bash
 python3 bat/pitches.py
-python3 bat/calc.py
+python3 bat/calc.py --today YYYY-MM-DD --benchmark auto
 ```
 
-`bat/calc.py` writes `state/batting.json`. Each pitch stores ticker, date, URL, title, stock return, benchmark return, and hit. The report reads this file. Authors with no usable archive get a `note` such as `archive starts YYYY-MM-DD` and null summaries.
+That command calls `batting_average` twice, once with `duration_months` 12 and once with 24, and writes both summaries to `state/batting.json`. To score one window only:
+
+```bash
+python3 bat/calc.py --today YYYY-MM-DD --window-months 12 --duration-months 24 --benchmark auto
+```
+
+`benchmark` `auto` is IWM, or XCS.TO for `.TO` and `.V`. Any other symbol is used for every pitch. Each pitch stores ticker, date, URL, title, stock return, benchmark return, and hit. The report reads this file. Authors with no usable archive get a `note` such as `archive starts YYYY-MM-DD` and null summaries.

@@ -1,0 +1,39 @@
+{
+ "SFM": {
+  "company": "Sprouts Farmers Market",
+  "words": 1440,
+  "read": "Read in full.",
+  "long": "The author holds a long position in the security mentioned.",
+  "c1": "Store expansion is the growth driver. The cited 2025 annual report planned 40 more stores in 2026, and five-year revenue growth is given as 6.36%.",
+  "c2": "No price target or valuation endpoint. The stated P/FCF of 17.1 is the current multiple, so this score is 0.",
+  "c3": "not stated",
+  "c4": "The moat section ties the organic and animal-welfare brand to higher gross margins than traditional grocers, and names inflation as the threat. That is a narrow intangibles claim.",
+  "c5": "No named operating result for the people running Sprouts. Buybacks are mentioned without a price or a person.",
+  "c6": "The article says the current multiple is reasonable and the position is for stability. It does not say the market is wrong.",
+  "c7": "Forty store openings during 2026 are named, without a specific date. Later comparable-sales checks are not a dated re-rating event.",
+  "flags": [
+   "H1 2026 comparable store sales were -1.4%.",
+   "Inflation could push customers to cheaper chains.",
+   "SBC is 9.07% of free cash flow.",
+   "No price target."
+  ]
+ },
+ "BPC.CN": {
+  "company": "The Precision Peptide Company",
+  "words": 1283,
+  "read": "Read in full.",
+  "long": "I own shares of The Precision Peptide Company (CSE: BPC / OTCQB: PNGAF), bought in the open market.",
+  "c1": "Needle-free access to peptides is the growth driver. Management describes four channels, three of them already live, in a category where injections have been the barrier.",
+  "c2": "No price target or valuation endpoint. The move from about 45 cents to about 30 cents is a price history, not a target.",
+  "c3": "not stated",
+  "c4": "Vertical integration and public reporting are described. They are not argued as one of the five moat types with a mechanism, a trend, and a threat.",
+  "c5": "Paul Katz is named as the former CEO of Ving, which exited in 2022, with no sale figure. That is a partial prior result.",
+  "c6": "The shares fell from about 45 cents to about 30 cents while a warrant block was outstanding, and the article says that block has now been exercised, so the overhang should not still be in the price.",
+  "c7": "The Thymosin Alpha 1 patch and channel growth are named over the next six months, with no calendar date.",
+  "flags": [
+   "US peptide rules are changing and are outside the company control.",
+   "No price target and no cash-runway figure.",
+   "The warrant overhang the article cites has already been exercised."
+  ]
+ }
+}

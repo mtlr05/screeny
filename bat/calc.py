@@ -1,15 +1,18 @@
 """Batting average: share of past long pitches that beat the benchmark.
 
-1-year window: published 1–2 years ago, 12-month total return.
-2-year window: published 2–3 years ago, 24-month total return.
-Benchmark: SPY for US listings, XIC.TO for Canadian (.TO / .V).
+Default cohort width is 12 months. Default hold is 24 months (the 2-year
+average): pitches published from 36 months ago up to 24 months ago.
+The 1-year average is the same width held for 12 months.
+auto benchmark: IWM, or XCS.TO for .TO and .V.
 Writes state/batting.json. Reads bat/pitches.json.
 """
+import argparse
 import datetime as dt
 import json
 import os
 import statistics as S
 import sys
+from calendar import monthrange
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "scripts"))
 from _paths import STATE, ensure
@@ -17,22 +20,49 @@ from _paths import STATE, ensure
 HERE = os.path.dirname(os.path.abspath(__file__))
 # Known buyouts where the adjusted-close series stops. Extend this when a pitch was acquired.
 BUY = {"CTLP": ("2025-07-31", 11.20), "IAS": ("2025-12-01", 10.30)}
+BA_METHOD = "v3-iwm-xcs"
+
+
+def _as_of(today):
+    return dt.date.fromisoformat(str(today)[:10]) if today else dt.date.today()
+
+
+def _shift_months(day, months):
+    """Move a date by a number of months. The day is clamped to the target month."""
+    months = int(months)
+    year = day.year + (day.month - 1 + months) // 12
+    month = (day.month - 1 + months) % 12 + 1
+    last = monthrange(year, month)[1]
+    return dt.date(year, month, min(day.day, last))
+
+
+def cohort(today=None, window_months=12, duration_months=24):
+    """(start, end, hold_months). End is exclusive.
+
+    Pitches published in [today - duration - window, today - duration).
+    Each pitch is held for duration_months, so the return is finished.
+    """
+    anchor = _as_of(today)
+    window_months = int(window_months)
+    duration_months = int(duration_months)
+    end = _shift_months(anchor, -duration_months)
+    start = _shift_months(anchor, -(duration_months + window_months))
+    return start.isoformat(), end.isoformat(), duration_months
+
+
+def choose_benchmark(symbol, choice="auto"):
+    """auto is IWM, or XCS.TO for .TO and .V. Any other choice is used for every pitch."""
+    if choice and str(choice).lower() != "auto":
+        return str(choice)
+    sym = str(symbol or "")
+    if sym.endswith(".TO") or sym.endswith(".V"):
+        return "XCS.TO"
+    return "IWM"
 
 
 def window_bounds(today=None):
-    """1y: published 1–2 years ago. 2y: published 2–3 years ago. End dates are exclusive."""
-    today = dt.date.fromisoformat(str(today)[:10]) if today else dt.date.today()
-
-    def back(years):
-        try:
-            return today.replace(year=today.year - years)
-        except ValueError:
-            return today.replace(year=today.year - years, day=28)
-
-    y1_end = back(1).isoformat()
-    y1_start = back(2).isoformat()
-    y2_start = back(3).isoformat()
-    return {"1y": (y1_start, y1_end, 12), "2y": (y2_start, y1_start, 24)}
+    """1y: published 1–2 years ago, held 12 months. 2y: published 2–3 years ago, held 24 months."""
+    return {"1y": cohort(today, 12, 12), "2y": cohort(today, 12, 24)}
 
 
 def pitch_parts(row):
@@ -89,125 +119,145 @@ def pitches_in_window(pitches, window="2y", today=None):
     return out
 
 
-def summarize(name, pitches, today=None):
-    """Batting-average record for one author. Market libraries load only when this runs."""
-    import pandas as pd
-    import yfinance as yf
+def _summary_from_scored(scored):
+    """Report summary for one cohort. None when no pitch had a completed price."""
+    rows = scored.get("rows") or []
+    if not rows:
+        return None
+    ex = [x["stock_ret"] - x["bench_ret"] for x in rows]
+    h = sum(x["hit"] for x in rows)
+    bst = max(rows, key=lambda x: x["stock_ret"] - x["bench_ret"])
+    wst = min(rows, key=lambda x: x["stock_ret"] - x["bench_ret"])
+    return dict(
+        hits=h,
+        n=len(rows),
+        pct=round(h / len(rows), 3),
+        p_lt=p_lt_hits(h, len(rows)),
+        median_excess=round(S.median(ex), 4),
+        median_return=scored.get("median_return"),
+        best=f"{bst['ticker']} {bst['stock_ret']*100:+.0f}% vs {bst['bench_ret']*100:+.0f}%",
+        worst=f"{wst['ticker']} {wst['stock_ret']*100:+.0f}% vs {wst['bench_ret']*100:+.0f}%",
+        small=len(rows) < 5,
+    )
 
-    today_d = dt.date.fromisoformat(str(today)[:10]) if today else dt.date.today()
-    TODAY = pd.Timestamp(today_d)
-    W = window_bounds(today_d)
-    cache = {}
 
-    def hist(t):
-        if t not in cache:
-            h = None
-            try:
-                h = yf.Ticker(t).history(
-                    start=W["2y"][0],
-                    end=(TODAY + pd.Timedelta(days=1)).strftime("%Y-%m-%d"),
-                    auto_adjust=True,
-                )["Close"]
-            except Exception:
-                h = None
-            if h is None or len(getattr(h, "index", [])) == 0:
-                h = pd.Series(dtype=float, index=pd.DatetimeIndex([]))
-            else:
-                h.index = pd.DatetimeIndex(h.index).tz_localize(None)
-            cache[t] = h
-        return cache[t]
+def batting_average(pitches, today=None, window_months=12, duration_months=24, benchmark="auto"):
+    """One cohort. Prices and exclusions go through bat/lib.py.
 
-    def ret(t, d0, m):
-        h = hist(t)
-        d0 = pd.Timestamp(d0)
-        d1 = d0 + pd.DateOffset(months=m)
-        if d1 > TODAY:
-            return None, "window not complete"
-        s = h[h.index >= d0]
-        if s.empty:
-            if t in BUY:
-                return None, "buyout but no start price"
-            return None, "no price data"
-        p0 = s.iloc[0]
-        e = h[h.index <= d1]
-        if t in BUY and pd.Timestamp(BUY[t][0]) < d1:
-            return BUY[t][1] / p0 - 1, "buyout price"
-        if e.empty or e.index[-1] < d1 - pd.Timedelta(days=10):
-            if t in BUY:
-                return BUY[t][1] / p0 - 1, "buyout price"
-            return (e.iloc[-1] / p0 - 1 if not e.empty else None), "last trade " + (str(e.index[-1].date()) if not e.empty else "")
-        return e.iloc[-1] / p0 - 1, ""
+    today is the as-of date. window_months is the publication-cohort width
+    (default 12). duration_months is the hold (default 24). benchmark "auto"
+    is IWM, or XCS.TO for .TO and .V. Any other symbol is used for every pitch.
+    """
+    import lib
 
-    def bret(b, d0, m):
-        r, _ = ret(b, d0, m)
-        return r
+    scored = lib.score(
+        pitches,
+        today=today,
+        window_months=window_months,
+        duration_months=duration_months,
+        benchmark=benchmark,
+    )
+    return {
+        "summary": _summary_from_scored(scored),
+        "pitches": scored.get("rows") or [],
+        "excluded": scored.get("excluded") or [],
+        "benchmark": benchmark,
+        "window_months": int(window_months),
+        "duration_months": int(duration_months),
+        "ba_method": BA_METHOD,
+    }
 
-    res = {"pitches": {}, "summary": {}, "excluded": []}
-    for w, (_a, _b, m) in W.items():
-        rows = []
-        for raw in pitches_in_window(pitches, w, today_d):
-            t, d, u, ti, method, conf = pitch_parts(raw)
-            bm = "XIC.TO" if str(t).endswith((".TO", ".V")) else "SPY"
-            r, note = ret(t, d, m)
-            br = bret(bm, d, m)
-            if r is None or br is None:
-                res["excluded"].append(dict(ticker=t, date=d, window=w, why=note))
-                continue
-            row = dict(
-                ticker=t,
-                date=d,
-                url=u,
-                title=ti,
-                stock_ret=round(r, 4),
-                bench=bm,
-                bench_ret=round(br, 4),
-                hit=int(r > br),
-                note=note,
-            )
-            if method:
-                row["method"] = method
-                row["confidence"] = conf
-            rows.append(row)
-        res["pitches"][w] = rows
-        if rows:
-            ex = [x["stock_ret"] - x["bench_ret"] for x in rows]
-            h = sum(x["hit"] for x in rows)
-            bst = max(rows, key=lambda x: x["stock_ret"] - x["bench_ret"])
-            wst = min(rows, key=lambda x: x["stock_ret"] - x["bench_ret"])
-            res["summary"][w] = dict(
-                hits=h,
-                n=len(rows),
-                pct=round(h / len(rows), 3),
-                p_lt=p_lt_hits(h, len(rows)),
-                median_excess=round(S.median(ex), 4),
-                best=f"{bst['ticker']} {bst['stock_ret']*100:+.0f}% vs {bst['bench_ret']*100:+.0f}%",
-                worst=f"{wst['ticker']} {wst['stock_ret']*100:+.0f}% vs {wst['bench_ret']*100:+.0f}%",
-                small=len(rows) < 5,
-            )
-        else:
-            res["summary"][w] = None
+
+def summarize(name, pitches, today=None, benchmark="auto"):
+    """Both report windows. 1y is held 12 months. 2y is held 24 months. Cohort width is 12."""
+    res = {"pitches": {}, "summary": {}, "excluded": [], "ba_method": BA_METHOD}
+    for window, duration in (("1y", 12), ("2y", 24)):
+        one = batting_average(pitches, today=today, window_months=12, duration_months=duration, benchmark=benchmark)
+        res["pitches"][window] = one["pitches"]
+        res["summary"][window] = one["summary"]
+        for item in one["excluded"]:
+            item = dict(item)
+            item["window"] = window
+            res["excluded"].append(item)
     return res
 
 
-def main():
-    path = os.path.join(HERE, "pitches.json")
+def _load_pitches(path):
     if not os.path.exists(path):
         print("missing", path, "(run python3 bat/pitches.py first)")
         sys.exit(2)
-    P = json.load(open(path, encoding="utf-8"))
-    out = {}
+    return json.load(open(path, encoding="utf-8"))
+
+
+def _authors(doc):
+    found = []
     for group in ("SUB", "SA"):
-        for k, L in P.get(group, {}).items():
-            res = summarize(k, L)
-            out[k] = res
-            print(k, {w: (s and f"{s['hits']}/{s['n']}") for w, s in res["summary"].items()}, "excl", len(res["excluded"]))
-    for k, why in P.get("NONE", {}).items():
-        out[k] = {"pitches": {}, "summary": {"1y": None, "2y": None}, "note": why}
+        for key, rows in (doc.get(group) or {}).items():
+            found.append((key, rows))
+    return found
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description="Write state/batting.json from bat/pitches.json")
+    ap.add_argument("--today", default="", help="as-of date YYYY-MM-DD (default: today)")
+    ap.add_argument("--window-months", type=int, default=None, help="publication cohort width (default 12)")
+    ap.add_argument("--duration-months", type=int, default=None, help="hold in months (default 24 when set; both windows when omitted)")
+    ap.add_argument("--benchmark", default="auto", help="auto = IWM, or XCS.TO for .TO and .V; or one symbol for every pitch")
+    ap.add_argument("--pitches", default="", help="pitches JSON (default bat/pitches.json)")
+    ap.add_argument("--self-test", action="store_true")
+    args = ap.parse_args(argv)
+    if args.self_test:
+        return _self_test()
+    path = args.pitches or os.path.join(HERE, "pitches.json")
+    doc = _load_pitches(path)
+    today = args.today or None
+    one_window = args.window_months is not None or args.duration_months is not None
+    window_months = 12 if args.window_months is None else args.window_months
+    duration_months = 24 if args.duration_months is None else args.duration_months
+    out = {}
+    for key, rows in _authors(doc):
+        if one_window:
+            one = batting_average(rows, today=today, window_months=window_months, duration_months=duration_months, benchmark=args.benchmark)
+            label = "1y" if duration_months == 12 and window_months == 12 else "2y" if duration_months == 24 and window_months == 12 else f"{duration_months}m"
+            res = {
+                "pitches": {label: one["pitches"]},
+                "summary": {label: one["summary"]},
+                "excluded": one["excluded"],
+                "ba_method": BA_METHOD,
+                "benchmark": args.benchmark,
+            }
+        else:
+            res = summarize(key, rows, today=today, benchmark=args.benchmark)
+            res["benchmark"] = args.benchmark
+        out[key] = res
+        print(key, {w: (s and f"{s['hits']}/{s['n']}") for w, s in res["summary"].items()}, "excl", len(res["excluded"]))
+    for key, why in (doc.get("NONE") or {}).items():
+        out[key] = {"pitches": {}, "summary": {"1y": None, "2y": None}, "note": why, "ba_method": BA_METHOD}
     ensure(STATE)
     dest = os.path.join(STATE, "batting.json")
     json.dump(out, open(dest, "w", encoding="utf-8"), indent=1)
     print("wrote", dest)
+    return 0
+
+
+def _self_test():
+    start, end, months = cohort("2026-10-18", 12, 24)
+    assert (start, end, months) == ("2023-10-18", "2024-10-18", 24), (start, end, months)
+    start, end, months = cohort("2026-10-18", 12, 12)
+    assert (start, end, months) == ("2024-10-18", "2025-10-18", 12), (start, end, months)
+    assert window_bounds("2026-10-18")["2y"][2] == 24
+    assert choose_benchmark("ABC") == "IWM"
+    assert choose_benchmark("ABC.TO") == "XCS.TO"
+    assert choose_benchmark("ABC.V") == "XCS.TO"
+    assert choose_benchmark("ABC.CN") == "IWM"
+    assert choose_benchmark("ABC.NE") == "IWM"
+    assert choose_benchmark("ABC", "SPY") == "SPY"
+    assert p_lt_hits(2, 2) == 0.75
+    assert p_lt_hits(0, 5) == 0.0
+    assert p_lt_hits(15, 31) == 0.3601
+    print("calc self-test ok")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

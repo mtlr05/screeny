@@ -25,8 +25,9 @@ On-demand scout for single-stock investment write-ups. David runs it from the Cu
 1. **Stats** — three numbers only: articles sourced, articles read in full, articles scored.
 2. Screening and scoring rules.
 3. **Ranked list** — top 15 plus every name tied with the 15th score. Include a **BA 2y (1y)** column: the author's 2-year batting average as hits/n = %, else the 1-year tagged `(1y)`, else `n/a`. The column does not change the /7 score. A total still stored out of 6 is shown as /6.
-4. Author batting top-5 tables, near misses, then **Articles from top-record authors**, then caveats.
-5. **Appendix: one-pagers**, then **Appendix: detailed stats** (drop reasons, Seeking Alpha breakdown, counts by source type). Detailed stats stay in the appendix.
+4. **Score vs P(fewer hits)** — one point per scored article. Blue is the 2-year `P(X < hits)`. Red is the 1-year figure, used only when the 2-year sample is missing. A black x at 0 means neither sample exists.
+5. Author batting top-5 tables, near misses, then **Articles from top-record authors**, then caveats.
+6. **Appendix: one-pagers**, then **Appendix: batting average and P(X < hits)** (the short explanation, then every chart point with its article link), then **Appendix: detailed stats** (drop reasons, Seeking Alpha breakdown, counts by source type). Detailed stats stay in the appendix.
 
 ## Where things live
 
@@ -37,7 +38,7 @@ On-demand scout for single-stock investment write-ups. David runs it from the Cu
 - `reports/` — dated outputs. Sample: `reports/2026-10-14/`.
 - `fulltext/` and `cache/` — local only, not committed. A copy of each usable `fulltext/` file also goes to the shared store outside the clone (`SCREENY_TEXT_STORE`, default `~/.screeny/fulltext_store`).
 - `.cursor/skills/stock-screen/` — sweep, triage, read, score, report.
-- `.cursor/skills/stock-screen-scoring/` — the six criteria and the evidence rules. This skill takes precedence over the scoring summary in the stock-screen skill.
+- `.cursor/skills/stock-screen-scoring/` — the seven criteria and the evidence rules. This skill takes precedence over the scoring summary in the stock-screen skill.
 - `.cursor/skills/author-batting-average/` — batting average on its own.
 - `scripts/` — sweep, fetch, prices, earnings drops, report. `rerun/` — full-window helpers. `bat/` — batting-average helpers.
 
@@ -51,7 +52,7 @@ Tracked active sources have a soft cap of 600. Drop a source only for a 2-year b
 
 David can approve a source by hand when it misses the automatic add bar. Three publications were added that way on 2026-10-16: Intrinsic Value System (15/31, `p_lt_hits_by_chance` 0.3601), Welfare Capital Research (2/2, 0.75), and The Lead-Lag Report (2/2, 0.75). The exception is recorded in each row's `how_discovered`. Later removal proposals still use the drop rules.
 
-The /7 score still needs an explicit long disclosure. The 2-year batting average is separate. One pitch per ticker, published 2–3 years ago. `bat/longcheck.py` drops a short, a sell, or a hold unless the body shows the author owns the shares. A pitch with no such signal still counts. Price timeouts are not delistings. A symbol with no price data is retried as `.TO` then `.V`. The batting-average benchmark is XIC.TO for `.TO` and `.V`, and SPY otherwise. `ba_method` for that path is `v2-excl-TO`.
+The /7 score still needs an explicit long disclosure. The 2-year batting average is separate. One pitch per ticker, published 2–3 years ago. `bat/longcheck.py` drops a short, a sell, or a hold unless the body shows the author owns the shares. A pitch with no such signal still counts. Price timeouts are not delistings. A symbol with no price data is retried as `.TO` then `.V`. The batting-average benchmark is XCS.TO for `.TO` and `.V`, and IWM otherwise. `ba_method` for a new calculation is `v3-iwm-xcs`. A stored row keeps its old method until that author is recalculated. The since-publish column stays IWM for US listings and XIC.TO for Canada.
 
 `p_lt_hits_by_chance` is `P(X <= hits - 1)` with `p = 0.5`. It is always stored as `ba2y_p_lt_hits`, shown on every proposal and in the report, and batting summaries sort by it, highest first.
 
