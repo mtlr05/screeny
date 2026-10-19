@@ -60,13 +60,13 @@ For each name: confirm the drop was earnings-day news, confirm listing and size,
 
 ## 3. Value Investors Club
 
-Each run, check VIC public ideas that have newly come off the ~45-day embargo (published about 45–52 days ago, so they show up in the last-7-days public window). Screen and score them with the same rules as every other source. If the write-up does not disclose a long position, drop it as `author not long`.
+Each run, check VIC public ideas that have newly come off the ~45-day embargo (published about 45–52 days ago, so they show up in the last-7-days public window). Screen and score them with the same rules as every other source. The form line "I and/or others I advise hold a material investment in the issuer's securities" counts as a long disclosure. The form line that the author and people they advise do not hold a material investment is `author not long`.
 
 ## 4. Seeking Alpha
 
 Seeking Alpha is one pull for this run. It is not a tracked source and it is not a row in `state/source_stats.csv` or `state/seen_posts.csv`. Never open investing groups, marketplace, or Alpha Picks. Do not paste, request, or store a password, a token, or a cookie.
 
-Use the machine's signed-in browser. Open https://seekingalpha.com and check that the account menu is visible and an article page shows full text. If the session has expired, stop and ask the user to sign in, then check again. Do not log in yourself. Free-in-full articles only.
+New articles are read by `scripts/sa_read.py` in a visible Chrome window. That window is the signed-in browser for the pull. If it shows a sign-in page, the script waits. Do not log in yourself and do not paste a cookie. Free-in-full articles only.
 
 Past pitches, for batting average only, stay on the public author API: `python3 bat/sa_one.py "Author Name" author-slug`. Title, date, ticker, and sentiment are enough.
 
@@ -80,7 +80,13 @@ python3 scripts/sa_ingest.py screen reports/sa_list_<date>.csv
 ```
 
 That writes `reports/sa_candidates_<date>.csv` and `reports/sa_read_order_<date>.csv`. Columns extend `seen_posts` with `author,ticker,mcap_usd,exchange,sa_status,drop_reason`. `source` is `Seeking Alpha`. A kept row has `sa_status` `screened`. Read in the order file: tickers not yet scored first, then the rest by date, so a rate limit cuts off the least useful reads.
-3. Full read, in that order, 20–30 seconds apart. Prefer the rendered page text. Do not use a PDF unless the page will not copy; the checker unwraps wrapped lines before it counts words. Open the article, scroll to the disclosure, and save `fulltext/sa_<id>.txt` with `URL`, `TITLE`, `AUTHOR`, `DATE`, `TICKERS`, a `=== SUMMARY ===` section, `=== ARTICLE BODY ===`, and `=== ANALYST'S DISCLOSURE ===`. If the first save is under 600 words, reload once, scroll to "Analyst's Disclosure", and save again before treating it as a preview.
+3. Full read, in that order, 20–30 seconds apart. The reader is a script, not the chat agent:
+
+```bash
+python3 scripts/sa_read.py reports/sa_read_order_<date>.csv
+```
+
+It opens each unread URL in a visible Chrome window (profile `~/.screeny/chrome_sa`, outside the repo). It does not use `fetch()` and it does not open a second tab. Prefer the rendered page text. Do not use a PDF unless the page will not copy; the checker unwraps wrapped lines before it counts words. The script saves `fulltext/sa_<id>.txt` with `URL`, `TITLE`, `AUTHOR`, `DATE`, `TICKERS`, a `=== SUMMARY ===` section, `=== ARTICLE BODY ===`, and `=== ANALYST'S DISCLOSURE ===`. If the first save is under 600 words, it reloads once, scrolls to "Analyst's Disclosure", and saves again before treating the page as a preview. A progress line is appended to `reports/sa_read_progress_<date>.log`. A killed run resumes from `state/sa_results.json` and does not reopen a usable saved file.
 4. Classify each saved file:
 
 ```bash
@@ -88,7 +94,7 @@ python3 scripts/sa_ingest.py check fulltext/sa_<id>.txt
 ```
 
 `full` means the body is at least 600 words, there is no paywall marker, and the disclosure says a beneficial long position in the shares of that company. Another listing of the same company counts: the check compares the base symbol and, when a Yahoo quote is available, the company name. `ESVIF` matches an article on `ESI.TO` when both quotes are Ensign Energy. A short body, a paywall marker (`Subscribe to continue`, `To continue reading`, `only available to Premium`, `Sign up to continue`), or a missing disclosure is `preview` and is not scored. A disclosure that names only unrelated tickers, such as `NIO` and `LI` on an `XPEV` article, is `not_long`. A bond, preferred, or note of the same issuer, such as `MFICL` against `MFIC`, is `long_other_security`. It is not scored. The report appendix lists those so the user can judge them.
-5. If the page is a Press & Hold bot check, a captcha, or HTTP 403 or 429, pause and try that article once more. If it fails again, stop. `check` exits 3 on a bot-check page. The unread remainder stays in `reports/sa_read_order_<date>.csv`. Next time the user is signed in, continue with:
+5. If the page is a Press & Hold bot check, a captcha, or HTTP 403 or 429, `sa_read.py` prints the ticker and waits on that same page until the article heading is present and the check text is gone. It does not navigate to the next URL while the check is up, and it does not stop the queue. `check` exits 3 on a saved bot-check page, so that page is not scored. If the window is signed out, the script waits until the account menu is there. The unread remainder stays in `reports/sa_read_order_<date>.csv`. To list what is still unread:
 
 ```bash
 python3 scripts/sa_ingest.py resume reports/sa_read_order_<date>.csv
@@ -107,7 +113,7 @@ That writes `state/sa_breakdown.json` (`li`, `li_from`, `li_to`, `kept`, `read`,
 python3 scripts/sa_ingest.py self-test
 ```
 
-That runs the screen, the preview and long-disclosure checks, the bot-check stop, and dedupe on fake rows. It does not touch the network.
+That runs the screen, the preview and long-disclosure checks, the bot-check classification, and dedupe on fake rows. It does not touch the network.
 
 ## 5. X
 
@@ -137,7 +143,7 @@ Apply this before a name can be scored:
 - Small/mid cap, under about US$10B.
 - Listed in the US or Canada.
 - Not already scored.
-- The author discloses a long position. Drop reason `author not long` otherwise.
+- The author discloses a long position. A Seeking Alpha "beneficial long position" disclosure, an explicit "I own / I am long / I hold a position" statement, or the Value Investors Club form line "I and/or others I advise hold a material investment in the issuer's securities" counts. A Buy/LONG rating alone, "may hold" boilerplate, or the club line that they do not hold a material investment, does not. Drop reason `author not long` otherwise.
 
 Record an ambiguous disclosure (the "may hold" kind of line) and drop it. Prioritise posts with a price target, a valuation section, and a management discussion.
 

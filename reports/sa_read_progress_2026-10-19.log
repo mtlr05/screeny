@@ -1,0 +1,230 @@
+2026-10-19T10:07:05 START unread=135
+2026-10-19T10:10:02 START unread=135
+2026-10-19T10:10:04 RELOAD 4953336 WIX — first save under 600 words
+2026-10-19T10:10:09 SAVED 4953336 WIX words=1518 check=0
+2026-10-19T10:10:37 HOLD 4953521 BIRK — Press & Hold is on the page. Hold the button in the Chrome window.
+2026-10-19T10:14:18 ERROR 4953521 BIRK Page.wait_for_timeout: Target page, context or browser has been closed
+2026-10-19T10:14:43 ERROR 4953628 BLLN Page.goto: Target page, context or browser has been closed
+2026-10-19T10:15:08 ERROR 4953544 CRGY Page.goto: Target page, context or browser has been closed
+2026-10-19T10:15:33 ERROR 4953405 CSQR Page.goto: Target page, context or browser has been closed
+2026-10-19T10:15:58 ERROR 4953510 ECO Page.goto: Target page, context or browser has been closed
+2026-10-19T10:16:23 ERROR 4953549 EPAM Page.goto: Target page, context or browser has been closed
+2026-10-19T10:16:48 ERROR 4953604 ESI.TO Page.goto: Target page, context or browser has been closed
+2026-10-19T10:17:13 ERROR 4953396 FIGR Page.goto: Target page, context or browser has been closed
+2026-10-19T10:17:38 ERROR 4953387 FISN Page.goto: Target page, context or browser has been closed
+2026-10-19T10:18:03 ERROR 4953483 LLESY Page.goto: Target page, context or browser has been closed
+2026-10-19T10:18:28 ERROR 4953494 NAT Page.goto: Target page, context or browser has been closed
+2026-10-19T10:18:53 ERROR 4953506 NVEC Page.goto: Target page, context or browser has been closed
+2026-10-19T10:19:18 ERROR 4953469 ONDS Page.goto: Target page, context or browser has been closed
+2026-10-19T10:19:43 ERROR 4953602 OUST Page.goto: Target page, context or browser has been closed
+2026-10-19T10:20:08 ERROR 4953408 PCOR Page.goto: Target page, context or browser has been closed
+2026-10-19T10:20:33 ERROR 4953451 PENG Page.goto: Target page, context or browser has been closed
+2026-10-19T10:21:49 START unread=134
+2026-10-19T10:21:50 HOLD 4953521 BIRK — Press & Hold is on the page. Hold the button in the browser window.
+2026-10-19T10:29:19 ERROR 4953521 BIRK Page.wait_for_timeout: Target page, context or browser has been closed
+2026-10-19T10:29:19 RELAUNCH — the browser window closed. Opening it again on the same article.
+2026-10-19T10:29:21 HOLD 4953521 BIRK — Press & Hold is on the page. Hold the button in the browser window.
+2026-10-19T10:30:07 ERROR 4953521 BIRK Page.wait_for_timeout: Target page, context or browser has been closed
+2026-10-19T10:30:07 RELAUNCH — the browser window closed. Opening it again on the same article.
+2026-10-19T10:30:08 HOLD 4953521 BIRK — Press & Hold is on the page. Hold the button in the browser window.
+2026-10-19T10:30:10 ERROR 4953521 BIRK Page.wait_for_timeout: Target page, context or browser has been closed
+2026-10-19T10:30:10 RELAUNCH — the browser window closed. Opening it again on the same article.
+2026-10-19T10:30:12 HOLD 4953521 BIRK — Press & Hold is on the page. Hold the button in the browser window.
+2026-10-19T10:33:14 ERROR 4953521 BIRK Page.wait_for_timeout: Target page, context or browser has been closed
+2026-10-19T10:33:14 RELAUNCH — the browser window closed. Opening it again on the same article.
+2026-10-19T10:33:15 HOLD 4953521 BIRK — Press & Hold is on the page. Hold the button in the browser window.
+2026-10-19T10:33:17 ERROR 4953521 BIRK Page.wait_for_timeout: Target page, context or browser has been closed
+2026-10-19T10:33:17 RELAUNCH — the browser window closed. Opening it again on the same article.
+2026-10-19T10:33:19 RELOAD 4953521 BIRK — first save under 600 words
+2026-10-19T10:33:24 SAVED 4953521 BIRK words=261 check=0
+2026-10-19T10:33:49 ERROR 4953628 BLLN Page.goto: Target page, context or browser has been closed
+Call log:
+  - navigating to "https://seekingalpha.com/article/4953628-billiontoone-a-molecular-diagnostics-stock-with-strong-quality-and-garp-credentials", waiting until "domcontentloaded"
+
+2026-10-19T10:33:49 RELAUNCH — the browser window closed. Opening it again on the same article.
+2026-10-19T10:34:16 HOLD 4953628 BLLN — Press & Hold is on the page. Hold the button in the browser window.
+2026-10-19T10:34:42 START unread=133
+2026-10-19T10:34:44 HOLD 4953628 BLLN — Press & Hold is on the page. Chrome window. title=Access to this page has been denied flags=none body=
+2026-10-19T10:35:26 ERROR 4953628 BLLN Page.wait_for_timeout: Target page, context or browser has been closed
+2026-10-19T10:35:26 RELAUNCH — the browser window closed. Opening it again on the same article.
+2026-10-19T10:35:28 HOLD 4953628 BLLN — Press & Hold is on the page. Chrome window. title=Access to this page has been denied flags=none body=Before we continue... Press & Hold to confirm you are a human (and not a bot). Reference ID 0774e650-cbca-11f1-b97b-5917a26426cc
+2026-10-19T10:38:12 ERROR 4953628 BLLN Page.wait_for_timeout: Target page, context or browser has been closed
+2026-10-19T10:38:12 RELAUNCH — the browser window closed. Opening it again on the same article.
+2026-10-19T10:38:13 HOLD 4953628 BLLN — Press & Hold is on the page. Chrome window. title=Access to this page has been denied flags=none body=Before we continue... Press & Hold to confirm you are a human (and not a bot). Reference ID 0774e650-cbca-11f1-b97b-5917a26426cc
+2026-10-19T10:38:24 ERROR 4953628 BLLN Page.wait_for_timeout: Target page, context or browser has been closed
+2026-10-19T10:38:24 RELAUNCH — the browser window closed. Opening it again on the same article.
+2026-10-19T10:38:25 HOLD 4953628 BLLN — Press & Hold is on the page. Chrome window. title=Access to this page has been denied flags=none body=Before we continue... Press & Hold to confirm you are a human (and not a bot). Reference ID 0774e650-cbca-11f1-b97b-5917a26426cc
+2026-10-19T10:44:41 ERROR 4953628 BLLN Page.wait_for_timeout: Target page, context or browser has been closed
+2026-10-19T10:44:41 RELAUNCH — the browser window closed. Opening it again on the same article.
+2026-10-19T10:44:42 HOLD 4953628 BLLN — Press & Hold is on the page. Chrome window. title=Access to this page has been denied flags=none body=Before we continue... Press & Hold to confirm you are a human (and not a bot). Reference ID 0774e650-cbca-11f1-b97b-5917a26426cc
+2026-10-19T10:46:14 ERROR 4953628 BLLN Page.wait_for_timeout: Target page, context or browser has been closed
+2026-10-19T10:46:14 RELAUNCH — the browser window closed. Opening it again on the same article.
+2026-10-19T10:46:15 HOLD 4953628 BLLN — Press & Hold is on the page. Chrome window. title=Access to this page has been denied flags=none body=Before we continue... Press & Hold to confirm you are a human (and not a bot). Reference ID 0774e650-cbca-11f1-b97b-5917a26426cc
+2026-10-19T10:46:26 ERROR 4953628 BLLN Page.wait_for_timeout: Target page, context or browser has been closed
+2026-10-19T10:46:26 RELAUNCH — the browser window closed. Opening it again on the same article.
+2026-10-19T10:46:27 HOLD 4953628 BLLN — Press & Hold is on the page. Chrome window. title=Access to this page has been denied flags=none body=Before we continue... Press & Hold to confirm you are a human (and not a bot). Reference ID 0774e650-cbca-11f1-b97b-5917a26426cc
+2026-10-19T10:47:35 START unread=134
+2026-10-19T10:47:35 BROWSER Google Chrome C:\Program Files\Google\Chrome\Application\chrome.exe — ordinary window, profile outside the repo, no Playwright debugger.
+2026-10-19T10:47:56 ERROR 4953521 BIRK Chrome did not stay open for https://seekingalpha.com/article/4953521-birkenstock-unique-product-meets-attractive-valuation
+2026-10-19T10:48:42 ERROR 4953628 BLLN Chrome did not stay open for https://seekingalpha.com/article/4953628-billiontoone-a-molecular-diagnostics-stock-with-strong-quality-and-garp-credentials
+2026-10-19T10:51:34 START unread=134
+2026-10-19T10:51:34 BROWSER Google Chrome C:\Program Files\Google\Chrome\Application\chrome.exe — ordinary window, profile outside the repo, no Playwright debugger.
+2026-10-19T10:51:39 RELOAD 4953521 BIRK — first save under 600 words
+2026-10-19T10:51:44 SAVED 4953521 BIRK words=113 check=0
+2026-10-19T10:52:12 RELOAD 4953628 BLLN — first save under 600 words
+2026-10-19T10:52:16 SAVED 4953628 BLLN words=152 check=0
+2026-10-19T10:52:45 RELOAD 4953544 CRGY — first save under 600 words
+2026-10-19T10:52:49 SAVED 4953544 CRGY words=119 check=0
+2026-10-19T10:53:18 RELOAD 4953405 CSQR — first save under 600 words
+2026-10-19T10:53:22 SAVED 4953405 CSQR words=126 check=0
+2026-10-19T10:53:50 RELOAD 4953510 ECO — first save under 600 words
+2026-10-19T10:57:18 START unread=134
+2026-10-19T10:57:18 BROWSER Google Chrome C:\Program Files\Google\Chrome\Application\chrome.exe — ordinary window, profile outside the repo, no Playwright debugger.
+2026-10-19T10:57:21 RELOAD 4953521 BIRK — first save under 600 words
+2026-10-19T10:57:24 SAVED 4953521 BIRK words=259 check=0
+2026-10-19T10:57:52 RELOAD 4953628 BLLN — first save under 600 words
+2026-10-19T10:57:55 SAVED 4953628 BLLN words=87 check=0
+2026-10-19T10:58:22 RELOAD 4953544 CRGY — first save under 600 words
+2026-10-19T10:58:25 SAVED 4953544 CRGY words=107 check=0
+2026-10-19T10:58:53 RELOAD 4953405 CSQR — first save under 600 words
+2026-10-19T10:58:56 SAVED 4953405 CSQR words=150 check=0
+2026-10-19T10:59:23 RELOAD 4953510 ECO — first save under 600 words
+2026-10-19T10:59:26 SAVED 4953510 ECO words=54 check=0
+2026-10-19T11:02:03 START unread=134
+2026-10-19T11:02:03 BROWSER Google Chrome C:\Program Files\Google\Chrome\Application\chrome.exe — ordinary window, profile outside the repo, no Playwright debugger.
+2026-10-19T11:02:10 SAVED 4953521 BIRK words=1601 check=0
+2026-10-19T11:02:41 SAVED 4953628 BLLN words=1677 check=0
+2026-10-19T11:03:12 SAVED 4953544 CRGY words=2685 check=0
+2026-10-19T11:03:44 SAVED 4953405 CSQR words=1310 check=0
+2026-10-19T11:04:15 SAVED 4953510 ECO words=1567 check=0
+2026-10-19T11:04:46 SAVED 4953549 EPAM words=1630 check=0
+2026-10-19T11:05:18 SAVED 4953604 ESI.TO words=1220 check=0
+2026-10-19T11:05:49 SAVED 4953396 FIGR words=1187 check=0
+2026-10-19T11:06:20 SAVED 4953387 FISN words=3087 check=0
+2026-10-19T11:06:51 SAVED 4953483 LLESY words=2620 check=0
+2026-10-19T11:07:23 SAVED 4953494 NAT words=2006 check=0
+2026-10-19T11:07:54 SAVED 4953506 NVEC words=2491 check=0
+2026-10-19T11:08:25 SAVED 4953469 ONDS words=3237 check=0
+2026-10-19T11:08:58 SAVED 4953602 OUST words=1956 check=0
+2026-10-19T11:09:29 SAVED 4953408 PCOR words=2320 check=0
+2026-10-19T11:10:02 SAVED 4953451 PENG words=1804 check=0
+2026-10-19T11:10:33 SAVED 4953495 PRPO words=3333 check=0
+2026-10-19T11:11:04 SAVED 4953612 PSIX words=3872 check=0
+2026-10-19T11:11:35 SAVED 4953623 RPC words=1481 check=0
+2026-10-19T11:12:07 SAVED 4953633 SATL words=1791 check=0
+2026-10-19T11:12:38 SAVED 4953418 SIRI words=2328 check=0
+2026-10-19T11:13:09 SAVED 4953449 TWIN words=1419 check=0
+2026-10-19T11:13:41 SAVED 4953411 TXO words=1644 check=0
+2026-10-19T11:14:12 SAVED 4953477 UCTT words=1918 check=0
+2026-10-19T11:14:43 SAVED 4953582 VIOT words=2264 check=0
+2026-10-19T11:15:15 SAVED 4953385 XPEV words=1160 check=0
+2026-10-19T11:15:47 SAVED 4953480 YLLXF words=1083 check=0
+2026-10-19T11:16:19 SAVED 4953774 AB words=2893 check=0
+2026-10-19T11:16:50 SAVED 4953696 ABTC words=1882 check=0
+2026-10-19T11:17:22 SAVED 4953827 AVA words=1957 check=0
+2026-10-19T11:17:54 SAVED 4953752 BLSH words=1234 check=0
+2026-10-19T11:18:25 SAVED 4953731 CABA words=2324 check=0
+2026-10-19T11:18:57 SAVED 4953658 CELH words=2001 check=0
+2026-10-19T11:19:28 SAVED 4953834 CHWY words=1401 check=0
+2026-10-19T11:19:59 SAVED 4953803 CLMT words=1102 check=0
+2026-10-19T11:20:31 SAVED 4953808 DSVSF words=2409 check=0
+2026-10-19T11:21:04 SAVED 4953792 ECO words=1240 check=0
+2026-10-19T11:21:35 SAVED 4953719 GENB words=2095 check=0
+2026-10-19T11:22:06 SAVED 4953711 GGAL words=2819 check=0
+2026-10-19T11:22:37 SAVED 4953631 GRNT words=1306 check=0
+2026-10-19T11:23:08 SAVED 4953754 GTLB words=4398 check=0
+2026-10-19T11:23:37 SAVED 4953661 HIMS words=2717 check=0
+2026-10-19T11:24:09 SAVED 4953902 INOD words=1800 check=0
+2026-10-19T11:24:40 SAVED 4953835 INOD words=1149 check=0
+2026-10-19T11:25:11 SAVED 4953810 KRKNF words=1540 check=0
+2026-10-19T11:25:41 SAVED 4953730 LNC words=2123 check=0
+2026-10-19T11:26:13 SAVED 4953735 MFIC words=1186 check=0
+2026-10-19T11:26:44 SAVED 4953801 MGM words=3058 check=0
+2026-10-19T11:27:15 SAVED 4953956 MSGE words=1374 check=0
+2026-10-19T11:27:46 SAVED 4953781 NVCR words=2148 check=0
+2026-10-19T11:28:17 SAVED 4953645 PLMR words=1058 check=0
+2026-10-19T11:28:49 SAVED 4953695 RGTI words=2040 check=0
+2026-10-19T11:29:20 SAVED 4953758 RILY words=1850 check=0
+2026-10-19T11:29:52 SAVED 4953698 SANA words=1472 check=0
+2026-10-19T11:30:23 SAVED 4953816 SOBO words=1577 check=0
+2026-10-19T11:30:54 SAVED 4953740 TAYD words=1217 check=0
+2026-10-19T11:31:26 SAVED 4953717 URGN words=1776 check=0
+2026-10-19T11:31:57 SAVED 4953716 VIRT words=2380 check=0
+2026-10-19T11:32:28 SAVED 4953724 WULF words=2098 check=0
+2026-10-19T11:32:59 SAVED 4953878 XRX words=1092 check=0
+2026-10-19T11:33:31 SAVED 4954018 ACHR words=2039 check=0
+2026-10-19T11:34:03 SAVED 4954230 AKTS words=2120 check=0
+2026-10-19T11:34:36 SAVED 4954105 ARIS words=1808 check=0
+2026-10-19T11:35:07 SAVED 4954103 AUB words=1690 check=0
+2026-10-19T11:35:38 SAVED 4954244 BMI words=2069 check=0
+2026-10-19T11:36:09 SAVED 4954094 CRUS words=1605 check=0
+2026-10-19T11:36:40 SAVED 4953964 EMN words=2215 check=0
+2026-10-19T11:37:11 SAVED 4954261 EOPSF words=3617 check=0
+2026-10-19T11:37:43 SAVED 4954236 EXP words=1786 check=0
+2026-10-19T11:38:14 SAVED 4953966 FEMY words=3490 check=0
+2026-10-19T11:38:45 SAVED 4954033 FIGS words=1357 check=0
+2026-10-19T11:39:17 SAVED 4954106 INDV words=1577 check=0
+2026-10-19T11:46:06 SAVED 4953987 IVA words=3009 check=0
+2026-10-19T11:46:37 SAVED 4953961 KGEI words=1699 check=0
+2026-10-19T11:47:08 SAVED 4953920 MRP words=1352 check=0
+2026-10-19T11:47:40 SAVED 4954090 MUR words=1646 check=0
+2026-10-19T11:48:11 SAVED 4954032 NRIX words=3392 check=0
+2026-10-19T11:48:42 SAVED 4954066 NVRI words=1318 check=0
+2026-10-19T11:49:14 SAVED 4953978 OI words=1533 check=0
+2026-10-19T11:49:45 SAVED 4954063 TRAX words=2003 check=0
+2026-10-19T11:50:16 SAVED 4954279 VRA words=1292 check=0
+2026-10-19T11:50:47 SAVED 4954432 ARWR words=1571 check=0
+2026-10-19T11:51:18 SAVED 4954399 AVAV words=1042 check=0
+2026-10-19T11:51:50 SAVED 4954365 CHWY words=1809 check=0
+2026-10-19T11:52:21 SAVED 4954396 CMRE words=1521 check=0
+2026-10-19T11:52:52 SAVED 4954330 CXW words=2111 check=0
+2026-10-19T11:53:24 SAVED 4954291 DRS words=2010 check=0
+2026-10-19T11:53:55 SAVED 4954410 EDU words=1138 check=0
+2026-10-19T11:54:26 SAVED 4954403 GLNG words=1090 check=0
+2026-10-19T11:54:58 SAVED 4954349 GVA words=1734 check=0
+2026-10-19T11:55:29 SAVED 4954315 HUT words=2014 check=0
+2026-10-19T11:56:01 SAVED 4954467 ICFI words=1722 check=0
+2026-10-19T11:56:32 SAVED 4954293 IRS words=1672 check=0
+2026-10-19T11:57:03 SAVED 4954617 JOBY words=1767 check=0
+2026-10-19T11:57:34 SAVED 4954314 PCOR words=2342 check=0
+2026-10-19T11:58:05 SAVED 4954484 QURE words=2654 check=0
+2026-10-19T11:58:36 SAVED 4954339 S words=2297 check=0
+2026-10-19T11:59:08 SAVED 4954446 SCTX words=2535 check=0
+2026-10-19T11:59:39 SAVED 4954518 SKYH words=2695 check=0
+2026-10-19T12:00:09 SAVED 4954264 UNTC words=1341 check=0
+2026-10-19T12:00:42 SAVED 4954280 VFF words=1692 check=0
+2026-10-19T12:01:13 SAVED 4954353 WT words=1382 check=0
+2026-10-19T12:01:44 SAVED 4954426 ZVRA words=2249 check=0
+2026-10-19T12:02:15 SAVED 4954766 AAUC words=1923 check=0
+2026-10-19T12:02:46 SAVED 4954850 AQST words=1850 check=0
+2026-10-19T12:03:17 SAVED 4954673 ASYS words=1518 check=0
+2026-10-19T12:03:49 SAVED 4954805 BFH words=1579 check=0
+2026-10-19T12:04:20 SAVED 4954684 CHEF words=1136 check=0
+2026-10-19T12:04:51 SAVED 4954708 EPM words=1823 check=0
+2026-10-19T12:05:22 SAVED 4954764 EVER words=1200 check=0
+2026-10-19T12:05:53 SAVED 4954734 HDSN words=5482 check=0
+2026-10-19T12:06:24 SAVED 4954792 HOPE words=1200 check=0
+2026-10-19T12:06:55 SAVED 4954700 HVT words=1534 check=0
+2026-10-19T12:07:26 SAVED 4954844 JMKE words=1660 check=0
+2026-10-19T12:07:58 SAVED 4954772 LBTYA words=1590 check=0
+2026-10-19T12:08:30 SAVED 4954685 MNRO words=2521 check=0
+2026-10-19T12:09:01 SAVED 4954767 NESR words=1673 check=0
+2026-10-19T12:09:33 SAVED 4954763 SUPN words=1982 check=0
+2026-10-19T12:10:06 SAVED 4954738 TFPM words=1487 check=0
+2026-10-19T12:10:37 SAVED 4954982 AXTI words=2631 check=0
+2026-10-19T12:11:09 SAVED 4954947 BLBD words=1242 check=0
+2026-10-19T12:11:51 RELOAD 4954941 CC — first save under 600 words
+2026-10-19T12:11:58 SAVED 4954941 CC words=2232 check=0
+2026-10-19T12:12:29 SAVED 4955001 COLL words=2065 check=0
+2026-10-19T12:13:00 SAVED 4954952 GGGOF words=2539 check=0
+2026-10-19T12:13:33 SAVED 4954958 LBRT words=1561 check=0
+2026-10-19T12:14:04 SAVED 4954980 MAIN words=2738 check=0
+2026-10-19T12:14:35 SAVED 4954973 MOD words=3247 check=0
+2026-10-19T12:15:06 SAVED 4954962 MTH words=3132 check=0
+2026-10-19T12:15:38 SAVED 4954953 NHI words=1954 check=0
+2026-10-19T12:16:09 SAVED 4954990 TATT words=1720 check=0
+2026-10-19T12:16:40 SAVED 4955042 ORKA words=2059 check=0
+2026-10-19T12:17:11 SAVED 4955161 BBOT words=2297 check=0
+2026-10-19T12:17:43 SAVED 4955093 IBEX words=1290 check=0
+2026-10-19T12:18:15 SAVED 4955137 MESO words=1841 check=0
+2026-10-19T12:18:16 DONE

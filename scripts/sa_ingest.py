@@ -565,7 +565,7 @@ def check(path, results_path, candidates_path="", quotes=None):
         write_csv(candidates_path, CAND_FIELDS, rows)
     print(f"{aid} {status}")
     if status == "blocked":
-        print("Bot check. Pause and read this article once more. If it fails again, stop and score only what was already read in full.")
+        print("Bot check. Ask the user to resolve Press & Hold in the browser. Wait until the article loads, then continue reading. Do not score this page.")
         return 3
     return 0
 

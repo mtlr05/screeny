@@ -1,0 +1,14 @@
+{
+  "li": 375,
+  "li_from": "2026-10-11",
+  "li_to": "2026-10-19",
+  "kept": 141,
+  "drops": {
+    "not small/mid cap (>=US$10B at publish)": 225,
+    "ETF / fund / trust": 2,
+    "multi-stock title": 2,
+    "no market cap data": 3,
+    "not an equity (currency/crypto/commodity)": 1,
+    "recap / portfolio / housekeeping": 1
+  }
+}

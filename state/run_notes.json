@@ -1,8 +1,9 @@
 {
- "price_source": "px.py Yahoo chart, publish-day close",
- "ceo_stake_source": "from the article only",
- "sa_pull_complete": false,
- "extra_caveats": [
-  "Value Investors Club's public page now shows ideas only after 90 days (the page's end date was 2026-07-21). The 30 ideas published 2026-07-13 through 2026-07-20 are the ones that became public in this window. Thirteen US or Canada small- and mid-cap long ideas were read in full. Each ends with the club's form line, \"I and/or others I advise hold a material investment in the issuer's securities,\" or with the line that they do not hold one. That form line is not an explicit \"I own / I am long / I hold\" statement, so those thirteen were dropped as author not long. Mistras (MG) returned an empty body and was not read."
- ]
+  "price_source": "px.py Yahoo chart, publish-day close",
+  "ceo_stake_source": "from the article only",
+  "sa_pull_complete": true,
+  "extra_caveats": [
+    "Value Investors Club's public page shows ideas only after 90 days (the page's end date was 2026-07-21). The 30 ideas published 2026-07-13 through 2026-07-20 are the ones that became public in this window. The form line that the author or people they advise hold a material investment in the issuer's securities counts as a long. Twelve US or Canada ideas under about US$10 billion that use that line were scored from the saved text. AirBoss of America and Sphere Entertainment use the line that they do not hold a material investment, so they stay dropped as author not long. Capral is listed in Australia. Mistras (MG) returned an empty body and was not read.",
+    "Seeking Alpha was signed in. Long Ideas from 2026-10-11 through 2026-10-19 were listed (375) and 141 passed the cap and listing screen. The reader is ordinary Google Chrome with the profile outside the repo, and it does not use Playwright. This run saved 134 articles. All 141 kept articles now have saved text. 46 beneficial longs were scored, including Hercules Metals (BADEF), which was already scored before this run. 94 were read and dropped because the author did not disclose a long position. 1 was a preview and was not scored. None remain unread. The public author API returned a bot check for most new Seeking Alpha authors, so those batting averages are left blank. Substack and Value Investors Club text already saved was not fetched again."
+  ]
 }

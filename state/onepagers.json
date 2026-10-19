@@ -35,5 +35,1066 @@
    "No price target and no cash-runway figure.",
    "The warrant overhang the article cites has already been exercised."
   ]
+ },
+ "BADEF": {
+  "company": "Hercules Metals",
+  "words": 1335,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of BADEF either through stock ownership, options, or other derivatives.",
+  "c1": "Copper demand for grids, vehicles, and data centers is the growth driver. Leviathan is the named discovery, with a second target at Hook and two more zones planned.",
+  "c2": "No price target or valuation endpoint. The rating change from strong buy to buy is not a price.",
+  "c3": "Insiders continued to steadily purchase shares on the open market in the months preceding the management addition. No CEO percentage is stated. The new team's C$4.5 million was a private placement, and Barrick's 10% is not the CEO's stake.",
+  "c4": "Road access, power lines, and a US location are described. They are not argued as one of the five moat types.",
+  "c5": "George Ogilvie's Arizona Sonoran team advanced Cactus from about C$125 million in July 2021 to a Hudbay acquisition at about C$2.0 billion in 2026, a 16-fold gain. That is one result with figures.",
+  "c6": "The article says the recent drill results were somewhat ignored. It does not say why that discount should close, and it says the chart does not look favorable.",
+  "c7": "The drill program is to expand beyond two rigs in 2027, with Southern Flats and Pegasus named. No calendar date.",
+  "flags": [
+   "Cash of C$25.6 million against C$18.8 million of burn over four quarters, with a raise described as likely in 2027.",
+   "The author cut the rating from strong buy to buy because the chart does not look favorable.",
+   "No price target.",
+   "Explorer risk, including dilution, is stated as the main risk."
+  ]
+ },
+ "BLND": {
+  "company": "Blend Labs",
+  "words": 5828,
+  "read": "Read in full.",
+  "long": "I and/or others I advise hold a material investment in the issuer's securities.",
+  "c1": "Autopilot, released commercially on July 2, 2026, and a mortgage-volume recovery are the growth drivers. The CEO said the AI path already supports 10% to 15% incremental growth in 2027.",
+  "c2": "The base case is more than 2.5x in two to three years, which the article states as a 37% to 60% IRR. The midpoint is about 48% a year.",
+  "c3": "The article says the CEO owns 31% of the voting power today, and 82% if every equity award were exercised.",
+  "c4": "The installed mortgage workflow is the switching cost. A Fiserv leader says changing vendors after an integration is a lot of effort, and names the threat that a larger firm could build its own system.",
+  "c5": "Cash operating expense in Q1 2026 was 72% below the Q4 2021 peak, and the company is cash-flow positive after selling Title365. That is one operating result with figures.",
+  "c6": "The stock is flat with the March 3 Autopilot launch, so the price assigns nothing to the agent, and the article says a Haveli bid or Q3 results are what would put that value in the price.",
+  "c7": "Autopilot is not in the numbers until the Q3 financials, and that release is tied to whether the agent is showing up.",
+  "flags": [
+   "56% of recent revenue is the mortgage suite, which moves with rates.",
+   "Top five customers were 39% of 2025 revenue.",
+   "Autopilot adoption could be slower than hoped."
+  ]
+ },
+ "SMWB": {
+  "company": "Similarweb",
+  "words": 2598,
+  "read": "Read in full.",
+  "long": "I and/or others I advise hold a material investment in the issuer's securities.",
+  "c1": "AI data licenses are the growth driver. One $47 million deal, about $8 million a year for three years, adds about 500 basis points of growth on a $290 million base.",
+  "c2": "At $400 million of revenue and a 30% free-cash-flow margin, a 10% yield is $14.50 a share, about 109% above the price, in about three years. That is about 29% a year.",
+  "c3": "Founder and CEO Or Offer bought about $300,000 of stock this year. Three other directors bought about $1 million in aggregate.",
+  "c4": "Ten-plus years of first-party web, app, and retail data across 190 countries is the intangible. The threat is that LLM search replaces SEO, and the article argues customers will need both tools.",
+  "c5": "Operating margin went from -33% to 7% in Q3 2024 while revenue grew 18%. The later AI sales push then missed the deals it was built for, so the record is one result with figures.",
+  "c6": "The market is pricing SEO as a casualty of LLMs. The article says the $47 million deal is not yet in sell-side estimates, so those numbers have to come up as the contract shows through.",
+  "c7": "Or Offer said he intends to retire within 12 months, and the article ties that window to a possible sale of the data asset.",
+  "flags": [
+   "The founder plans to retire within 12 months.",
+   "AI data contracts could be one-time if they do not renew.",
+   "Dilution is still about 3% a year."
+  ]
+ },
+ "SRTA": {
+  "company": "Strata Critical Medical",
+  "words": 3489,
+  "read": "Read in full.",
+  "long": "I and/or others I advise hold a material investment in the issuer's securities.",
+  "c1": "US transplants and normothermic regional perfusion are the growth driver. Deceased-donor transplants set a record for twelve straight years, and the community is targeting 50,000 transplants in 2026.",
+  "c2": "The base case is about $9.85 a share on FY2029 EBITDA at 12x, held 2.5 years from $5.23. That is a 29% IRR, inside 25% to 40%.",
+  "c3": "not stated",
+  "c4": "The moat section names a national logistics network, scarce perfusion staff that hospitals rent rather than employ, and one accountable provider across recovery and flight. TransMedics is the named threat, limited to organs on its own device.",
+  "c5": "Will Heyburn and Melissa Tomkiel sold the passenger business to Joby for up to $125 million and bought HLT-NRP at a mid-single-digit EBITDA multiple. That is one capital-allocation result with figures.",
+  "c6": "The shares still carry the old Blade air-taxi identity and a GAAP loss. The article says each 2026 quarter of Keystone revenue is what makes the two-segment healthcare business show up in a screen.",
+  "c7": "Each 2026 quarter is tied to the thesis, because that is when a full period of the clinical business lands next to organic logistics growth.",
+  "flags": [
+   "The clinical business is barely a year old.",
+   "GAAP losses and FY2025 cash outflow.",
+   "Customer base is concentrated in 55 organ-procurement organizations."
+  ]
+ },
+ "RDEIY": {
+  "company": "Redeia",
+  "words": 4506,
+  "read": "Read in full.",
+  "long": "I and/or others I advise hold a material investment in the issuer's securities.",
+  "c1": "The government-approved 2026-2031 plan is the growth driver. It lifts average annual capex by more than half and the regulated asset base at about a 9% annual rate, after a flat decade.",
+  "c2": "The author expects a low-double-digit compound return for five years, and about \u20ac25 a share in 2031, more than 60% above the then price before dividends. That price gain is about 10% a year.",
+  "c3": "The CEO's annual bonus can reach 110% of a \u20ac350,000 base and is tied to the capex plan, profit before tax, and return on invested capital. No ownership percentage is stated.",
+  "c4": "Redeia is the only high-voltage operator in Spain by government decree, with no end date. The article argues the physics of transmission and names the blackout liability and the 2032 rate reset as the threats.",
+  "c5": "On the CEO's watch the fiber business sold 49% to KKR in 2021 at 22.1x EBITDA, \u20ac2.3 billion. That is one capital-allocation result with figures.",
+  "c6": "The shares fell \u20ac4, or \u20ac2.2 billion, after the April 2025 blackout while other European grid operators rose. The March 2026 ENTSO report is what the article says should take the blame off Redeia.",
+  "c7": "The CNMC investigation, with a maximum penalty of \u20ac60 million, is named and has no decision date.",
+  "flags": [
+   "A blackout liability is unprovisioned.",
+   "Free cash flow is negative while the new assets are built.",
+   "The 2032-2037 allowed return depends on Spanish bond yields."
+  ]
+ },
+ "STC.TO": {
+  "company": "Sangoma Technologies",
+  "words": 2134,
+  "read": "Read in full.",
+  "long": "I and/or others I advise hold a material investment in the issuer's securities.",
+  "c1": "The infrastructure segment is the growth driver. Management said voice grew 19% and MSP and data grew 9%, and AI agents need that kind of communications infrastructure.",
+  "c2": "The author says the business is worth about $11 a share, against a publish close of $5.75. Over the default two years that is 38% a year.",
+  "c3": "Chairman Norm Worthington owns just under 20%. He is not the CEO and not a founder of Sangoma.",
+  "c4": "The applications market is described as commoditized. Low churn is stated, and it is not argued as one of the five moat types with a mechanism and a threat.",
+  "c5": "The team that joined in fall 2023 has recurring revenue at about 92% and monthly churn at 0.79%. The same team missed a 10% organic-growth hope and reported 3% to 4% declines, so the record is partial.",
+  "c6": "The shares are priced as a UCaaS company that missed growth targets. The article says the overlooked infrastructure segment and the chair's wish for liquidity are why a sale process can close the gap.",
+  "c7": "An investment bank was retained about two months before the write-up to review a sale. No end date is given.",
+  "flags": [
+   "The strategic review can fail.",
+   "Applications revenue has been declining about 6% to 7%.",
+   "Infrastructure growth could slow."
+  ]
+ },
+ "ADCT": {
+  "company": "ADC Therapeutics",
+  "words": 1149,
+  "read": "Read in full.",
+  "long": "I and/or others I advise hold a material investment in the issuer's securities.",
+  "c1": "Label expansion of ZYNLONTA is the growth driver. The existing third-line franchise is about $74 million of revenue, and the article expects new uses to multiply that.",
+  "c2": "If LOTIS-5 adds nothing, the author still sees more than $300 million of revenue and more than $150 million of EBIT, worth about $5 a share. From the $1.26 close over two years that is about 99% a year.",
+  "c3": "not stated",
+  "c4": "An approved drug franchise is described. It is not argued as one of the five moat types with a mechanism, a trend, and a threat.",
+  "c5": "No named operating result for the people running the company. The trial figures belong to the drug, not to a person's record.",
+  "c6": "The stock fell about 70% because LOTIS-5 was worse than expected, and the article says the market is pricing a real chance the drug is pulled. The commercial case is that third-line use stays and LOTIS-7 is the actual driver.",
+  "c7": "LOTIS-7, which has finished enrolling 100 patients, reads out top-line data in the fourth quarter.",
+  "flags": [
+   "LOTIS-5 showed no overall-survival benefit and a death imbalance in older European patients.",
+   "The FDA can reject the second-line expansion.",
+   "The $5 value assumes LOTIS-7 and the marginal-zone use both arrive."
+  ]
+ },
+ "FMBL": {
+  "company": "Farmers & Merchants Bank of Long Beach",
+  "words": 959,
+  "read": "Read in full.",
+  "long": "I and/or others I advise hold a material investment in the issuer's securities.",
+  "c1": "The Fidelity securities-based loan program is the growth driver. The author uses $1.5 billion of loans in three to four years, about $90 million of extra interest income, against $430 million of 2025 interest income.",
+  "c2": "The author says a low-teens IRR over the next five years is reasonable. That is below 25% a year. No dollar target is stated.",
+  "c3": "not stated",
+  "c4": "A 1.5% cost of funds and about $3 billion of non-interest-bearing deposits are the cost advantage. No threat to that deposit franchise is named, so the moat stays narrow.",
+  "c5": "New hires are described as experienced and were introduced at the annual meeting. No result with figures is attached to them.",
+  "c6": "The partnership is not officially disclosed, and the stock is at 78% of tangible book against a 172% average for banks with $10 billion to $50 billion of assets. The loan ramp is what the article says will show up in earnings.",
+  "c7": "A proxy item would cut the merger vote from 80% to 60%, and a $40 million repurchase is being sought. Neither has a date.",
+  "flags": [
+   "The Fidelity investment is inferred, not confirmed by the company.",
+   "A sale is explicitly not the thesis.",
+   "Controlling holders have not pursued steps to make the shares more liquid."
+  ]
+ },
+ "G": {
+  "company": "Genpact",
+  "words": 1051,
+  "read": "Read in full.",
+  "long": "I and/or others I advise hold a material investment in the issuer's securities.",
+  "c1": "Deploying AI inside workflows Genpact already runs is the growth driver. Advanced Technology Solutions, 27% of revenue, grew 24.3% in the first quarter of 2026, and the core segment still grew 1.4%.",
+  "c2": "With 3% long-term growth, normalized earnings of $3.87 are worth $48.40. From the $30.48 close over two years that is 26% a year.",
+  "c3": "not stated",
+  "c4": "Workflow knowledge is the switching cost, and spreading the fixed cost of an AI system across many clients is the cost advantage. The threat is that a client uses Genpact to document a process and then takes it in-house.",
+  "c5": "No named operating result for the people running Genpact. The GE spinoff is company history.",
+  "c6": "A reverse DCF says the price implies zero or negative perpetual growth, because the market treats task automation as losing the client. Eight quarters of growth, including the core segment, are what the article says contradicts that.",
+  "c7": "No future event is named.",
+  "flags": [
+   "The core segment could shrink before the technology segment replaces it.",
+   "A client could insource a process after Genpact documents it.",
+   "No dated catalyst."
+  ]
+ },
+ "AW.TO": {
+  "company": "A&W Food Services of Canada",
+  "words": 1194,
+  "read": "Read in full.",
+  "long": "I and/or others I advise hold a material investment in the issuer's securities.",
+  "c1": "Store growth and the Canadian Pret A Manger rights are the growth drivers. System sales have compounded at 6% for 20 years, and 2026 targets include 2% unit growth.",
+  "c2": "The author says the base case should return 11% to 12%, from a dividend yield above 5% and earnings growth of 6% to 7%. That is below 25% a year.",
+  "c3": "Insiders, including two former CEOs, and TorQuest own 58%. That is an aggregate holding. The current CEO's own stake is not stated.",
+  "c4": "The brand is described as domestic and strong, and 70% of new stores are opened by existing franchisees. No threat to that position is named, so the moat stays narrow.",
+  "c5": "The CEO has been at the company for more than 30 years and in the job for nine, after running marketing and operations. No result is tied to those years with figures.",
+  "c6": "The article calls the price reasonable and the return ordinary, with extra upside if the company is sold. It does not say the market is wrong.",
+  "c7": "Three or four Pret stores are planned for 2026, with no opening date. A sale is described as a few years away.",
+  "flags": [
+   "Same-store sales targets are well below the long-run pace.",
+   "The head-lease structure is a large liability if franchisees fail.",
+   "A sale is a hope, not a process."
+  ]
+ },
+ "FULC": {
+  "company": "Fulcrum Therapeutics",
+  "words": 1765,
+  "read": "Read in full.",
+  "long": "I and/or others I advise hold a material investment in the issuer's securities.",
+  "c1": "This is a cash shell. The last drug, pociredir, was discontinued, and the value is the cash plus a reverse merger. That is an asset value, not a growth runway.",
+  "c2": "Net cash is about $4.44 a share against a $3.62 close. Over the default two years that is about 11% a year. The author says the deal should be near term and does not give a year count.",
+  "c3": "not stated",
+  "c4": "A failed program and a cash balance are not one of the five moat types.",
+  "c5": "Tang Capital is named as a buyer of shells, with a list of completed deals and no return figure on those deals. That is a partial record for a holder, not for the remaining management.",
+  "c6": "The stock is below net cash because the drug failed. The article says Leerink's process and holders of more than 40% of the shares are what force a fair deal, as in the BOLD, NextCure, and VYNE mergers.",
+  "c7": "A transaction is expected in the near term. No date is set. The June announcements are already past.",
+  "flags": [
+   "The reverse merger can be dilutive, as the cited shells retained about 1% to 4%.",
+   "Lease and severance cash can come in above the estimate.",
+   "No date is set for a deal."
+  ]
+ },
+ "ACRE": {
+  "company": "Ares Commercial Real Estate",
+  "words": 2620,
+  "read": "Read in full.",
+  "long": "I and/or others I advise hold a material investment in the issuer's securities.",
+  "c1": "The pitch is a cheap book and two troubled loans, not a growth franchise. Loan demand is described as inflecting, and that is a cycle, so this scores as an asset value.",
+  "c2": "A 10% yield on the $0.15 quarterly dividend is a $6 stock. From the $4.52 close over two years that is 15% a year.",
+  "c3": "not stated",
+  "c4": "An external mortgage REIT priced below book is not one of the five moat types.",
+  "c5": "The current CEO, Bryan Donohoe, is described as having a credit background and as not yet having turned the book around. Ares's record on this vehicle is the halving of book value.",
+  "c6": "A 13% yield prices a dividend cut. The article says resolving the Chicago office loan and the Brooklyn condo loan, then relending the proceeds, is what makes the $0.15 dividend covered.",
+  "c7": "Construction on the Brooklyn project runs through fall 2026, and the article ties that finish to a takeout of the loan. A sale process on the Chicago building is described as active.",
+  "flags": [
+   "The two largest loans are not accruing.",
+   "Further credit migration would delay the recovery.",
+   "Ares can keep neglecting the vehicle."
+  ]
+ },
+ "FINV": {
+  "company": "FinVolution Group",
+  "words": 1292,
+  "read": "Read in full.",
+  "long": "I and/or others I advise hold a material investment in the issuer's securities.",
+  "c1": "The international book is the growth driver. It was 30% of revenue and 8% of adjusted operating profit in the first quarter of 2026.",
+  "c2": "The author says 50% to 100% upside over three to five years. The midpoint, 75% over four years, is 15% a year.",
+  "c3": "not stated",
+  "c4": "Scale, technology, and cheaper customer acquisition are named in one sentence. They are not argued as one of the five moat types with a mechanism, a trend, and a threat.",
+  "c5": "The company is called best in class and a pioneer. No named person's result is given with figures.",
+  "c6": "The low multiple is blamed on the old peer-to-peer history and the 2025 rate cap. A recovery in sentiment is the hoped-for close, and no mechanism is given for why the gap has to shut.",
+  "c7": "No future event is named. Dividends and buybacks are described as ongoing.",
+  "flags": [
+   "Further rate caps in China or in Indonesia and the Philippines.",
+   "A credit downturn hits the first-loss exposure.",
+   "No dated catalyst."
+  ]
+ },
+ "ESI.TO": {
+  "company": "Ensign Energy Services",
+  "words": 1220,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of ESVIF; PTEN either through stock ownership, options, or other derivatives.",
+  "c1": "The U.S. drilling recovery, scarce high-spec rigs, and international activity are the growth driver. The Citadel deal adds six high-spec rigs for US$65 million, mostly for Occidental.",
+  "c2": "The author says Ensign trades at 0.5x book and should trade at least at book value during the upcycle. No horizon is stated, so the hold is 2 years. That is about 41% a year.",
+  "c3": "not stated",
+  "c4": "High-spec scarcity and maintenance-only capex are described. They are not argued as one of the five moat types with a mechanism, a trend, and a threat.",
+  "c5": "No named person's operating result is given with figures. The Citadel purchase is a transaction, not a track record.",
+  "c6": "The shares sold off with the May oil top as if this were a normal supply-flood cycle. The correction is higher dayrates, because contractors are keeping capex to maintenance.",
+  "c7": "Higher dayrates over the next few quarters, and possible 2027 capex plans if oil stays high for two or three months, are named and undated.",
+  "flags": [
+   "Kuwait and Bahrain rigs are suspended while the five Oman rigs stay active.",
+   "The Citadel deal pushed out the debt-reduction goal.",
+   "The street average target is only about 10% upside and is not the endpoint used."
+  ]
+ },
+ "FIGR": {
+  "company": "Figure Technology Solutions",
+  "words": 1187,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of FIGR either through stock ownership, options, or other derivatives.",
+  "c1": "The lending marketplace, Figure Connect, and the Kiavi deal are the growth drivers. Q2 sales were $225.6 million, up 95% from Q2 2025, and the author forecasts $950 million in 2026 and $1.23 billion in 2027.",
+  "c2": "The stated target is $44.80, from 15x 2027 EBITDA of $642 million plus net corporate cash. No horizon is stated, so the hold is 2 years. That is about 25% a year.",
+  "c3": "not stated",
+  "c4": "The distribution network is the network effect. Figure Connect was about 65% of activity, up from 42% in Q2 2025, with 102 active partners and 489 in total, up 26% sequentially. The threats named are lower Connect take rates, U.S. housing and rates, the Kiavi integration, and regulation.",
+  "c5": "No named person's operating result is given with figures. The Kiavi deal, $717 million in cash with Sixth Street, is a transaction.",
+  "c6": "The shares fell into a $25 to $35 range and the author says $28 is reasonable against a $44.80 value. The reason that gap has to close is not specific.",
+  "c7": "Kiavi volume will be reflected in Q4 results, a named quarter inside 24 months and tied to the growth thesis. The Q3 preliminary figures were already released on October 6.",
+  "flags": [
+   "Stock-based compensation was $52 million in the first half.",
+   "Connect take rates are lower, so sales can lag volume.",
+   "The business is sensitive to U.S. housing and interest rates.",
+   "Kiavi integration and regulatory uncertainty."
+  ]
+ },
+ "ONDS": {
+  "company": "Ondas",
+  "words": 3237,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of ONDS, PLTR either through stock ownership, options, or other derivatives.",
+  "c1": "A defense-prime buildout is the growth driver. The full-year target is $525 million to $550 million of 2026 revenue, with a $1 billion exit run rate.",
+  "c2": "The bull case is the one the author adopts: $20.87 at the end of 2027, from $1.3 billion of revenue at 10x sales. The horizon is the end of 2027, about 1.22 years. That is about 155% a year.",
+  "c3": "not stated",
+  "c4": "Prime-contractor status is efficient scale: Ondas owns the customer vehicle after the Mistral merger, including the $982 million Army IDIQ. The budget trend is the FY2027 request, and the threats named are dilution and the execution ramp.",
+  "c5": "No named person's operating result is given with figures. Insider sales of about $44 million, with no open-market purchases, are not an operating record.",
+  "c6": "The market is pricing the share count, which rose from 93 million to about 590 million, rather than the cash and the backlog. The correction is revenue catching that share count.",
+  "c7": "Adjusted EBITDA profitability at the operating platform in Q4 2026 is a named quarter inside 24 months and is tied to the thesis.",
+  "flags": [
+   "Share count rose from 93 million to about 590 million, with 45 million more DZYNE shares due on January 4, 2027.",
+   "One customer was 40% of Q2 revenue, and $187 million of backlog sits in the Middle East.",
+   "More than 20 companies were acquired in 14 months.",
+   "Insiders sold about $44 million with no open-market purchases."
+  ]
+ },
+ "OUST": {
+  "company": "Ouster",
+  "words": 1956,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of OUST either through stock ownership, options, or other derivatives.",
+  "c1": "Physical-AI perception is the growth driver. REV8 and the StereoLabs deal move Ouster from a LiDAR supplier to a camera, compute, and software package, and management's stated growth range is 30% to 50% a year.",
+  "c2": "The stated target is $88.27 in 2028, from 15x sales on $452.54 million of revenue and about 76.90 million shares. The author says the horizon is about 18 months. That is about 78% a year.",
+  "c3": "not stated",
+  "c4": "The one-stop perception package is a narrow switching cost: customers take cameras, LiDAR, compute, and software from one vendor, and REV8 is backward compatible with REV7 housings. Orders are described as coming in faster than expected. The threat is that growth which only meets guidance has been punished before.",
+  "c5": "No named person's operating result is given with figures. The author's own prior Ouster article is not a record of the people running the company.",
+  "c6": "The article says the market priced the stock on macroeconomics and on the old consumer-ADAS path. The reason that view has to change is left as a return of last summer's enthusiasm.",
+  "c7": "REV8 sales are said to ramp from Q4 2026 through 2028, a named quarter inside 24 months and tied to the growth thesis.",
+  "flags": [
+   "The 2027 profitability comment comes from an interview, not official guidance.",
+   "The stock has been punished when revenue only met the forecast.",
+   "Further equity awards can lift the 76.90 million share count used in the target."
+  ]
+ },
+ "PRPO": {
+  "company": "Precipio",
+  "words": 3333,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of PRPO either through stock ownership, options, or other derivatives.",
+  "c1": "On-site cancer testing is the growth driver. The product is a kit-and-instrument model, and 2025 revenue grew 30% to $24.0 million.",
+  "c2": "The stated endpoint is the probability-weighted 2031 price of $160, not the $45 to $52 figure, which is that $160 discounted back to today. The horizon is the end of 2031, about 5.22 years. That is about 46% a year.",
+  "c3": "Ilan Danieli owns about 2,850 shares outright. Against the stated share count that holding is under 1%, so the CEO's own stake is 0. Officers and directors hold 16.6%, an aggregate of at least 10%, so the score is 0.25.",
+  "c4": "The kit placed in the customer's lab is a narrow switching cost. The article says turnaround and pathologist training create switching costs once the instrument is installed, and the threat is slow conversion of new labs.",
+  "c5": "Ilan Danieli founded Precipio Diagnostics in 2011 and still runs it. No separate sale or turnaround figure is given for that record.",
+  "c6": "The shares still trade at roughly the revenue multiple of the cash-burn years. The correction is proof that new-lab sales and cash flow are showing up.",
+  "c7": "November 2026 results are tied to pipeline conversion and cash flow, and the March 2027 10-K is tied to whether the substantial-doubt language comes off.",
+  "flags": [
+   "The filings still include a going-concern statement.",
+   "One customer was 26% of 2025 revenue.",
+   "The commercial build depends on distributors and a sales team rehired in January 2026.",
+   "A data-security class action is at an early stage, with no liability recorded."
+  ]
+ },
+ "SIRI": {
+  "company": "Sirius XM",
+  "words": 2328,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of SIRI either through stock ownership, options, or other derivatives.",
+  "c1": "The case is a cheap spectrum-and-cash-flow asset with buybacks. YouTube and the 360L rollout are named, but they are not the re-rating the author adopts.",
+  "c2": "The scenario the author calls the bear case is a share price of about $40 in five years. That is about 8% a year, so this score is 0.",
+  "c3": "not stated",
+  "c4": "Low churn and the 360L platform are a narrow switching cost: the subscription can attach to the person rather than the car, and 360L is already half of new trials with a path to 90% by 2030. The threat is a subscriber spiral if carmakers drop the receivers.",
+  "c5": "No named Sirius XM operating result is given for the people running it. The DaVita buyback history is another company.",
+  "c6": "The market is pricing the equity as if the radio business were already dead, with enterprise value near the spectrum value. The correction is buybacks restarting in 2027, while 360L and the YouTube deal show the deterioration has not arrived.",
+  "c7": "Large-scale buybacks are said to restart in 2027, a named year inside 24 months and tied to the re-rating.",
+  "flags": [
+   "Self-pay subscribers are slightly down from Q2 2024.",
+   "Net debt is stated at $9.5 billion.",
+   "The iHeart combination is described as aborted for now.",
+   "The five-year bear case is under 25% a year from the publish close."
+  ]
+ },
+ "YLLXF": {
+  "company": "Yellow Cake",
+  "words": 1083,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of YLLXF, SRUUF either through stock ownership, options, or other derivatives.",
+  "c1": "The case is a passive holding of uranium at a discount to net asset value. Demand growth for nuclear power is the commodity backdrop, not a company growth driver.",
+  "c2": "The author says the shares have the potential to double this cycle. No horizon is stated, so the hold is 2 years. A double in two years is about 41% a year.",
+  "c3": "not stated",
+  "c4": "Owning uranium in storage is not one of the five moat types.",
+  "c5": "No named person's operating result at Yellow Cake is given with figures. The author's own seven-year portfolio return is not the company's record.",
+  "c6": "Uranium equities are down on weak sentiment while the spot price is up about 10%, and the discount to net asset value is 20% to 25% against a usual 5% to 15%. The article says that discount is unlikely to last forever, without a mechanism.",
+  "c7": "A move in the uranium price toward $130 to $150 a pound this cycle is named and undated.",
+  "flags": [
+   "A deflationary move could cut the uranium spot price and widen the discount.",
+   "The primary listing is in London. The scored line is the U.S. ticker YLLXF.",
+   "The double is stated as potential this cycle, with no date."
+  ]
+ },
+ "VIOT": {
+  "company": "Viomi Technology",
+  "words": 2264,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of VIOT either through stock ownership, options, or other derivatives.",
+  "c1": "A return to growth in home water systems is the driver, after national subsidies for purifiers ended. The article cites an 8.7% market growth rate and sales outside China.",
+  "c2": "Book value is $3.25 per ADS, and the author says the shares are potentially worth twice the price. No horizon is stated, so the hold is 2 years. That is about 43% a year.",
+  "c3": "not stated",
+  "c4": "Product reviews and a growing market are described. They are not argued as one of the five moat types with a mechanism, a trend, and a threat.",
+  "c5": "Home-water revenue rose from RMB 1,065.17 million in FY2019 to RMB 1,498.37 million in FY2024. No person is named with that result.",
+  "c6": "The market treated the end of the national subsidy as a lasting hole. The correction is that the subsidy pulled demand forward, the comparison base gets easier in the H2 FY2026 report, and the company grew in years without the subsidy.",
+  "c7": "The H2 FY2026 report is named as the easier comparison and is not given a calendar date.",
+  "flags": [
+   "H1 FY2026 revenue fell 49.9% after national subsidies for purifiers ended.",
+   "The company reported a net loss of RMB 26.29 million in that half.",
+   "The dividend can be changed."
+  ]
+ },
+ "BLSH": {
+  "company": "Bullish",
+  "words": 1234,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of BLSH, COIN, BTC-USD either through stock ownership, options, or other derivatives.",
+  "c1": "Tokenized assets and the shift toward subscription and services revenue are the growth driver. That line was 68% of revenue in Q2, up 97% year over year.",
+  "c2": "The range if the multiple re-rates is $40 to $44, so the target is the midpoint, $42. No horizon is stated, so the hold is 2 years. That is about 15% a year.",
+  "c3": "not stated",
+  "c4": "Correlation with bitcoin and the Equiniti transfer-agent deal are not one of the five moat types.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "A 38% discount to the historical 70.1x multiple is named. The article does not say why that gap has to close.",
+  "c7": "Tokenization and the Equiniti deal are named and undated.",
+  "flags": [
+   "Q2 net loss was $280 million on digital-asset fair-value changes.",
+   "The business is tied to the bitcoin price.",
+   "Regulation, a platform breach, or slower tokenization are the risks the article names."
+  ]
+ },
+ "CHWY": {
+  "company": "Chewy",
+  "words": 1401,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of CHWY either through stock ownership, options, or other derivatives.",
+  "c1": "Autoship and the vet-clinic buildout are the growth drivers. Autoship is 84% of net sales and grew 11.5%, and Chewy is still growing faster than the pet industry.",
+  "c2": "The author's intrinsic value is $24.57, a 26% gap at the prices used in the model. No horizon is stated, so the hold is 2 years. That is about 12% a year.",
+  "c3": "not stated",
+  "c4": "Autoship is a moderate switching cost. It is 84% of sales and still growing faster than the company, and the article says customers rarely switch once deliveries are set. Amazon and Walmart on price and delivery are the threat.",
+  "c5": "No named person's operating result is given with figures. The margin path from 3% to 5.7% is stated as the company's, not a person's.",
+  "c6": "The market is pricing Chewy as a struggling pet retailer after the June guidance cut. The correction is that Autoship customers stay, and the margin path is still intact when the pet market recovers.",
+  "c7": "Ending FY 2026 with 60 vet clinics, and about $50 million of annualized AI savings in FY 2027, are named without a calendar date.",
+  "flags": [
+   "FY 2026 sales guidance was cut in June as pet owners pulled back.",
+   "The DCF still needs the operating margin to more than double.",
+   "BC Partners owns about 44% and has been selling.",
+   "Amazon and Walmart can compete on price and delivery."
+  ]
+ },
+ "CLMT": {
+  "company": "Calumet",
+  "words": 1102,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of CLMT either through stock ownership, options, or other derivatives.",
+  "c1": "The September-quarter earnings setup, and later sustainable-aviation-fuel expansion, are the driver. The author estimates $300 million to $325 million of EBITDA after corporate costs.",
+  "c2": "No specific price target or valuation endpoint. \"Well into the $100s\" is not a number.",
+  "c3": "not stated",
+  "c4": "One refinery for each business is stated as the main risk. It is not argued as one of the five moat types.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The author says the shares are woefully undervalued on a long-term EBITDA run rate, and also says the chart is overbought and he does not know how the price reacts to the report.",
+  "c7": "The September-quarter report is the event the thesis waits on, and it is not given a calendar date. The Shreveport shutdown is planned for November to December.",
+  "flags": [
+   "Each business has one refinery, Shreveport and Great Falls.",
+   "The chart is described as overbought, and the author would wait to add.",
+   "A two-to-four-week Shreveport shutdown is planned for November to December.",
+   "Today's specialty crack spreads are well above the $25 level the author calls normal."
+  ]
+ },
+ "DSVSF": {
+  "company": "Discovery Mining",
+  "words": 2409,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of DSVSF, AG, EXK, SVM, PAAS either through stock ownership, options, or other derivatives.",
+  "c1": "Growing gold production at Porcupine, plus the Cordero silver project, is the driver. Management's chart shows the potential to triple production in five years.",
+  "c2": "No price target or valuation endpoint. The past share-price gain is not a target.",
+  "c3": "not stated",
+  "c4": "The Timmins location and the new Mexican permits are described. They are not argued as one of the five moat types with a mechanism, a trend, and a threat.",
+  "c5": "Tony Makuch, Chairman, President, and CEO, was named CEO of the year by Kitco. That is an award, with no operating result of his given in figures.",
+  "c6": "The upgrade rests on gold and silver having further to run and on the company being well managed. The article does not say the market is wrong about this stock.",
+  "c7": "The CEO said the company is poised for a strong second half. No calendar date is given. Tripling production is a five-year statement.",
+  "flags": [
+   "All-in sustaining costs of $1,950 to $2,250 an ounce are above the industry average cited.",
+   "Cordero still has to be built after the October permits.",
+   "The author says the shares are thinly traded.",
+   "Gold and silver prices are volatile, and the article is an upgrade from hold."
+  ]
+ },
+ "ECO": {
+  "company": "Okeanis Eco Tankers",
+  "words": 1240,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of ECO, DHT either through stock ownership, options, or other derivatives.",
+  "c1": "The case is a spot-rate spike in crude tankers, not a secular growth driver. The fleet is eight VLCCs and ten Suezmaxes, mostly on the spot market.",
+  "c2": "Fair value is $135 a share on a 15% yield against a $20 dividend. No horizon is stated, so the hold is 2 years. That is about 17% a year.",
+  "c3": "not stated",
+  "c4": "A young fleet and Strait of Hormuz voyages are described. They are not argued as one of the five moat types.",
+  "c5": "No named person's operating result is given with figures. The stock's gain since the author's earlier articles is not the company's record.",
+  "c6": "The market is still using the author's old estimates, while spot VLCCs are argued to be earning about $1 million a day. The correction is the Q4 dividend, which the author puts near 26% of the market cap.",
+  "c7": "Q4 earnings and the dividend are a named quarter inside 24 months and are the thesis.",
+  "flags": [
+   "The rate case depends on the Strait of Hormuz staying disrupted.",
+   "The author says current rates are not sustainable for many quarters.",
+   "The shares trade above NAV, and a secondary offering is named as possible.",
+   "One vessel was hit at the CPC terminal."
+  ]
+ },
+ "HIMS": {
+  "company": "Hims & Hers Health",
+  "words": 2717,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of HIMS either through stock ownership, options, or other derivatives.",
+  "c1": "The core subscription business is the growth driver. The author uses a 17% revenue growth rate through 2030, and the Novo channel is described as about 100,000 new members a month.",
+  "c2": "The stated fair value is about $41 a share, from a 2030 exit multiple discounted to today. No hold period is stated, so the hold is 2 years. That is about 17% a year.",
+  "c3": "not stated",
+  "c4": "The shift from compounded drugs to branded GLP-1s is described, including the margin drop. It is not argued as one of the five moat types.",
+  "c5": "No named person's operating result is given with figures. The author's family-portfolio return is not the company's record.",
+  "c6": "The market repriced the whole company on a peptide decision the author values at about $3 a share. The correction is the core subscription math, about $38 to $39, plus the Novo adds.",
+  "c7": "Novo's Wegovy wholesale-cost cut on 1 January 2027, and Eli Lilly's planned retatrutide filing in the first quarter of 2027, are named dates inside 24 months and are tied to the thesis.",
+  "flags": [
+   "Churn is not disclosed.",
+   "Gross margin fell from about 76% to about 64%.",
+   "The FTC sued the company on 29 July 2026 over subscription cancellation.",
+   "The peptide piece is worth about $3 a share in the base case and is not the core target."
+  ]
+ },
+ "GTLB": {
+  "company": "GitLab",
+  "words": 4398,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of GTLB either through stock ownership, options, or other derivatives.",
+  "c1": "Agentic coding and enterprise demand for sovereignty are the growth drivers. Net ARR grew 42% year over year, and FY27 revenue guidance was raised to $1,129 million to $1,133 million.",
+  "c2": "No price target or valuation endpoint. Peer scenarios are described without a share price.",
+  "c3": "not stated",
+  "c4": "Self-managed and sovereign deployment is a moderate switching cost for regulated customers. Ultimate is 59% of ARR and grew 35%, and the threat is GitHub restoring reliability and bundling the product.",
+  "c5": "No named person's operating result is given with figures. Dmitriy Zaporozhets is named as the founder, and the article does not say he still runs it.",
+  "c6": "Reported revenue grew 21% while net ARR grew 42% and first orders doubled. The article says the payoff shows up in 2027, when this year's investment year is behind it.",
+  "c7": "Orbit is set to become generally available next month, and 2027 is the year the article ties to the re-rating. Both are inside 24 months.",
+  "flags": [
+   "GitHub could fix reliability and lean on Microsoft's distribution.",
+   "Consumption credits could replace seat revenue.",
+   "The shares are up 47% this year and trade at 53x forward earnings.",
+   "OpenAI is reported to be building an internal alternative."
+  ]
+ },
+ "MGM": {
+  "company": "MGM Resorts",
+  "words": 3058,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of MGM either through stock ownership, options, or other derivatives.",
+  "c1": "The case is a cheap lease-adjusted cash flow and a buyback, with softer room rates. It is not a secular growth story.",
+  "c2": "The base sum of the parts is about $45. No horizon is stated, so the hold is 2 years. That is about 24% a year.",
+  "c3": "not stated",
+  "c4": "The Strip portfolio is efficient scale and an intangible. The resorts sit under the VICI lease, Strip room revenue has weakened, and the threat is rent that does not fall.",
+  "c5": "About $9.7 billion of buybacks since the end of 2020 cut the share count by about half, at an average price a little under $40.",
+  "c6": "The market is treating a financing failure as a broken business. The correction is that rates, not the resorts, ended the $48.30 bid.",
+  "c7": "The October 28 quarterly report is tied to an easy Las Vegas comparison and to whether buybacks resumed.",
+  "flags": [
+   "Strip RevPAR fell in the four reported quarters through June.",
+   "Rent is fixed and was $2.26 billion in 2025.",
+   "MGM China EBITDAR fell 15% in the quarter.",
+   "Osaka does not open until 2030, and the bear case is about $27."
+  ]
+ },
+ "MFIC": {
+  "company": "MidCap Financial",
+  "words": 1186,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of MFIC, ARCC, FDUS, OBDC, BXSL either through stock ownership, options, or other derivatives.",
+  "c1": "The case is a floating-rate loan book and a discount to net asset value. Higher rates may lift income. It is not a secular growth story.",
+  "c2": "The price-to-NAV range is 0.8x to 0.9x on a $13.37 net asset value, so the midpoint is $11.37. No horizon is stated, so the hold is 2 years. That is about 16% a year.",
+  "c3": "not stated",
+  "c4": "A first-lien loan book is not one of the five moat types.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The shares fell to a 37% discount to net asset value while coverage rose to 129% after the dividend cut. The correction is a move toward 0.8x to 0.9x if net asset value stabilizes and non-accruals come down.",
+  "c7": "Further rate increases over the next year, and higher portfolio yields in the quarters ahead, are named without a calendar date.",
+  "flags": [
+   "Non-accruals rose to 2.8% of fair value.",
+   "Net asset value has been falling faster than at Ares and Blue Owl.",
+   "The dividend was cut 18.4% in the first quarter."
+  ]
+ },
+ "KRKNF": {
+  "company": "Kraken Robotics",
+  "words": 1540,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of KRKNF either through stock ownership, options, or other derivatives.",
+  "c1": "Autonomous underwater vehicles and the Covelya acquisition are the growth driver. Management guides to $290 million to $320 million of 2026 revenue, about triple the prior year.",
+  "c2": "No price target or valuation endpoint. A forward price-to-sales multiple is the current multiple.",
+  "c3": "not stated",
+  "c4": "Integration with more than 30 vehicle platforms is described. It is not argued as one of the five moat types with a mechanism, a trend, and a threat.",
+  "c5": "No named person's operating result is given with figures. The company missed last year's revenue estimate.",
+  "c6": "The market cap is lower than before a deal that added about $300 million of revenue, and the guide was kept after a soft quarter. The article does not say what forces that gap to close.",
+  "c7": "A stronger second half, with Covelya in the third and fourth quarters, is named and not given a report date.",
+  "flags": [
+   "Q2 revenue grew only 4%, and the company missed last year's revenue estimate.",
+   "One contract can swing a quarter.",
+   "2027 growth includes a full year of Covelya that is not all organic."
+  ]
+ },
+ "LNC": {
+  "company": "Lincoln National",
+  "words": 2123,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of LNC either through stock ownership, options, or other derivatives.",
+  "c1": "The case is that the capital repair is done and the shares are still cheap. The author says future growth is likely to be slower.",
+  "c2": "The price target the rating uses is $55. No horizon is stated, so the hold is 2 years. That is about 16% a year.",
+  "c3": "not stated",
+  "c4": "An insurance franchise is described. It is not argued as one of the five moat types with a mechanism, a trend, and a threat.",
+  "c5": "The RBC ratio was rebuilt from below 400% to above 420%. No person is named with that result.",
+  "c6": "The market is still pricing the 2022 capital scare. The correction is that the risk-based capital ratio is above 420%, operating earnings already annualize near $9 a share, and peers trade nearer 1x book and 6x to 7.5x earnings.",
+  "c7": "The third quarter of 2026 is named as the next check, without a calendar date.",
+  "flags": [
+   "The author says growth is likely to be slower as risk is transferred away.",
+   "Rates above 5% make the 4.45% yield less attractive.",
+   "The path from the capital repair to a $75 value can still take a long time."
+  ]
+ },
+ "URGN": {
+  "company": "UroGen Pharma",
+  "words": 1776,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of CGON,URGN either through stock ownership, options, or other derivatives.",
+  "flags": [
+   "Cash and securities of $108 million against debt of $188.7 million.",
+   "CG Oncology's Phase 3 readout is expected in the second half of 2026. The author is also long CGON.",
+   "Jelmyto sales have flattened, and generics start in 2030."
+  ],
+  "c1": "Zusduri is the growth driver. It is the only approved non-surgical treatment for recurrent low-grade intermediate-risk bladder cancer, in a market the article puts above $5 billion, and it sold $95.4 million in its first four quarters.",
+  "c2": "No price target or valuation endpoint. Street revenue and earnings figures are not a share price the author says the stock should reach.",
+  "c3": "not stated",
+  "c4": "The RTGel patent through 2044 is a narrow intangible. The gel keeps mitomycin in the bladder, Zusduri is the only approved non-surgical option, and launch sales are rising. The threat is CG Oncology's Phase 3 readout in the second half of 2026, with Johnson & Johnson and Relmada also in the clinic.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The shares fell about 30% from the August high. The article says surgery is the only competition through 2027, and it does not say why that pullback has to reverse.",
+  "c7": "An NDA for UGN-103 is expected in the third quarter of 2026, with approval anticipated in 2027. That quarter is inside 24 months and is tied to the lead franchise."
+ },
+ "XRX": {
+  "company": "Xerox",
+  "words": 1092,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of XRX either through stock ownership, options, or other derivatives.",
+  "flags": [
+   "Pro forma revenue fell 6.5%, and equipment sales fell 13%.",
+   "About 6.6 points of the 10.6% margin were a one-time tariff benefit.",
+   "Debt is still the main risk after the Lexmark deal."
+  ],
+  "c1": "The case is a mature printing business that does not need growth. Pro forma revenue is still falling. The author wants revenue to stabilize, margins to improve, and debt to come down.",
+  "c2": "No price target or valuation endpoint.",
+  "c3": "not stated",
+  "c4": "A comparison with HP's printing margin is not one of the five moat types.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The author says the market is too pessimistic if the pro forma decline narrows, Lexmark savings show up in profit, and debt keeps falling. That correction is still a test, not a result.",
+  "c7": "The third-quarter report is the test of whether the pro forma revenue decline narrows. That quarter is inside 24 months and is tied to the thesis."
+ },
+ "ARIS": {
+  "company": "Aris Mining",
+  "words": 1808,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of ARIS, FSM, EQX either through stock ownership, options, or other derivatives.",
+  "c1": "Doubling production is the growth driver. Management forecasts about 300,000 ounces a year from Segovia and 200,000 from Marmato, against 257,000 ounces produced in 2025.",
+  "c2": "No price target or valuation endpoint. A forward P/E of 8.25x is the current multiple. The project NPVs are not a price for the stock.",
+  "c3": "not stated",
+  "c4": "Segovia grade and a low cash cost are described. They are not argued as one of the five moat types with a mechanism, a trend, and a threat.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The shares trade at a steep discount to gold-mining peers, and the article says the market gives Soto Norte and Toroparu almost no credit. The correction is Marmato coming online and those projects moving through their studies.",
+  "c7": "Third-quarter results around November 4 are tied to the production outlook. Marmato is due to pour first gold by year-end.",
+  "flags": [
+   "Every producing ounce is in Colombia.",
+   "Third-quarter production of 69,300 ounces may put the year at the low end of guidance.",
+   "Soto Norte and Toroparu are not permitted. Toroparu sits in territory Venezuela claims.",
+   "A base shelf was filed in July. Management said it has no current plan to issue shares."
+  ]
+ },
+ "CRUS": {
+  "company": "Cirrus Logic",
+  "words": 1605,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of CRUS either through stock ownership, options, or other derivatives.",
+  "c1": "Apple content and new applications are the growth driver. The author keeps a prior case for about $2 billion of added revenue, and says this purchase makes that case more likely.",
+  "c2": "Stated $250, horizon 2.5 years. Publish close 108.34 on 2026-10-14 for CRUS (px.py). (250/108.34)^(1/2.5)-1 = 39.7%/yr.",
+  "c3": "not stated",
+  "c4": "A long relationship with Apple is described. It is not argued as one of the five moat types with a mechanism, a trend, and a threat.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The stock fell more than $6 on a small purchase that the article calls low-risk and already assimilated. The correction is the growth case still standing, plus the company buying shares.",
+  "c7": "No dated event. The higher price is framed over the next few years.",
+  "flags": [
+   "The author says to stay away until the lower Bollinger band turns flat.",
+   "A claimed Apple Pro production cut would be about $0.50 a share if it is real.",
+   "The stock trades thinly, which the author says lets the price move hard in either direction.",
+   "The purchase price of INVENTVM was not disclosed."
+  ]
+ },
+ "EMN": {
+  "company": "Eastman Chemical",
+  "words": 2215,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of EMN either through stock ownership, options, or other derivatives.",
+  "c1": "The case is a cyclical earnings recovery, not a new growth driver. Molecular recycling is one piece of getting back to $8 a share.",
+  "c2": "Stated fair value $104, horizon 2.5 years. Publish close 62.88 on 2026-10-14 for EMN (px.py). (104/62.88)^(1/2.5)-1 = 22.3%/yr. The $84 figure is the buy level, not the endpoint.",
+  "c3": "not stated",
+  "c4": "Patents and proprietary materials are named in a sentence. They are not argued as a moat with a mechanism, a trend, and a threat.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The shares price in a lasting earnings decline, at about 7 to 8 times the recovery case, while second-quarter earnings per share rose 23%. The correction is the multiple moving back toward 13 times as savings, volume, and recycling show up.",
+  "c7": "No dated event. The path is the next few years of earnings normalization.",
+  "flags": [
+   "Auto, construction, and discretionary end markets are still weak.",
+   "The author says good returns on the recycling plants still have to be shown.",
+   "Getting to $8 a share is a positive scenario, not the base forecast.",
+   "The dividend yield above 5.4% is part of the author's stated return and is not in the price math."
+  ]
+ },
+ "EOPSF": {
+  "company": "Electro Optic Systems",
+  "words": 3617,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of EOPSF either through stock ownership, options, or other derivatives.",
+  "c1": "Counter-drone systems and directed-energy weapons are the growth driver. The MARSS buy is meant to let the company bid as a prime.",
+  "c2": "No price target or valuation endpoint. The revenue multiple is the current multiple.",
+  "c3": "not stated",
+  "c4": "The pointing and beam-conditioning gear is argued as proprietary, built from decades of space tracking, and not available off the shelf. The company has shipped systems and holds a Netherlands laser contract, but nLIGHT and the defense primes are named as real competition.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The revenue multiple is high against the old business, and the article says that comparison no longer fits after the satellite-communications sale. The correction is the order book turning into revenue, which is the same growth case.",
+  "c7": "The first Netherlands laser system is now expected in the middle of 2027, inside two years, and it is tied to the directed-energy case.",
+  "flags": [
+   "The UAE laser agreement is still conditional.",
+   "The company is still burning cash.",
+   "nLIGHT is described as better placed on high-energy lasers, and the large primes are investing in the same field.",
+   "Revenue is lumpy and the sales cycle is one to three years."
+  ]
+ },
+ "FEMY": {
+  "company": "Femasys",
+  "words": 3490,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of FEMY either through stock ownership, options, or other derivatives.",
+  "c1": "The growth driver is a sales force selling an in-office fertility bundle to OB/GYNs. The August financing is what funds that build.",
+  "c2": "Stated $11 as of year-end 2029, horizon 3.21 years. Publish close 1.56 on 2026-10-14 for FEMY (px.py). (11/1.56)^(1/3.21)-1 = 83.6%/yr. The $5 figure is a value discounted to today. Street targets are not used.",
+  "c3": "not stated",
+  "c4": "An open OB/GYN channel is described. It is not argued as one of the five moat types.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The stock is below cash after a failed first launch. The article says the missing piece was a funded sales force, which the August placement supplies. The correction is revenue showing up and the milestone warrant becoming likely.",
+  "c7": "Post-market FemaSeed data are due in the fourth quarter of 2026, inside two years, and they are tied to whether doctors will use the product.",
+  "flags": [
+   "A 1-for-20 reverse split was done on 5 June 2026.",
+   "Another $10 to $15 million may be needed if the warrants stay out of the money.",
+   "U.S. approval of FemBloc is not expected before 2030.",
+   "The sales force is the risk the author says still decides the outcome."
+  ]
+ },
+ "IVA": {
+  "company": "Inventiva",
+  "words": 3009,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of IVA either through stock ownership, options, or other derivatives.",
+  "c1": "Lanifibranor for MASH is the growth driver. The case is the Phase 3 readout opening a market the author puts above $15 billion by 2035.",
+  "c2": "Stated probability-weighted fair value $15, horizon 2 years. Publish close 2.87 on 2026-10-14 for IVA (px.py). (15/2.87)^(1/2)-1 = 128.6%/yr. The $29 figure is one scenario, not the value used for the rating.",
+  "c3": "not stated",
+  "c4": "No moat is argued. Rezdiffra, Wegovy, and later GLP-1 drugs are named as competition.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The shares trade near $3 against a probability-weighted value of about $15. The article says the market is not paying for a 40% chance of the strong Phase 3 case. The correction is the readout itself.",
+  "c7": "Topline Phase 3 results are expected in the fourth quarter of 2026, inside two years, and the whole thesis hangs on that readout.",
+  "flags": [
+   "The model puts a 32% chance on a near-total loss.",
+   "Cash funds the current plan only through the second quarter of 2027.",
+   "A 10% branch is a safety finding that blocks approval.",
+   "GLP-1 drugs could shrink the MASH market the model is built on."
+  ]
+ },
+ "MUR": {
+  "company": "Murphy Oil",
+  "words": 1646,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of MUR either through stock ownership, options, or other derivatives.",
+  "c1": "New offshore barrels are the growth driver. The article puts a floor of about 50,000 barrels a day from Vietnam, with a similar amount possible from Western Africa about a year later.",
+  "c2": "No price target or valuation endpoint. The 2030s are named as the production window, not as a share price.",
+  "c3": "not stated",
+  "c4": "A habit of taking smaller projects the majors skip is described. It is not argued as one of the five moat types with a mechanism, a trend, and a threat.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The article says the market prices offshore producers on current cash flow, and the Vietnam platform is too small to matter. The discoveries are the part it says is being ignored, and they start to count when the new barrels are produced.",
+  "c7": "No dated event. First oil in Vietnam is already underway. The larger barrels are a few years out.",
+  "flags": [
+   "The oil price when these discoveries start producing is unknown.",
+   "The Vietnam platform now producing is described as small for a company this size.",
+   "Dry holes and the write-offs that go with them are part of the plan.",
+   "Cote d'Ivoire is called a good start, not proof the new exploration process works."
+  ]
+ },
+ "NVRI": {
+  "company": "Enviri",
+  "words": 1318,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of NVRI either through stock ownership, options, or other derivatives.",
+  "c1": "The case is a recovery back to past earnings, then a sale of both pieces. It is not a new growth driver.",
+  "c2": "Stated $29, horizon 2 years. Publish close 19.48 on 2026-10-14 for NVRI (px.py). (29/19.48)^(1/2)-1 = 22.0%/yr. The sale of the environmental business is the 2028 step in that two-year window.",
+  "c3": "not stated",
+  "c4": "No moat is argued.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The shares are priced as if the rail contract exposure can still get worse, while the author says the reserve is already the worst case. The correction is a Network Rail settlement and a sale of the two businesses.",
+  "c7": "Swiss rail approval is expected in the first half of 2027, inside two years, and it is a step the author needs before a sale of the rail business.",
+  "flags": [
+   "Network Rail damages are still being negotiated.",
+   "The editor's note says the security does not trade on a major U.S. exchange.",
+   "A steel-volume slowdown would land on a balance sheet the author already calls tight.",
+   "The $29 figure needs both a rail sale and an environmental sale."
+  ]
+ },
+ "AVAV": {
+  "company": "AeroVironment",
+  "words": 1042,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of AVAV either through stock ownership, options, or other derivatives.",
+  "c1": "Defense systems are the growth driver. Management is guiding to 15% to 20% annual growth through 2030, and a $465 million laser award is the new contract.",
+  "c2": "Stated $207, horizon 1 year. Publish close 123.22 on 2026-10-15 for AVAV (px.py). (207/123.22)^(1/1)-1 = 68.0%/yr. The $207 figure is 5 times the midpoint of 2027 revenue guidance.",
+  "c3": "not stated",
+  "c4": "No moat is argued.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The shares are at a low sales multiple while the company is winning work. The article says reiterated guidance was caution about the 2027 budget, not a weaker business. The correction is another year of growth, which the author expects the market to notice after the midterms.",
+  "c7": "LOCUST deliveries are expected in the fourth quarter of 2027, inside two years, and the author ties that contract to the growth case.",
+  "flags": [
+   "Management did not raise guidance because the fiscal 2027 budget timing is uncertain.",
+   "LOCUST deliveries are not expected until the fourth quarter of 2027.",
+   "Debt of $850 million is above cash of $580 million.",
+   "The $207 value uses a 5 times sales multiple on 2027 guidance, not a later cash-flow model."
+  ]
+ },
+ "ARWR": {
+  "company": "Arrowhead Pharmaceuticals",
+  "words": 1571,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of ARWR either through stock ownership, options, or other derivatives.",
+  "c1": "The growth driver is the new subcutaneous CNS platform plus the Redemplo launch in a larger cholesterol indication.",
+  "c2": "No price target or valuation endpoint.",
+  "c3": "not stated",
+  "c4": "A new delivery platform is described. It is not argued as one of the five moat types with a mechanism, a trend, and a threat.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The stock is down 34% since July while the news has been good. The article says investors are not paying for the tau data. The author also says that data is unlikely to move the stock before the second half of 2028.",
+  "c7": "Redemplo for severe high triglycerides could be approved and launched as soon as the second quarter of 2027, inside two years, and the author calls that launch the near-term risk and the funding use.",
+  "flags": [
+   "The author says Alzheimer's is an indication he avoids when he can.",
+   "He does not expect a market-moving CNS catalyst before the second half of 2028.",
+   "The tau comparison with diranersen is not in the same patients.",
+   "The near-term risk he names is the commercial launch, not the phase 1 data."
+  ]
+ },
+ "GLNG": {
+  "company": "Golar LNG",
+  "words": 1090,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of GLNG either through stock ownership, options, or other derivatives.",
+  "c1": "The fourth floating LNG ship is the growth driver. The author adds it to three contracted ships and gets to $1.29 billion of annual EBITDA.",
+  "c2": "Implied $63.50, horizon 2 years. Publish close 44.95 on 2026-10-15 for GLNG (px.py). (63.50/44.95)^(1/2)-1 = 18.9%/yr. The $63.50 figure is 10 times EBITDA on the signed contracts and 8 times on the fourth ship, after cash, debt, and remaining spending.",
+  "c3": "not stated",
+  "c4": "Long contracts and a repeated ship design are described. They are not argued as one of the five moat types with a mechanism, a trend, and a threat.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The shares are down almost 7% while the author says the plan has become safer. The market also has to look through a temporary earnings dip while Hilli is offline for a move. The correction the article names is a strategic review by early 2027.",
+  "c7": "Management's strategic review may be done by year-end or the first quarter of 2027, inside two years, and the author ties that review to unlocking value.",
+  "flags": [
+   "The fourth ship has no customer yet.",
+   "Hilli is offline, so near-term earnings are expected to fall.",
+   "The fourth ship is not due until about 2030, after $2.45 billion of spending.",
+   "The strategic review has no stated outcome."
+  ]
+ },
+ "JOBY": {
+  "company": "Joby Aviation",
+  "words": 1767,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of JOBY either through stock ownership, options, or other derivatives.",
+  "c1": "Passenger air taxis are the growth driver. The author still treats the commercial ramp as the case, even with certification later than hoped.",
+  "c2": "No price target or valuation endpoint. A lower enterprise value is the current multiple.",
+  "c3": "not stated",
+  "c4": "A manufacturing venture with Toyota is described. It is not argued as one of the five moat types.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The shares have fallen on a slower certification path and a defense deal that does not fit the air-taxi story. The author says the long-term case is intact, but he also says there is no near-term reason for the price to move.",
+  "c7": "FAA certification is placed in late 2027, inside two years, and the commercial case depends on it. The author says it may slip into 2028.",
+  "flags": [
+   "Certification may slip from late 2027 into 2028.",
+   "The Resonant Sciences deal is mostly cash and is not the air-taxi business.",
+   "A $750 million share-sale program is available.",
+   "Passenger flights in the UAE in 2026 now look unlikely to the author."
+  ]
+ },
+ "QURE": {
+  "company": "uniQure",
+  "words": 2654,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of QURE either through stock ownership, options, or other derivatives.",
+  "c1": "AMT-130 for Huntington's disease is the growth driver. The case is a first treatment that slows the disease, not a cash pile.",
+  "c2": "Stated $47, horizon 1 year. Publish close 22.52 on 2026-10-15 for QURE (px.py). (47/22.52)^(1/1)-1 = 108.7%/yr. The $65 figure is the value if the drug is approved, not the probability-weighted target.",
+  "c3": "not stated",
+  "c4": "No moat is argued.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The stock fell on a four-year data miss that is not the filing. The filing uses the three-year data, which met both endpoints the FDA had accepted. The correction is the review of that filing.",
+  "c7": "An FDA filing decision is expected around 1 November 2026, inside two years, and the rating is built on that review.",
+  "flags": [
+   "The four-year composite endpoint missed statistical significance.",
+   "The FDA refused the package in March 2026 and reversed itself in June.",
+   "The filing rests on 12 high-dose patients.",
+   "A failed confirmatory trial is modeled as a drop to about $3."
+  ]
+ },
+ "SKYH": {
+  "company": "Sky Harbour",
+  "words": 2695,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of SKYH either through stock ownership, options, or other derivatives.",
+  "c1": "More hangar campuses are the growth driver. The company has 22 airports secured and is aiming for 50.",
+  "c2": "Stated $28.23 by 2030, horizon 4.21 years. Publish close 9.14 on 2026-10-15 for SKYH (px.py). (28.23/9.14)^(1/4.21)-1 = 30.7%/yr. The $17.81 and $28.95 figures are values discounted to today. The $61 figure is a 2036 case if no more stock is issued.",
+  "c3": "The article says CFO Francisco Gonzalez purchased 8,950 shares in five transactions, including 3,850 shares at $9.25 on 2 October. That is an officer's open-market purchase, not the CEO's stake.",
+  "c4": "Airport land that will not be replaced is the moat, an efficient-scale claim. New major airports have not been built in 30 years, rents on the new campuses are higher, and the threat is slow lease-up plus the need for each airport's approval.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The shares price the secured campuses below even the author's bear case and give nothing for the path to 50. He says the market is stuck on how the build gets funded. The correction is debt and cash flow paying for most of it, with the next proof at the November results.",
+  "c7": "Third-quarter results are expected on 11 November 2026, inside two years, and the author ties them to the Denver lease-up that is part of the case.",
+  "flags": [
+   "Denver occupancy is 44%, which management called a disappointment.",
+   "If the warrants expire, more stock may be needed in the second half of 2027.",
+   "A Miami hangar stake sale that was under discussion did not close.",
+   "Reaching 50 campuses needs about five new airport approvals a year."
+  ]
+ },
+ "HDSN": {
+  "company": "Hudson Technologies",
+  "words": 5482,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of HDSN either through stock ownership, options, or other derivatives.",
+  "c1": "Reclaimed refrigerant is the growth driver. The case is the legal cut in new HFC supply while air-conditioning systems still need the gas.",
+  "c2": "No price target or valuation endpoint. A price-to-sales ratio of 0.84 is the current multiple.",
+  "c3": "The article says there has been significant insider buying just below $5. It does not name the buyer or the number of shares.",
+  "c4": "The reclamation process and the rule that used gas must be recovered are the moat, a mix of a proprietary method and a regulated niche. Volumes rose 18% for two years, and the threat is illegal imports plus the other large reclaimer.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The shares are down 66% from the 2024 high because refrigerant prices are soft, and a defense-contract win did not move the stock. The author says supply is about to be cut while demand stays up. The correction is that price gap showing up in the results.",
+  "c7": "Third-quarter results on 28 October 2026 are inside two years, and the author ties them to a price and volume surprise.",
+  "flags": [
+   "Illegal refrigerant imports are described as millions of pounds.",
+   "A 2026 rule change pushed some equipment deadlines out to 2030-2032.",
+   "Feedstock is bought as needed, not under long contracts.",
+   "The editor's note says the security does not trade on a major U.S. exchange."
+  ]
+ },
+ "LBTYA": {
+  "company": "Liberty Global",
+  "words": 1590,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of LBTYK either through stock ownership, options, or other derivatives.",
+  "c1": "The case is that the holding company is cheap against cash and the Dutch business. Ziggo's broadband gains are mentioned, but they are not the reason for the rating.",
+  "c2": "Stated $14, horizon 2 years. Publish close 7.80 on 2026-10-16 for LBTYA (px.py). (14/7.80)^(1/2)-1 = 34.0%/yr.",
+  "c3": "not stated",
+  "c4": "No moat is argued.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The shares fell about 25% on a bond selloff after management would not rule out a debt swap. The author says the price fell faster than the value of the cash and the Dutch business. The correction is management saying what it will do with the UK venture.",
+  "c7": "The third-quarter update on 3 November 2026 is inside two years, and the author says that call has to cover the UK debt and the Dutch spin.",
+  "flags": [
+   "The UK venture's unsecured bonds are at 38 cents.",
+   "Management did not rule out a debt swap.",
+   "The UK regulator is due to decide on a competitor deal in December.",
+   "The disclosure names LBTYK, the other share class."
+  ]
+ },
+ "TFPM": {
+  "company": "Triple Flag Precious Metals",
+  "words": 1487,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of TFPM, TFPM:CA either through stock ownership, options, or other derivatives.",
+  "c1": "Ounces already under contract are the growth driver. Ravenswood started delivering in July, and the company is aiming for about 50% more ounces by 2030.",
+  "c2": "Stated $31.50, horizon 2 years. Publish close 30.71 on 2026-10-16 for TFPM (px.py). (31.50/30.71)^(1/2)-1 = 1.3%/yr. The $18.50 figure is the author's asset value, and $31.50 is 1.7 times that value.",
+  "c3": "not stated",
+  "c4": "A royalty that rises with the gold price is described. A royalty by itself is not one of the five moat types.",
+  "c5": "The CEO says the company put $28 million into the Steppe stream and has already received more than $60 million back, plus gold still to be delivered.",
+  "c6": "The shares fell about 9% with gold and trade at 1.60 times the author's asset value, against 1.95 times for Franco-Nevada and 2.38 times for Wheaton. He says the growth is already paid for. The correction is the new ounces and paying down the credit line.",
+  "c7": "Management expects the credit line to be repaid during 2027, inside two years, and the author says he is wrong if it is still drawn at the end of that year.",
+  "flags": [
+   "Northparkes is about 27% of the author's value, and its gold sales fell by half in the second quarter.",
+   "The credit line is the largest draw since listing.",
+   "A 10% fall in gold takes the author's asset value to $16.81.",
+   "Hope Bay's first gold is in 2030, which is outside the next two years."
+  ]
+ },
+ "AXTI": {
+  "company": "AXT",
+  "words": 2631,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of AXTI either through stock ownership, options, or other derivatives.",
+  "c1": "Indium phosphide wafers for optical links are the growth driver. Management is aiming for about four times the recent quarterly sales of that product by the end of 2027.",
+  "c2": "No price target or valuation endpoint. The sales and EBITDA multiples in the article are what the stock trades at. The $92 figure is the average analyst target, which the author sets aside.",
+  "c3": "not stated",
+  "c4": "Making these wafers is argued as a scarce process: few suppliers, the company's own furnaces, and customers paying cash to reserve supply. Sales and margins jumped in the latest quarter. The author says new supply from rivals arrives in 2028 to 2030, so the shortage is a window, not a permanent moat.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The author says the estimates do not include the full capacity and margin case. He also says a lot of growth is already in the price. The correction is the company hitting the capacity targets, which is the same plan.",
+  "c7": "Results on 29 October 2026 are inside two years, and the author ties them to whether revenue clears the $66 million guide and whether the indium phosphide capacity target holds.",
+  "flags": [
+   "Every export from China needs a permit.",
+   "The share count is up nearly 50% over the past year.",
+   "Rival capacity is aimed at 2028 to 2030.",
+   "About $49 million of redemption rights sit with private-equity investors in the China subsidiary."
+  ]
+ },
+ "CC": {
+  "company": "Chemours",
+  "words": 2232,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of CC either through stock ownership, options, or other derivatives.",
+  "c1": "The case is a recovery in the titanium and advanced-materials businesses back toward mid-cycle earnings. It is not a new growth driver.",
+  "c2": "Stated price target $20, horizon 2 years. Last completed close 12.74 on 2026-10-16 for CC (px.py). The article date was a Saturday. (20/12.74)^(1/2)-1 = 25.3%/yr. The $30 figure is the fair value, not the price target used for the rating.",
+  "c3": "not stated",
+  "c4": "Market leadership is named. It is not argued as one of the five moat types with a mechanism, a trend, and a threat.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The shares have fallen further than the operating news, which the author says has barely changed. The market wants proof of earnings power. The correction is the other segments getting back toward mid-cycle and the debt ratio falling under 3 times.",
+  "c7": "No dated event. The turnaround is put in 2027 and 2028.",
+  "flags": [
+   "Earnings, EBITDA, and net income are still falling.",
+   "Leverage is about 4.4 times, and the credit rating is BB.",
+   "PFAS and other legacy liabilities are still in the case.",
+   "The author says the recovery may take longer than expected."
+  ]
+ },
+ "LBRT": {
+  "company": "Liberty Energy",
+  "words": 1561,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of BW, LBRT either through stock ownership, options, or other derivatives.",
+  "c1": "Modular power for data centers is the growth driver, on top of a rebound in well completions.",
+  "c2": "No share-price target. The author states a 25% to 30% yearly return through 2029 from 7.5 times $1.5 billion of EBITDA and $4 billion of debt, but the article does not give a share count, so that is not a price.",
+  "c3": "not stated",
+  "c4": "A shift toward contract power is described. It is not argued as one of the five moat types.",
+  "c5": "No named person's operating result is given with figures. The 17% to 18% return is a target, not a result already delivered.",
+  "c6": "The shares fell 34% after a jump in spending and new rules on data centers. The author says that ignores a completions rebound already showing up in drilling. The correction is that work reaching the frac crews, plus the first power units.",
+  "c7": "The first 300 megawatts are due in 2027, inside two years, and the author ties that delivery to the earnings base he is underwriting.",
+  "flags": [
+   "2026 capital spending was raised by 50% to secure engines.",
+   "The author expects debt of $4 billion to fund the power assets.",
+   "Near-term free cash flow is negative.",
+   "The shares still move with headlines about the Strait of Hormuz."
+  ]
+ },
+ "MTH": {
+  "company": "Meritage Homes",
+  "words": 3132,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of MTH either through stock ownership, options, or other derivatives.",
+  "c1": "The case is that the stock is cheap against book and normalized earnings. The margin squeeze is the cycle, not a new growth driver.",
+  "c2": "Stated $70 to $85, midpoint $77.50, horizon 2 years. Last completed close 59.17 on 2026-10-16 for MTH (px.py). The article date was a Saturday. (77.50/59.17)^(1/2)-1 = 14.5%/yr.",
+  "c3": "Directors Joseph Keough and Dennis Arriola bought shares in the open market in 2025. Executive Chairman Steven Hilton controls about 830,000 shares, about 1.3% of 65.2 million shares, which is under 5%.",
+  "c4": "Rate buydowns are described as a selling tool. They are not argued as one of the five moat types.",
+  "c5": "Since the end of 2017 the share count is down 19%. In 2025 and the first half of 2026 the company spent $525 million buying stock below book.",
+  "c6": "The shares price an 18% gross margin as if the business were damaged. The author says that margin is where the company earned before the pandemic, on a larger equity base. The correction is the market treating the squeeze as a cycle.",
+  "c7": "Third-quarter results on 28 October 2026 are inside two years, and the author ties them to how much margin the summer rate move cost.",
+  "flags": [
+   "First-half gross margin fell to 17.9% from 21.5%.",
+   "Sixteen of 18 Fed officials expect another rate increase this year.",
+   "Land charges were $38.9 million in the fourth quarter of 2025 and $7.7 million in the first half of 2026.",
+   "Insiders have only sold over the last 12 months."
+  ]
+ },
+ "NHI": {
+  "company": "National Health Investors",
+  "words": 1954,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of NHI either through stock ownership, options, or other derivatives.",
+  "c1": "Newer senior-housing properties are the growth driver. The author uses 8% income growth on that slice against 2.5% on the rest.",
+  "c2": "Stated fair value $73, horizon 2 years. Last completed close 66.28 on 2026-10-16 for NHI (px.py). The article date was a Saturday. (73/66.28)^(1/2)-1 = 5.0%/yr. The $73 figure is a value discounted to today.",
+  "c3": "not stated",
+  "c4": "No moat is argued.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The shares fell on a nursing-home sale and on a weak older housing portfolio. The author says the sale price was a low yield and the new buildings are not that old portfolio. The correction is the new properties showing up in 2027 income.",
+  "c7": "No single dated event is tied to a re-rating. The proceeds have to be reinvested by December to avoid a tax bill, and the author says that bill now looks unlikely.",
+  "flags": [
+   "The older Holiday portfolio has had six straight quarters of falling occupancy.",
+   "Newer housing occupancy also slipped from 87.3% to 86.5% in the second quarter.",
+   "A weak home-sale market can slow move-ins.",
+   "The dividend is part of the author's stated return and is not in the price math."
+  ]
+ },
+ "BBOT": {
+  "company": "BridgeBio Oncology",
+  "words": 2297,
+  "read": "Read in full.",
+  "long": "I/we have a beneficial long position in the shares of BBOT either through stock ownership, options, or other derivatives.",
+  "c1": "A drug that hits several KRAS mutations is the growth driver. The case is that molecule, not the cash pile.",
+  "c2": "Implied $3.76, horizon 2 years. Last completed close 2.82 on 2026-10-16 for BBOT (px.py). The article was published on a session that is still open. (3.76/2.82)^(1/2)-1 = 15.5%/yr. The author calls $3.76 a scenario value, not a target. It is peak sales times a 30% margin, times 3, times his odds, plus cash, divided by 90 million shares.",
+  "c3": "not stated",
+  "c4": "No moat is argued.",
+  "c5": "No named person's operating result is given with figures.",
+  "c6": "The shares fell about 68% after the company narrowed one program to patients who already failed a KRAS drug. The author says that decision does not touch the broader molecule. The correction is data on that broader molecule.",
+  "c7": "Monotherapy data on the broader molecule are expected in the fourth quarter of 2026, inside two years, and the rating depends on them.",
+  "flags": [
+   "The early response rates are from small groups with no control arm.",
+   "The model uses 90 million shares, above the 80 million already outstanding.",
+   "Grade 3 nausea and diarrhea are already in the dosing story.",
+   "The author says the $3.76 figure is not a target."
+  ]
  }
 }

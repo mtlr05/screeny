@@ -3,6 +3,7 @@ feedparser>=6.0
 yfinance>=0.2.40
 pandas>=2.0
 matplotlib>=3.8
+playwright>=1.40
 
 # Optional PDF rendering (scripts/make_report.py --pdf). Markdown is the report.
 # markdown>=3.5

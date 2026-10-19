@@ -537,7 +537,7 @@ def render(doc, onepagers, live, chart_dir=None):
     A("## 1. Screening")
     A("")
     A(
-        'A post must be: free to read in full (paywalled or preview-only posts are dropped); a single-stock bullish pitch (updates and earnings reviews count); on a small/mid-cap company; listed in the US or Canada; and the author must disclose holding a long position (a Seeking Alpha "beneficial long position" disclosure, or an explicit "I own / I am long / I hold a position" statement; "may hold" boilerplate does not count). Any length qualifies. Lacking a moat or an edge is not a drop.'
+        'A post must be: free to read in full (paywalled or preview-only posts are dropped); a single-stock bullish pitch (updates and earnings reviews count); on a small/mid-cap company; listed in the US or Canada; and the author must disclose holding a long position (a Seeking Alpha "beneficial long position" disclosure, or an explicit "I own / I am long / I hold a position" statement; the Value Investors Club line that the author or people they advise hold a material investment counts, and the line that they do not hold one does not; "may hold" boilerplate does not count). Any length qualifies. Lacking a moat or an edge is not a drop.'
     )
     A("")
     A("## 2. Reported, not scored")
