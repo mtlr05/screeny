@@ -1,8 +1,10 @@
 """Disposition of every candidate read in full.
 
 S maps an extract index (or ticker) to (T, R, C, M, D, K, short note):
-  T thesis/runway, R return ~40%/yr, C CEO large holder,
-  M moat or edge, D differential view, K dated catalyst.
+  T thesis/runway, R return ~40%/yr, C CEO ownership or incentive,
+  M moat, D differential view, K dated catalyst.
+A six-number score is the old stored rubric: M is moat, edge is not its own
+number, and D and K are criteria 6 and 7.
 D maps an index to a DROP key for articles dropped after the full read.
 EXTRA is a list of manual adds: sym, title, url, date, source, sc, note.
 LONG is the set of indexes/tickers whose author disclosed a long position.
