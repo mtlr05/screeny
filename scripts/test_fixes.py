@@ -286,6 +286,102 @@ def test_shared_store_copies_into_fulltext():
     print("shared store copies into fulltext")
 
 
+def _estimate(avg, analysts, low=None, high=None, bare_count=False):
+    def box(value):
+        return None if value is None else {"raw": value, "fmt": str(value)}
+
+    count = analysts if bare_count else box(analysts)
+    return {
+        "avg": box(avg),
+        "low": box(low),
+        "high": box(high),
+        "numberOfAnalysts": count,
+    }
+
+
+def test_revenue_consensus_parser():
+    """Saved earningsTrend payload. No network."""
+    import datetime as dt
+
+    import revenue_consensus as rc
+
+    end_2027 = int(dt.datetime(2027, 12, 31, tzinfo=dt.timezone.utc).timestamp())
+    payload = {
+        "quoteSummary": {
+            "result": [{
+                "financialData": {"financialCurrency": "USD"},
+                "earningsTrend": {
+                    "trend": [
+                        {
+                            "period": "0q",
+                            "endDate": "2026-03-31",
+                            "revenueEstimate": _estimate(999, 8, 900, 1100),
+                        },
+                        {
+                            "period": "0y",
+                            "endDate": "2026-12-31",
+                            "revenueEstimate": _estimate(100, 4, 90, 110, bare_count=True),
+                        },
+                        {
+                            "period": "+1y",
+                            "endDate": {"raw": end_2027, "fmt": "2027-12-31"},
+                            "revenueEstimate": _estimate(150, 3, 140, 160),
+                        },
+                        {
+                            "period": "+1y",
+                            "endDate": "2028-12-31",
+                            "revenueEstimate": _estimate(180, 0, 170, 190),
+                        },
+                    ]
+                },
+            }],
+            "error": None,
+        }
+    }
+    rows = rc.annual_rows(payload)
+    assert [row["period"] + " " + row["end"][:4] for row in rows] == ["0y 2026", "+1y 2027"], rows
+    assert rows[0]["analysts"] == 4 and rows[0]["currency"] == "USD"
+    assert rows[0]["low"] == 90 and rows[0]["high"] == 110
+    match = rc.row_for_year(rows, 2027)
+    assert match["avg"] == 150 and match["analysts"] == 3 and match["end"] == "2027-12-31"
+    assert rc.row_for_year(rows, 2028) is None
+    assert rc.row_for_year(rows, 2026)["avg"] == 100
+    assert "0q" not in [row["period"] for row in rows]
+
+    zero = {
+        "quoteSummary": {
+            "result": [{
+                "earningsTrend": {
+                    "trend": [
+                        {
+                            "period": "0y",
+                            "endDate": "2026-12-31",
+                            "revenueEstimate": _estimate(100, 2),
+                        },
+                        {
+                            "period": "+1y",
+                            "endDate": "2027-12-31",
+                            "revenueEstimate": _estimate(150, 0),
+                        },
+                    ]
+                }
+            }]
+        }
+    }
+    zero_rows = rc.annual_rows(zero)
+    assert rc.row_for_year(zero_rows, 2027) is None
+    assert [row["end"][:4] for row in zero_rows] == ["2026"]
+
+    assert rc.gap_band(110, 100)[0] == 1
+    assert rc.gap_band(109, 100)[0] == 0.5
+    assert rc.gap_band(100.01, 100)[0] == 0.5
+    assert rc.gap_band(100, 100)[0] == 0
+    assert rc.gap_band(90, 100)[0] == 0
+    score, gap = rc.gap_band(110, 100)
+    assert score == 1 and gap >= rc.GAP_FULL
+    print("revenue consensus parser ok", match["end"], "gap", round(gap, 4))
+
+
 if __name__ == "__main__":
     test_in_window_sourced_count()
     test_pitch_titles_stay_and_recap_drops()
@@ -295,3 +391,4 @@ if __name__ == "__main__":
     test_old_six_point_scores_stay_marked_out_of_6()
     test_fetch_body_reuses_stored_text()
     test_shared_store_copies_into_fulltext()
+    test_revenue_consensus_parser()

@@ -158,13 +158,19 @@ One point each. Partial credit is as stated. Small/mid cap and US/Canada listing
 3. CEO ownership or incentive. Judge this only from the article or a cited filing. Score the highest tier in the stock-screen-scoring skill: current CEO or founder-CEO at least 5% = 1; an open-market purchase by the CEO or executive chair = 0.75; CEO at 1–5%, a stated share or dollar holding that is not shown to be under 1%, a skin-in-the-game statement, or a non-CEO founder or chair at least 5% = 0.5; aggregate insiders at least 10%, a director or unnamed insider purchase, or pay tied to performance = 0.25; otherwise 0. If nothing is stated, score 0 and write "not stated". The evidence sentence quotes or cites the matched sentence. `scripts/ceo_stake_grep.py` only lists candidates.
 4. Moat, on the five moat types: Strong 1 / Moderate 0.75 / Narrow 0.5; none described = 0. The scale is in the stock-screen-scoring skill. A 0 here is not a drop.
 5. Edge, from checkable evidence about the people: Strong 1 / Moderate 0.75 / Narrow 0.5; assertion only = 0. The scale is in the stock-screen-scoring skill.
-6. Differential view, written by you: the specific reason the market is wrong (stigma or category label, a temporary or mundane issue, neglect) and why it should correct, compared with what the price implies and with other coverage. Score 1 only when the article states both the cause of the mispricing and why it corrects. Otherwise 0.5. Matches consensus = 0. An overreaction to temporary news supports it.
+6. Differential view. When a street revenue consensus exists, this point is the gap between the author's dollar revenue forecast and that consensus, and the qualitative reading is not used. Run `python3 scripts/revenue_consensus.py TICKER YEAR`. Yahoo Finance `earningsTrend` `revenueEstimate.avg` is the street number when the printed period-end year has at least one analyst. YEAR is that period-end year. If Yahoo has no row for the author's year, a consensus dollar figure the article states is the street number. The bands, including the full-point cutoff, are in the stock-screen-scoring skill. A consensus for a covered year with no author dollar revenue for that year scores 0. The qualitative test (the article names the mispricing and why it corrects = 1; one side missing or vague = 0.5; matches consensus = 0; an overreaction to temporary news supports a 1) runs only when the Yahoo fetch fails, every annual row has zero analysts, or the author's dollar revenue is only for a year with no Yahoo row, and the article cites no consensus dollar figure.
 7. Dated catalyst: 1 only for a named event with a date inside 24 months. Named but undated = 0.5. None = 0.
 
 Check the publish-day close:
 
 ```bash
 python3 scripts/px.py YYYY-MM-DD TICKER
+```
+
+Street revenue consensus for criterion 6:
+
+```bash
+python3 scripts/revenue_consensus.py TICKER [YEAR]
 ```
 
 Benchmark for "since publish" in the report is IWM for US listings and XIC.TO for Canada (`.TO`, `.V`, `.CN`).
