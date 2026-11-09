@@ -15,7 +15,7 @@ On-demand scout for single-stock investment write-ups. David runs it from the Cu
 
 ## Preferences
 
-- US or Canada listings. Small or mid cap, under about US$10B. One stock per pitch. Updates and earnings reviews count. A missing moat or edge is not a drop. Criterion 4 is moat and criterion 5 is edge. Each can be 0. The total is out of 7.
+- US or Canada listings. Small or mid cap, under about US$10B. One stock per pitch. Updates and earnings reviews count. A missing moat or edge is not a drop. Criterion 4 is moat: the scorer can supply an obvious type, mechanism, trend, and threat from the business as the article presents it, and the author does not have to use the word moat. Criterion 5 is edge, from the article or a cited filing only. Each can be 0. The total is out of 7.
 - The Substack sweep drops a free post on the title only when it is a recap, a macro phrase, or a list (whole words). The bare word "macro" is not a drop. A title that names one ticker or one exchange is not title-dropped; the body screen decides. It then reads about the first 1,500 words and drops the post only when that text is clearly not a single-stock pitch, or the author is short, selling, or on hold. Unclear posts stay. Every in-window post is a row in `reports/substack_screen_<date>.csv`. Triage drop counts in the report are read from that file.
 - Full run: last 4 months. "This week": last 7 days.
 - Cap and listing are screening filters, not points on the /7 score.

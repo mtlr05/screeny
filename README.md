@@ -60,13 +60,13 @@ The agent follows `AGENTS.md` and `.cursor/skills/`. A full run covers the last 
 
 One point each, out of 7. Small or mid cap (under about US$10B) and a US or Canada listing are filters, not points. The evidence rules are in `.cursor/skills/stock-screen-scoring/`.
 
-1. Thesis with a secular runway. Cheap with no growth is 0.5.
+1. Thesis with a secular runway or growth driver. Cheap with no growth is 0.5.
 2. Return of about 40% a year from the publish-day close to the author's target. 25–40% a year is 0.5. Under 25% is 0.
 3. CEO ownership or incentive, from the article or a cited filing only. Nothing stated is 0 and the note says "not stated". `scripts/ceo_stake_grep.py` only lists candidate sentences.
-4. Moat. None described is 0, and that is not a drop.
-5. Edge. An assertion with no checkable evidence is 0, and that is not a drop.
-6. Differential view: why the market is wrong, and why that corrects.
-7. A named catalyst dated inside 24 months. Named but undated is 0.5.
+4. Moat, on the five types. The scorer can recognize an obvious moat from the business as the article presents it; the author does not have to spell it out. Strong 1 / Moderate 0.75 / Narrow 0.5. A bare label, or none of the five, is 0, and that is not a drop. An inferred moat with no stated durability is Narrow 0.5 unless a stronger advantage is supported.
+5. Edge, from checkable evidence in the article or a cited filing. An assertion with no such evidence is 0, and that is not a drop.
+6. Differential view. When a street revenue consensus exists, the score is the gap between the author's dollar revenue and that consensus (at least 10% = 1; above 0 and under 10% = 0.5; zero or negative = 0; no author dollar revenue = 0). The consensus is as of the fetch date. The qualitative test (why the market is wrong, and why that corrects) is the fallback only when no street number is available.
+7. A named catalyst dated inside 24 months is 1. Named but undated is 0.5. None is 0.
 
 The author must disclose a long position. A Buy rating alone, or "may hold" boilerplate, does not count.
 
