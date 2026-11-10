@@ -382,6 +382,115 @@ def test_revenue_consensus_parser():
     print("revenue consensus parser ok", match["end"], "gap", round(gap, 4))
 
 
+def test_long_gate_substack_fallback_and_structured_forms():
+    """Stance gate. The score is not an input. SA and VIC still require the form."""
+    import inspect
+
+    import long_gate
+    import sa_ingest
+
+    params = inspect.signature(long_gate.decision).parameters
+    assert "score" not in params and "sc" not in params
+
+    passes = [
+        ("substack", "I own the shares.", ""),
+        ("substack", "I am long the stock.", ""),
+        ("substack", "I hold a position in the company.", ""),
+        ("blog", "We are long.", ""),
+        ("forum", "The author holds a long position in the stock.", ""),
+        ("substack", "I value the shares at $40, about double the current price.", ""),
+        ("substack", "My 12-month price target for the stock is $25.", ""),
+        ("substack", "Over the next two years I expect the shares to double.", ""),
+        ("substack", "I recommend owning the shares.", ""),
+        ("substack", "The shares are worth $25.", ""),
+        ("substack", "I think the stock is worth $18 a share.", ""),
+        ("substack", "Base case $40 per share over two years.", ""),
+        ("substack", "I own the shares. Recommendation: Hold.", ""),
+        ("substack", "I may hold a position. I recommend owning the shares.", ""),
+        ("substack", "I recommend owning the shares.", "ACME is a Buy"),
+    ]
+    for source, text, title in passes:
+        assert long_gate.decision(source, text, title) == "pass", (source, title, text)
+        assert long_gate.reason(source, text, title) == "", (source, text)
+
+    drops = [
+        ("substack", "ACME is a Buy", "ACME: Buy"),
+        ("substack", "LONG", "LONG $ACME"),
+        ("substack", "Acme makes widgets for hospitals. Revenue was $40 million. The CEO joined in 2019.", "Acme Corp"),
+        ("substack", "The CEO's net worth is $40 million. Revenue was $40 million.", "Acme Corp"),
+        ("substack", "The lithium sector will grow over the next two years as demand rises.", "Lithium"),
+        ("substack", "I love this company. The product is amazing and the team is world class.", "Acme"),
+        ("substack", "I may hold a position in the stock.", ""),
+        ("substack", "My price target is $40. I do not own the stock.", ""),
+        ("substack", "My price target is $40. I am short the shares.", ""),
+        ("substack", "My price target is $40. Recommendation: Hold.", ""),
+        ("substack", "The company makes widgets.", "Price target $40"),
+        (
+            "substack",
+            "This is a thorough look at a high-quality compounder with a long runway, strong returns on capital, and an excellent culture. " * 8,
+            "Acme",
+        ),
+    ]
+    for source, text, title in drops:
+        assert long_gate.decision(source, text, title) == "drop", (source, title, text)
+        assert long_gate.reason(source, text, title) == "author not long", (source, text)
+
+    stance = "I am long the shares. My price target is $40. I recommend owning them."
+    assert long_gate.decision("seeking alpha", stance) == "drop"
+    assert long_gate.decision("SA", stance) == "drop"
+    assert long_gate.reason("Author (SA)", stance) == "author not long"
+    disclosed = stance + " I/we have a beneficial long position in the shares of ACME."
+    assert long_gate.decision("Seeking Alpha", disclosed) == "pass"
+
+    vic_pos = "I and/or others I advise hold a material investment in the issuer's securities."
+    vic_neg = "I and/or others I advise do not hold a material investment in the issuer's securities."
+    assert long_gate.decision("Value Investors Club", vic_pos) == "pass"
+    assert long_gate.decision("vic", vic_neg) == "drop"
+    assert long_gate.decision("vic", vic_neg + " " + stance) == "drop"
+    assert long_gate.decision("VIC", stance) == "drop"
+
+    body = "I recommend owning the shares. My price target is $40. " + " ".join(["word"] * 700)
+    saved = (
+        "URL: https://seekingalpha.com/article/77\nTITLE: Acme\nAUTHOR: A\nDATE: Oct 13, 2026\n"
+        "TICKERS: Example (ACME) Stock\n\n=== SUMMARY ===\n- a bullet\n\n=== ARTICLE BODY ===\n"
+        f"{body}\n\n=== ANALYST'S DISCLOSURE ===\nNo position is disclosed here.\n"
+    )
+    status, why = sa_ingest.classify_text(saved, "ACME", {})
+    assert status == "not_long" and why == "author not long", (status, why)
+    print("long gate: substack fallback passes; SA and VIC still require the form")
+
+
+def test_batting_average_longcheck_is_unchanged():
+    """The 2-year batting average still counts a pitch with no long signal."""
+    import longcheck
+
+    assert longcheck.is_long("My price target is $40. I recommend owning the shares.")[0] == "unclear"
+    assert longcheck.exclude_reason("Acme", "My price target is $40.")[0] is None
+    assert longcheck.exclude_reason("Acme", "I am short the stock.")[0] == "short"
+    print("batting-average longcheck still counts a pitch with no long signal")
+
+
+def test_long_gate_wording_matches_across_screener_docs():
+    import long_gate
+    import make_report
+
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    for rel in (
+        "AGENTS.md",
+        "README.md",
+        ".cursor/skills/stock-screen/SKILL.md",
+        ".cursor/skills/author-batting-average/SKILL.md",
+    ):
+        text = open(os.path.join(root, rel), encoding="utf-8").read()
+        assert long_gate.FALLBACK in text, rel
+    doc = {"window": ["2026-10-01", "2026-10-16"], "stats": {"sourced": 0, "read": 0, "scored": 0}, "articles": []}
+    md, _rows, _ranked = make_report.render(doc, {}, live=False)
+    assert long_gate.FALLBACK in md
+    assert "beneficial long position" in md
+    assert "The /7 score does not keep or drop the article." in md
+    print("long-gate wording matches")
+
+
 if __name__ == "__main__":
     test_in_window_sourced_count()
     test_pitch_titles_stay_and_recap_drops()
@@ -392,3 +501,6 @@ if __name__ == "__main__":
     test_fetch_body_reuses_stored_text()
     test_shared_store_copies_into_fulltext()
     test_revenue_consensus_parser()
+    test_long_gate_substack_fallback_and_structured_forms()
+    test_batting_average_longcheck_is_unchanged()
+    test_long_gate_wording_matches_across_screener_docs()
