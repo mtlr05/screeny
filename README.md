@@ -68,7 +68,7 @@ One point each, out of 7. Small or mid cap (under about US$10B) and a US or Cana
 6. Differential view. When a street revenue consensus exists, the score is the gap between the author's dollar revenue and that consensus (at least 10% = 1; above 0 and under 10% = 0.5; zero or negative = 0; no author dollar revenue = 0). The consensus is as of the fetch date. The qualitative test (why the market is wrong, and why that corrects) is the fallback only when no street number is available.
 7. A named catalyst dated inside 24 months is 1. Named but undated is 0.5. None is 0.
 
-The author must disclose a long position. A Buy rating alone, or "may hold" boilerplate, does not count.
+The author must pass the long gate. This is a stance gate. The /7 score does not keep or drop the article. A Seeking Alpha "beneficial long position" disclosure, an explicit "I own / I am long / I hold a position" statement, or the Value Investors Club form line that the author or people they advise hold a material investment counts. A Buy/LONG rating alone, "may hold" boilerplate, or the club line that they do not hold a material investment, does not. Drop reason: `author not long`. On a source with no structured disclosure form (Substack and similar), an explicit "I own," "I am long," or "I hold a position" statement still counts. If that sentence is missing, the article still passes the long gate when the author takes a clear long-side investment stance in the body: a valued upside target or forecast horizon for the shares, or an unequivocal recommendation to own them, and does not disclose a short, a hold, or that they do not own the stock. A descriptive overview, a sector explainer, or enthusiasm without an investment conclusion still drops as `author not long`. A bullish headline or a Buy/LONG label alone is not enough. This fallback does not apply to Seeking Alpha or Value Investors Club, where a disclosure form exists and remains required. `scripts/long_gate.py` applies this gate.
 
 ## Batting average
 
@@ -221,6 +221,7 @@ python3 scripts/sa_ingest.py screen reports/sa_list_YYYY-MM-DD.csv
 python3 scripts/sa_ingest.py check fulltext/sa_ID.txt
 python3 scripts/sa_ingest.py merge reports/sa_candidates_YYYY-MM-DD.csv reports/triage_YYYY-MM-DD.json
 python3 scripts/sa_ingest.py self-test
+python3 scripts/long_gate.py
 python3 scripts/ceo_stake_grep.py self-test
 python3 scripts/ceo_stake_grep.py FILE
 python3 scripts/sa_public.py article https://seekingalpha.com/article/123
@@ -274,4 +275,4 @@ A full 4-month rebuild, when asked, is `python3 scripts/rerun_sweep.py`, then `r
 
 ## Rules that do not change
 
-Cite every source. Never invent a number, a ticker, a date, or a URL. Score only articles read in full. Do not bypass a paywall or a bot check. Never use Seeking Alpha investing groups. If Seeking Alpha shows a Press & Hold or other bot check, `scripts/sa_read.py` waits on that page until the article loads, then continues. Do not score the challenge page. The author has to disclose a long position. The Value Investors Club form line "I and/or others I advise hold a material investment in the issuer's securities" counts as one. The club line that they do not hold a material investment does not. X links are optional and are pasted by hand. This repo does not call the X MCP.
+Cite every source. Never invent a number, a ticker, a date, or a URL. Score only articles read in full. Do not bypass a paywall or a bot check. Never use Seeking Alpha investing groups. If Seeking Alpha shows a Press & Hold or other bot check, `scripts/sa_read.py` waits on that page until the article loads, then continues. Do not score the challenge page. The author has to pass the long gate in `scripts/long_gate.py`. The Value Investors Club form line "I and/or others I advise hold a material investment in the issuer's securities" counts as one. The club line that they do not hold a material investment does not. Seeking Alpha still needs the beneficial-long disclosure. The fallback for a source with no form is stated in the score section. X links are optional and are pasted by hand. This repo does not call the X MCP.

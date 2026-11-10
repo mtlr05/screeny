@@ -396,7 +396,11 @@ def analyze(title, subtitle, body, search, require_long=True):
     body is None when the body has not been fetched. Returns a dict with
     status pitch, skip, or need_body.
 
-    require_long=True (the article score) keeps only an explicit long.
+    require_long=True keeps a post only when stance() is long. That includes a
+    Buy or LONG label, "thesis", and an ownership sentence. This is pitch
+    detection for bat/pitches.py. It is not the screen long gate in
+    scripts/long_gate.py. A Buy or LONG label is enough here and is not enough
+    for that gate.
     require_long=False (the 2-year batting average) keeps an unclear stance.
     Short, sell, and hold are decided afterwards by bat/longcheck.py.
     Recap, macro, watchlist, foreign, and closed-exit notes are still skipped.
