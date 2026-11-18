@@ -22,6 +22,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "bat"))
 from _paths import CACHE, EXAMPLES, REPORTS, RERUN, ROOT, SEEN, SOURCES, STATE, ensure
 import calc as batcalc
+import long_gate
 import weekly_sweep
 
 LBL = ["Thesis/runway", "Return ~40%/yr", "CEO ownership", "Moat", "Edge", "Differential view", "Dated catalyst"]
@@ -537,7 +538,11 @@ def render(doc, onepagers, live, chart_dir=None):
     A("## 1. Screening")
     A("")
     A(
-        'A post must be: free to read in full (paywalled or preview-only posts are dropped); a single-stock bullish pitch (updates and earnings reviews count); on a small/mid-cap company; listed in the US or Canada; and the author must disclose holding a long position (a Seeking Alpha "beneficial long position" disclosure, or an explicit "I own / I am long / I hold a position" statement; the Value Investors Club line that the author or people they advise hold a material investment counts, and the line that they do not hold one does not; "may hold" boilerplate does not count). Any length qualifies. Lacking a moat or an edge is not a drop.'
+        "A post must be: free to read in full (paywalled or preview-only posts are dropped); a single-stock bullish pitch (updates and earnings reviews count); on a small/mid-cap company; listed in the US or Canada; and the author must pass the long gate. "
+        'A Seeking Alpha "beneficial long position" disclosure, an explicit "I own / I am long / I hold a position" statement, or the Value Investors Club form line that the author or people they advise hold a material investment counts. '
+        'A Buy/LONG rating alone, "may hold" boilerplate, or the club line that they do not hold a material investment, does not. '
+        + long_gate.FALLBACK
+        + " Any length qualifies. Lacking a moat or an edge is not a drop. The /7 score does not keep or drop the article."
     )
     A("")
     A("## 2. Reported, not scored")
