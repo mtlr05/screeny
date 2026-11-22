@@ -408,6 +408,21 @@ def test_long_gate_substack_fallback_and_structured_forms():
         ("substack", "I own the shares. Recommendation: Hold.", ""),
         ("substack", "I may hold a position. I recommend owning the shares.", ""),
         ("substack", "I recommend owning the shares.", "ACME is a Buy"),
+        ("substack", "tied with Amazon (AMZN) as my largest holding", ""),
+        ("substack", "This is my biggest position.", ""),
+        ("substack", "It is a top holding of mine.", ""),
+        ("substack", "The shares are in my portfolio.", ""),
+        ("substack", "I have increased my position.", ""),
+        ("substack", "I added to my position.", ""),
+        ("substack", "I increased a position.", ""),
+        ("substack", "I built a position.", ""),
+        ("substack", "I started a position.", ""),
+        ("substack", "I bought more shares.", ""),
+        ("substack", "The model provides a value of over $90 per share by 2030.", ""),
+        ("substack", "There is a per share value of over $90 by the end of the decade.", ""),
+        ("substack", "I calculate a share value rising to above $90 per share by 2030.", ""),
+        ("substack", "I own the shares. I rate the stock Hold.", ""),
+        ("substack", "I may hold a position. The shares are in my portfolio.", ""),
     ]
     for source, text, title in passes:
         assert long_gate.decision(source, text, title) == "pass", (source, title, text)
@@ -425,6 +440,24 @@ def test_long_gate_substack_fallback_and_structured_forms():
         ("substack", "My price target is $40. I am short the shares.", ""),
         ("substack", "My price target is $40. Recommendation: Hold.", ""),
         ("substack", "The company makes widgets.", "Price target $40"),
+        ("substack", "My 12-month price target for the stock is $25. I rate the stock Hold.", ""),
+        ("substack", "I rate the stock Hold.", ""),
+        ("substack", "My price target is $40. Disclosure: no position.", ""),
+        ("substack", "Disclosure: no position.", ""),
+        ("substack", "My price target is $40. I have no position.", ""),
+        ("substack", "I have no position.", ""),
+        ("substack", "I value the shares at $40. I am not adding Deckers to the RC portfolio.", ""),
+        ("substack", "I am not adding Deckers to the RC portfolio.", ""),
+        ("substack", "I value the shares at $40. I am not adding X to the portfolio.", ""),
+        ("substack", "tied with Amazon (AMZN) as my largest holding. I have no position.", ""),
+        ("substack", "I have increased my position. Disclosure: no position.", ""),
+        ("substack", "The shares are in my portfolio. I am not adding Deckers to the RC portfolio.", ""),
+        ("substack", "I may hold a position in my portfolio.", ""),
+        ("substack", "The stock trades at $90 per share.", ""),
+        ("substack", "I love this company and expect great things by 2030.", "ACME is a Buy"),
+        ("substack", "The firm built a position of strength in its home market.", ""),
+        ("substack", "The share value of the firm reaches $90 million by 2030.", ""),
+        ("substack", "Earnings per share of $4 by 2030.", ""),
         (
             "substack",
             "This is a thorough look at a high-quality compounder with a long runway, strong returns on capital, and an excellent culture. " * 8,
@@ -448,6 +481,9 @@ def test_long_gate_substack_fallback_and_structured_forms():
     assert long_gate.decision("vic", vic_neg) == "drop"
     assert long_gate.decision("vic", vic_neg + " " + stance) == "drop"
     assert long_gate.decision("VIC", stance) == "drop"
+    open_long = "The shares are in my portfolio. The model provides a value of over $90 per share by 2030."
+    assert long_gate.decision("seeking alpha", open_long) == "drop"
+    assert long_gate.decision("vic", "I have increased my position. " + open_long) == "drop"
 
     body = "I recommend owning the shares. My price target is $40. " + " ".join(["word"] * 700)
     saved = (
